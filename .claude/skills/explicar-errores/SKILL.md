@@ -16,12 +16,18 @@ Cuando se active esta skill:
 6. Agrega una fila nueva a `WORK-MEMORY/registro_errores.csv` (créalo con el encabezado si todavía
    no existe) con estas columnas, en este orden:
    - `fecha` — fecha de hoy.
-   - `error` — el tipo o mensaje del error (ej. `ReferenceError: posX is not defined`).
+   - `tipo_error` — la categoría identificada en el paso 2, usando **exactamente** uno de estos
+     cuatro valores (siempre en minúscula, sin variaciones): `sintaxis`, `referencia`,
+     `tipo_de_dato`, `logica`. Esta columna es la que se usa para comparar en el paso 7 — no el
+     mensaje puntual.
+   - `error` — el mensaje específico del error, tal como aparece (ej. `ReferenceError: posX is not
+     defined`). Se guarda solo como registro/contexto, no se compara para detectar patrones.
    - `explicacion` — la causa general del tipo de error, en una frase.
    - `estrategia_de_acompanamiento` — cómo guiaste al estudiante (ej. "se le pidió ubicar dónde
      debía declararse la variable antes de dar la corrección").
    - `ejemplo_de_solucion` — un fragmento corto de código ya corregido.
    - `solucion` — una frase de qué se hizo para resolverlo.
-7. Revisa `WORK-MEMORY/registro_errores.csv`: si ya hay 3 o más filas con el mismo tipo de error
-   (columna `error`), dilo explícitamente y sugiere qué tema repasar — esta es la parte que ayuda
-   a mejorar el conocimiento, no solo a corregir el error de hoy.
+7. Revisa `WORK-MEMORY/registro_errores.csv`: si ya hay 3 o más filas con el mismo valor en
+   `tipo_error`, dilo explícitamente y sugiere qué tema repasar — esta es la parte que ayuda
+   a mejorar el conocimiento, no solo a corregir el error de hoy. No compares por la columna
+   `error`: el mensaje completo casi nunca se repite exacto aunque el tipo de error sí se repita.
