@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--
+    Esta etiqueta <meta name="viewport"> es OBLIGATORIA para que las media
+    queries funcionen bien en celulares. Sin ella, el navegador móvil
+    simula una pantalla ancha (~980px) y tu media query de "768px" nunca
+    se comportaría como esperas en un celular real.
+  -->
+  <title>Arthur Leywin Card</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!--
+    Un solo bloque de HTML para las dos versiones (mobile y web).
+    IMPORTANTE: el orden de estos divs en el documento NO determina su
+    posición visual. Cuando usas CSS Grid con "grid-area", la posición
+    la define el CSS (grid-template-areas), no el orden del HTML.
+    Por eso el mismo HTML puede verse distinto en mobile y en web
+    con solo cambiar el CSS.
+  -->
+  <div class="container">
+    <div class="glare"></div>
+    <div class="holo"></div>
+
+    <div class="header">
+      <div>
+        <div class="name">ARTHUR LEYWIN</div>
+        <div class="sub">MAGE &middot; REINCARNATED</div>
+      </div>
+      <div class="lv">LV</div>
+    </div>
+
+    <div class="img"></div>
+
+    <div class="powers">
+      <span class="lab">POWERS</span>
+      <div class="row"><div class="ic"></div><span class="txt">Asura Mode</span><div class="bar" style="width: 85%"></div></div>
+      <div class="row"><div class="ic"></div><span class="txt">Lightning Affinity</span><div class="bar" style="width: 70%"></div></div>
+    </div>
+
+    <div class="weakness">
+      <span class="lab">WEAKNESS</span>
+      <div class="marks">
+        <div class="m"></div>
+        <div class="m"></div>
+        <div class="m dashed"></div>
+      </div>
+      <span class="txt">Mana exhaustion after Asura form</span>
+    </div>
+
+    <div class="description">
+      <span class="lab">DESCRIPTION / LORE</span>
+      <p class="txt">Alma reencarnada en el mundo de Dicathen. Prodigio en espada y
+        magia, conocido por alcanzar el estado Asura en combate.</p>
+    </div>
+  </div>
+
+  <script>
+    /*
+      Tilt 3D + brillo "holo" que sigue el mouse, inspirado en el efecto de
+      https://github.com/simeydotme/pokemon-cards-css — ahí lo hacen con
+      Svelte, acá es la misma idea en JS plano: en cada pointermove se
+      calcula la posición del cursor DENTRO de la carta (0 a 1 en x/y) y
+      esos valores se guardan como CSS custom properties. El CSS (styles.css)
+      es el que realmente dibuja la rotación y el brillo a partir de esas
+      variables — el JS solo las actualiza.
+    */
+    const card = document.querySelector('.container');
+
+    card.addEventListener('pointermove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width;
+      const py = (e.clientY - rect.top) / rect.height;
+
+      const rotateY = (px - 0.5) * 20;
+      const rotateX = (py - 0.5) * -20;
+
+      card.style.setProperty('--rx', rotateX.toFixed(2) + 'deg');
+      card.style.setProperty('--ry', rotateY.toFixed(2) + 'deg');
+      card.style.setProperty('--mx', (px * 100).toFixed(1) + '%');
+      card.style.setProperty('--my', (py * 100).toFixed(1) + '%');
+      card.classList.add('active');
+    });
+
+    card.addEventListener('pointerleave', () => {
+      card.style.setProperty('--rx', '0deg');
+      card.style.setProperty('--ry', '0deg');
+      card.classList.remove('active');
+    });
+  </script>
+</body>
+</html>

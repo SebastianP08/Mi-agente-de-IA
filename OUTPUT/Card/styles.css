@@ -1,0 +1,309 @@
+/* =========================================================
+   MEDIA QUERIES — guía rápida usando esta carta como ejemplo
+   =========================================================
+
+   Una media query le dice al navegador: "aplica este bloque de CSS
+   SOLO si se cumple esta condición sobre la pantalla/ventana".
+
+   Sintaxis general:
+
+     @media (condicion) {
+       selector { propiedad: valor; }
+     }
+
+   La condición más común es el ANCHO de la ventana:
+
+     min-width: 768px   -> se activa cuando la ventana mide 768px
+                           o MÁS (de 768 hacia arriba)
+     max-width: 767px   -> se activa cuando la ventana mide 767px
+                           o MENOS (de 767 hacia abajo)
+
+   Este archivo usa la estrategia "mobile-first":
+   1. Primero escribes el CSS pensando en la pantalla más chica
+      (celular), SIN ninguna media query. Ese es el estilo "base".
+   2. Después, con @media (min-width: ...) vas agregando o
+      SOBRESCRIBIENDO reglas para pantallas más anchas.
+
+   ¿Por qué mobile-first y no al revés? Porque así el celular (que
+   tiene menos recursos y suele ser el caso más común) descarga y
+   procesa menos CSS: solo lee el bloque @media si su pantalla
+   realmente lo necesita.
+
+   Breakpoints típicos que vas a ver en proyectos reales:
+     ~480px  -> celulares chicos
+     ~768px  -> tablets (el que usamos acá)
+     ~1024px -> laptops
+     ~1280px -> pantallas grandes
+   No son un estándar fijo, son solo puntos donde el diseño empieza
+   a "romperse" y conviene reacomodar el layout.
+   ========================================================= */
+
+
+/* Reset mínimo: quita margenes/paddings por defecto del navegador
+   para que el layout sea predecible. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background: #0a0a12;
+  font-family: 'Georgia', 'Times New Roman', serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  perspective: 900px;
+}
+
+
+/* ---------------------------------------------------------
+   1) ESTILO BASE = versión MOBILE
+   No está dentro de ninguna @media, así que es lo primero que
+   aplica el navegador, sin importar el tamaño de pantalla.
+   --------------------------------------------------------- */
+.container {
+  display: grid;
+
+  /* 3 columnas: la del medio (1.4fr) es más ancha que las de los
+     costados (0.8fr cada una) -> por eso la imagen queda centrada
+     con "aire" a los lados. */
+  grid-template-columns: 0.8fr 1.4fr 0.8fr;
+
+  /* 5 filas, cada una con su proporción relativa (fr = fracción
+     del espacio disponible, no píxeles fijos). */
+  grid-template-rows: 0.5fr 2fr 1fr 1fr 0.5fr;
+
+  /* grid-template-areas dibuja el layout como un "mapa" de texto:
+     cada palabra es el nombre de un área (definida abajo con
+     grid-area), y un punto "." significa "celda vacía".
+     Fíjate que "img" solo ocupa la columna del medio, dejando la
+     primera y la tercera columna vacías en esa fila. */
+  grid-template-areas:
+    "header header header"
+    ".      img    ."
+    "description description description"
+    "powers powers powers"
+    "weakness weakness weakness";
+
+  width: 300px;
+  height: 400px;
+  border: 1px solid #6a4fd1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #111120;
+  box-shadow: 0 0 24px rgba(106, 79, 209, 0.35);
+
+  /* --- Tilt 3D (efecto tipo pokemon-cards-css) ---
+     --rx/--ry las actualiza el <script> en cada pointermove.
+     transform-style: preserve-3d hace que .glare y .holo (que están
+     "encima" en el mismo plano) roten junto con la carta en vez de
+     quedar planos sobre ella. */
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.4s ease;
+}
+.container.active {
+  transition: transform 0.05s linear;
+}
+
+
+/* ---------------------------------------------------------
+   2) MEDIA QUERY = versión WEB
+   Todo lo que está dentro de este bloque SOLO se aplica cuando
+   el ancho de la ventana es 768px o más. Si la ventana mide menos,
+   el navegador ignora por completo este bloque y se queda con el
+   estilo base de arriba.
+   --------------------------------------------------------- */
+@media (min-width: 768px) {
+
+  /* Ojo: seguimos usando el selector .container, NO hace falta
+     crear una clase nueva tipo ".container-web". Simplemente
+     redefinimos las propiedades que cambian; el resto (border,
+     background, etc.) se mantiene igual porque ya estaba definido
+     arriba y no lo estamos pisando acá. */
+  .container {
+
+    /* Ahora son 5 columnas en vez de 3, porque el layout web
+       reparte el espacio horizontal de otra forma (más ancho
+       disponible = podemos poner la imagen y la descripción
+       una al lado de la otra). */
+    grid-template-columns: 0.9fr 1.2fr 1fr 1fr 1fr;
+    grid-template-rows: 0.3fr 2.2fr 1fr 1.1fr 0.4fr;
+
+    /* Mismos NOMBRES de área (header, img, powers, weakness,
+       description) que en la versión mobile, pero en otra
+       posición. Por eso no hace falta tocar el HTML: el CSS es
+       el único que decide dónde va cada bloque. */
+    grid-template-areas:
+      "header header header header ."
+      "img img img description description"
+      "img img img .           ."
+      ".   powers powers powers ."
+      "weakness weakness weakness weakness .";
+
+    width: 640px;
+    height: 340px;
+  }
+
+  /* descarga.jpeg es CUADRADA (512x512), pero en desktop el área
+     .img mide ~389x218px — mucho más ancha que alta. Con
+     "background-size: cover" el navegador escala la imagen para
+     que su ANCHO llene el contenedor, y como resultado el alto
+     escalado (~389px) es casi el doble del área (~218px): sobra
+     casi la mitad de la imagen en alto y hay que recortarla.
+     "background-position: center X%" reparte ese recorte entre
+     arriba y abajo según X (0% = recorta todo abajo, 100% =
+     recorta todo arriba). Con "center" (50%) se recorta parejo
+     de los dos lados, y como el personaje está en la mitad
+     SUPERIOR de la foto, ese recorte parejo ya le comía la cabeza.
+     Con 0% (top) el recorte se va entero hacia abajo y se ve la
+     imagen completa desde arriba. */
+  .img {
+    background-position: center top;
+  }
+}
+
+
+/* ---------------------------------------------------------
+   3) Cada bloque se conecta a su área con grid-area.
+   Esta parte NO cambia entre mobile y web: como los nombres de
+   área son los mismos en los dos grid-template-areas de arriba,
+   con declarar grid-area una sola vez alcanza para las dos
+   versiones.
+   --------------------------------------------------------- */
+.header      { grid-area: header; }
+.img         { grid-area: img; }
+.powers      { grid-area: powers; }
+.weakness    { grid-area: weakness; }
+.description { grid-area: description; }
+
+
+/* ---------------------------------------------------------
+   Estilos de contenido — tema oscuro/cinemático inspirado en
+   la imagen de referencia (descarga.jpeg) de Arthur Leywin.
+   No tienen que ver con media queries, son solo la piel visual
+   de la carta.
+   --------------------------------------------------------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  background: #14101f;
+  border-bottom: 1px solid #4a3a8a;
+}
+.header .name { font-size: 14px; font-weight: bold; letter-spacing: 1px; color: #f0e9ff; }
+.header .sub  { font-size: 10px; letter-spacing: 0.5px; color: #9a86e0; }
+.header .lv {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #6a4fd1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #b8a8ff;
+  flex-shrink: 0;
+}
+
+.img {
+  background: #000 url("descarga.jpeg") center / cover no-repeat;
+}
+
+.description {
+  background: #14101f;
+  border-top: 1px solid #4a3a8a;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+}
+.description .lab { font-size: 9px; letter-spacing: 0.5px; color: #9a86e0; }
+.description .txt { margin: 0; font-size: 10px; line-height: 1.4; color: #d6cfff; }
+
+.powers {
+  background: #181228;
+  border-top: 1px solid #4a3a8a;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+}
+.powers .lab { font-size: 9px; letter-spacing: 0.5px; color: #9a86e0; }
+.powers .row { display: flex; align-items: center; gap: 6px; }
+.powers .ic  { width: 11px; height: 11px; border-radius: 50%; background: #6a4fd1; flex-shrink: 0; }
+.powers .txt { font-size: 9px; color: #d6cfff; flex-shrink: 0; }
+.powers .bar { height: 6px; background: linear-gradient(90deg, #6a4fd1, #4fd1ff); border-radius: 3px; }
+
+.weakness {
+  background: #14101f;
+  border-top: 1px solid #4a3a8a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  gap: 8px;
+}
+.weakness .lab   { font-size: 10px; letter-spacing: 0.5px; color: #9a86e0; }
+.weakness .marks { display: flex; gap: 3px; }
+.weakness .m     { width: 9px; height: 9px; border: 1px solid #6a4fd1; transform: rotate(45deg); }
+.weakness .m.dashed { border-style: dashed; border-color: #4a3a8a; }
+.weakness .txt   { font-size: 9px; color: #d6cfff; text-align: right; }
+
+/* ---------------------------------------------------------
+   Efecto holo/tilt (inspirado en pokemon-cards-css) — dos capas
+   transparentes ENCIMA del contenido, ancladas a las mismas
+   custom properties --mx/--my/--rx/--ry que actualiza el <script>.
+   pointer-events: none para que el mouse siga pudiendo "tocar"
+   la carta debajo y no quede bloqueado por estas capas.
+   --------------------------------------------------------- */
+.glare,
+.holo {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.container.active .glare,
+.container.active .holo {
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+/* Brillo blanco que sigue el cursor, como el reflejo de luz sobre
+   el plástico de una carta física. */
+.glare {
+  background: radial-gradient(
+    circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.55),
+    transparent 55%
+  );
+  mix-blend-mode: overlay;
+}
+
+/* Franjas de color tipo "foil" holográfico. mix-blend-mode: color-dodge
+   es lo que le da ese brillo saturado tipo arcoíris metálico en vez de
+   verse como una simple superposición de colores planos. */
+.holo {
+  background-image: repeating-linear-gradient(
+    115deg,
+    #ff7fae 0%,
+    #ffe07f 10%,
+    #7fffcf 20%,
+    #7fbfff 30%,
+    #cf7fff 40%,
+    #ff7fae 50%
+  );
+  background-size: 250% 250%;
+  background-position: var(--mx, 50%) var(--my, 50%);
+  mix-blend-mode: color-dodge;
+  filter: saturate(1.4);
+}
