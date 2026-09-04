@@ -15,6 +15,7 @@
 
     body.dark-mode{
         background-color: #000000;
+        color:#ffffff;
     }
 
     /* ==========================================
@@ -58,6 +59,58 @@
       border-radius: 6px;
     }
 
+    .grid-container2 {
+
+      /* TODO 1: activa Grid en este contenedor.
+         Propiedad: display
+         Valor: grid
+      */
+      display: grid;
+      /* TODO 2: define 3 columnas de 200px cada una.
+         Propiedad: grid-template-columns
+         Pista: puedes escribir "200px 200px 200px" a mano,
+         o usar el atajo repeat(3, 200px) — ambos hacen lo mismo.
+      */
+      grid-template-columns: repeat(3, auto);
+
+      /* TODO 3: agrega espacio entre las celdas, sin usar márgenes.
+         Propiedad: gap
+         Valor sugerido: 15px
+      */
+      gap: 20px;
+      /* Ya viene incluido, no lo toques: */
+      background-color: #24d3ff;
+      padding: 15px;
+      border-radius: 0px;
+    }
+
+    .grid-item2 {
+      background-color: #3498db;
+      color: rgb(230, 255, 3);
+      padding: 30px;
+      text-align: center;
+      font-size: 1.5rem;
+      border-radius: 6px;
+    }
+
+    .grid-container3 {
+      display: grid;
+      grid-template-columns: repeat(3, auto);
+      gap: 20px;
+      background-color: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    .grid-item3 {
+      background-color: #9b59b6;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      font-size: 1.5rem;
+      border-radius: 6px;
+    }
+
     /* TODO 4 (opcional, para quien termine antes): alinea el
        contenido de cada celda al centro verticalmente.
        Propiedad: align-items (va en .grid-container, no en .grid-item)
@@ -85,6 +138,12 @@
         border-radius: 100px;
         text-align: left;
       }
+      .grid-container2{
+        display: none;
+      }
+      .grid-item2 {
+        display: none;  
+      }
     }
 </style>
 <body>
@@ -104,21 +163,64 @@
   </div>
 
   <button id="boton">Botón</button>
-  <button id="boton2">Otro botón</button>
+  <button id="boton2">Oscurito</button>
+
+  <div id="caja2" class="grid-container2">
+    <div class="grid-item2">1</div>
+    <div class="grid-item2">2</div>
+    <div class="grid-item2">3</div>
+  </div>
+
+  <div id="caja3" class="grid-container3">
+    <div class="grid-item3">1</div>
+    <div class="grid-item3">2</div>
+    <div class="grid-item3">3</div>
+  </div>
 
   <script>
+    // Buscamos el div #demo (celda 9 del primer grid) y le cambiamos
+    // el texto apenas carga la página.
     let txt = document.getElementById("demo");
     txt.textContent="Hola mundo"
+
+    // Cuando se hace click en "Botón", cambia el texto de esa misma celda.
     let btnMsg = document.getElementById("boton");
     btnMsg.addEventListener("click", function () {
       console.log("Botón clickeado");
         txt.textContent="Estoy en clase de Lenguajes";
     });
 
+    // Botón de modo oscuro: alterna la clase "dark-mode" en el <body>
+    // (esa clase está definida en el CSS y cambia el fondo/color de texto)
+    // y actualiza el texto del botón según quede activada o no.
     let btn2 = document.getElementById("boton2");
     btn2.addEventListener("click", function () {
-    document.body.classList.toggle("dark-mode");
-    });
+    document.body.classList.toggle("dark-mode")
+    if(document.body.classList.contains("dark-mode"))
+    {btn2.textContent = "Modo Claro";}
+      else{btn2.textContent = "Oscurito"; }
+      });
+
+    // Ocultar/mostrar la caja 3 por JS (no por CSS), replicando el
+    // breakpoint de 700px que ya usa .grid-container2/.grid-item2.
+    let caja3 = document.getElementById("caja3");
+
+    // matchMedia crea un "media query" que podemos consultar y escuchar
+    // desde JS, igual que un @media en CSS pero programático.
+    let mqCaja3 = window.matchMedia("(min-width: 700px)");
+
+    // "e" es el objeto del media query: e.matches es true cuando el
+    // ancho de la ventana cumple la condición (>= 700px).
+    function toggleCaja3(e) {
+      caja3.style.display = e.matches ? "none" : "grid";
+    }
+
+    // La llamamos una vez al cargar, para que la caja arranque en el
+    // estado correcto según el tamaño inicial de la ventana...
+    toggleCaja3(mqCaja3);
+    // ...y la suscribimos a los cambios, para que se actualice cada vez
+    // que la ventana cruza el umbral de 700px (se agranda o se achica).
+    mqCaja3.addEventListener("change", toggleCaja3);
 
   </script>
 </body>
