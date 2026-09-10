@@ -23,3 +23,10 @@ Con `getElementsByClassName` había asumido que, si el código no truena en cons
 funcionando — pero asignar `.textContent` a una lista (HTMLCollection) en vez de a un elemento
 no da ningún error y tampoco hace nada. Me quedó la pregunta fija de revisar siempre si un
 selector me devuelve un elemento o una lista antes de usarlo.
+
+## 2026-09-10
+
+En la clase de hoy no presenté dificultades y aprendí algo que no sabía antes, y es cambiar el
+contenido en base al tamaño con JS, ya que solo lo había hecho anteriormente con HTML usando
+`display: none` y `@media`. Me pareció súper interesante y útil saber hacer esto de una manera
+distinta y más limpia.

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Landing Page</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    section {
+      padding: 40px 20px;
+    }
+
+    #imagen {
+      text-align: center;
+    }
+
+    #imagen-dragon {
+      max-width: 100%;
+      height: auto;
+      transition: all 0.4s ease;
+    }
+
+    /* Etapa 1: Huevo — quieto, tonos tierra */
+    body.etapa-huevo {
+      background-color: #f5ecd7;
+      color: #4a3b22;
+    }
+    body.etapa-huevo #titulo-texto {
+      font-size: 2rem;
+    }
+    body.etapa-huevo #imagen-dragon {
+      max-width: 220px;
+      border-radius: 50%;
+      border: 4px solid #c9a86a;
+    }
+
+    /* Etapa 2: Dragón bebé — liviano, colores frescos */
+    body.etapa-bebe {
+      background-color: #eafbea;
+      color: #1f5c1f;
+    }
+    body.etapa-bebe #titulo-texto {
+      font-size: 3rem;
+    }
+    body.etapa-bebe #imagen-dragon {
+      max-width: 320px;
+      border-radius: 16px;
+      border: 4px solid #6fcf6f;
+    }
+
+    /* Etapa 3: Dragón adulto — imponente, tonos de fuego */
+    body.etapa-adulto {
+      background-color: #1a1a1a;
+      color: #ffb37a;
+    }
+    body.etapa-adulto #titulo-texto {
+      font-size: 4.5rem;
+      text-shadow: 0 0 20px #ff4500;
+    }
+    body.etapa-adulto #imagen-dragon {
+      max-width: 480px;
+      border-radius: 8px;
+      box-shadow: 0 0 40px #ff4500;
+    }
+  </style>
+</head>
+<body>
+
+  <section id="titulo">
+    <h1 id="titulo-texto">Título de la landing</h1>
+    <h2>Placidusax</h2>
+  </section>
+
+  <section id="imagen">
+    <img id="imagen-dragon" src="..//Trabajo en clase/Imagenes/Huevo-dragon.png" alt="Huevo-dragon">
+  </section>
+
+  <section id="descripcion">
+    <h2>Descripción</h2>
+    <p id="descripcion-texto">Texto de descripción.</p>
+  </section>
+
+  <script>
+    const titulo = document.getElementById("titulo-texto");
+    const descripcion = document.getElementById("descripcion-texto");
+    const imagen = document.getElementById("imagen-dragon");
+    const img1 = "..//Trabajo en clase/Imagenes/Huevo-dragon.png";
+    const img2 = "..//Trabajo en clase/Imagenes/Baby-dragon.png";
+    const img3 = "..//Trabajo en clase/Imagenes/Dragon-adulto.png";
+
+    function resize(){
+
+      document.body.classList.remove("etapa-huevo", "etapa-bebe", "etapa-adulto");
+
+      if (window.innerWidth >= 1024){
+        titulo.textContent = "Dragon Adulto";
+        imagen.src = img3;
+        imagen.alt = "Dragon-adulto";
+        descripcion.textContent = "En esta etapa el dragón ya es todo un coloso de los cielos y las tormentas";
+        document.body.classList.add("etapa-adulto");
+      }
+      else if(window.innerWidth >= 768){
+        titulo.textContent = "Dragón Bebe";
+        imagen.src = img2;
+        imagen.alt = "Baby-dragon";
+        descripcion.textContent = "El dragón acaba de salir del huevo: es pequeño, torpe y todavía no puede volar.";
+        document.body.classList.add("etapa-bebe");
+      }
+      else{
+        titulo.textContent = "Huevo de Dragón";
+        imagen.src = img1;
+        imagen.alt = "Huevo-dragon";
+        descripcion.textContent = "Un huevo de dragón recién puesto, todavía duro y cerrado a la espera de eclosionar.";
+        document.body.classList.add("etapa-huevo");
+      }
+    }
+
+    window.addEventListener("resize", resize);
+    resize();
+  </script>
+
+</body>
+</html>
