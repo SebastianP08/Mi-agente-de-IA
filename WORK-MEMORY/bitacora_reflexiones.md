@@ -30,3 +30,9 @@ En la clase de hoy no presenté dificultades y aprendí algo que no sabía antes
 contenido en base al tamaño con JS, ya que solo lo había hecho anteriormente con HTML usando
 `display: none` y `@media`. Me pareció súper interesante y útil saber hacer esto de una manera
 distinta y más limpia.
+
+## 2026-09-11
+
+El día de hoy vimos como es el funcionamiento de objetos con javascript aplicando primero la
+creación de un solo objeto y una plantilla para una carta, despues con la ayuda de la IA generamos
+12 objetos en total cada uno con el estilo de la plantilla que se hizo.

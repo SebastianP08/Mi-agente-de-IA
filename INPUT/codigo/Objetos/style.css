@@ -1,0 +1,393 @@
+body {
+  position: relative;
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  display: grid;
+  justify-items: center;
+  gap: 15px;
+  overflow-x: hidden;
+  background-color: #f7ecd4;
+  background-image:
+    radial-gradient(1.5px 1.5px at 8% 22%, rgba(163, 0, 0, 0.35), transparent 60%),
+    radial-gradient(1.5px 1.5px at 22% 68%, rgba(163, 0, 0, 0.3), transparent 60%),
+    radial-gradient(1.5px 1.5px at 38% 12%, rgba(163, 0, 0, 0.3), transparent 60%),
+    radial-gradient(1px 1px at 47% 85%, rgba(163, 0, 0, 0.25), transparent 60%),
+    radial-gradient(1.5px 1.5px at 62% 45%, rgba(163, 0, 0, 0.3), transparent 60%),
+    radial-gradient(1px 1px at 74% 78%, rgba(163, 0, 0, 0.25), transparent 60%),
+    radial-gradient(1.5px 1.5px at 82% 20%, rgba(163, 0, 0, 0.3), transparent 60%),
+    radial-gradient(1px 1px at 91% 60%, rgba(163, 0, 0, 0.25), transparent 60%),
+    radial-gradient(circle at 50% 30%, rgba(212, 175, 55, 0.35), transparent 65%),
+    linear-gradient(180deg, #fdf6e6 0%, #f2dfab 45%, #e9cf8c 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transition: background-color 0.4s ease;
+}
+
+/* Cientos de ojos: cerrados en modo claro (dia), abiertos en modo oscuro (Almighty despierto) */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: 460px 460px;
+  transition: opacity 0.7s ease;
+}
+
+body::before {
+  opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='460' viewBox='0 0 460 460'%3E%3Cdefs%3E%3Cg id='e'%3E%3Cpath d='M-18 0 Q0 -12 18 0' stroke='rgba(74,5,5,0.5)' stroke-width='2.6' fill='none' stroke-linecap='round'/%3E%3Cline x1='-11' y1='3' x2='-13' y2='10' stroke='rgba(74,5,5,0.35)' stroke-width='1.4' stroke-linecap='round'/%3E%3Cline x1='0' y1='4' x2='0' y2='11' stroke='rgba(74,5,5,0.35)' stroke-width='1.4' stroke-linecap='round'/%3E%3Cline x1='11' y1='3' x2='13' y2='10' stroke='rgba(74,5,5,0.35)' stroke-width='1.4' stroke-linecap='round'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23e' transform='translate(70,70) scale(2.8)'/%3E%3Cuse href='%23e' transform='translate(260,50) scale(1.7) rotate(12)'/%3E%3Cuse href='%23e' transform='translate(400,170) scale(3.1) rotate(-15)'/%3E%3Cuse href='%23e' transform='translate(60,260) scale(2.1) rotate(8)'/%3E%3Cuse href='%23e' transform='translate(220,330) scale(2.6) rotate(-22)'/%3E%3Cuse href='%23e' transform='translate(370,390) scale(1.9) rotate(18)'/%3E%3Cuse href='%23e' transform='translate(150,150) scale(1.5) rotate(30)'/%3E%3C/svg%3E");
+}
+
+body::after {
+  opacity: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='460' height='460' viewBox='0 0 460 460'%3E%3Cdefs%3E%3Cg id='o'%3E%3Cpath d='M-18 0 Q0 -16 18 0 Q0 16 -18 0 Z' fill='rgba(20,0,0,0.6)' stroke='rgba(255,70,70,0.6)' stroke-width='1.4'/%3E%3Ccircle cx='0' cy='0' r='8' fill='rgba(255,30,30,0.9)'/%3E%3Ccircle cx='0' cy='0' r='3.3' fill='rgb(10,0,0)'/%3E%3Ccircle cx='-3.4' cy='-3.4' r='1.5' fill='rgba(255,255,255,0.85)'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23o' transform='translate(70,70) scale(2.8)'/%3E%3Cuse href='%23o' transform='translate(260,50) scale(1.7) rotate(12)'/%3E%3Cuse href='%23o' transform='translate(400,170) scale(3.1) rotate(-15)'/%3E%3Cuse href='%23o' transform='translate(60,260) scale(2.1) rotate(8)'/%3E%3Cuse href='%23o' transform='translate(220,330) scale(2.6) rotate(-22)'/%3E%3Cuse href='%23o' transform='translate(370,390) scale(1.9) rotate(18)'/%3E%3Cuse href='%23o' transform='translate(150,150) scale(1.5) rotate(30)'/%3E%3C/svg%3E");
+}
+
+body.oscuro::before {
+  opacity: 0;
+}
+
+body.oscuro::after {
+  opacity: 1;
+}
+
+h1 {
+  color: #4a0505;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  transition: color 0.3s ease;
+}
+
+#btnModoOscuro {
+  padding: 8px 16px;
+  border: 1px solid rgba(74, 5, 5, 0.4);
+  border-radius: 20px;
+  background-color: #4a0505;
+  color: #f7ecd4;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+h1,
+#btnModoOscuro,
+.galeria {
+  position: relative;
+  z-index: 1;
+}
+
+.galeria {
+  width: 100%;
+  max-width: 1400px;
+}
+
+.card-container {
+  width: 100%;
+}
+
+#contenedor {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+  /* Necesario para que las rotaciones 3D de .carta se vean con profundidad
+     real en vez de solo "aplastarse" en 2D. */
+  perspective: 1000px;
+}
+
+.carta {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  /* --rx/--ry las actualiza index.js en cada pointermove sobre la carta. */
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.4s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+.carta.activa {
+  transition: transform 0.05s linear;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35);
+}
+
+.carta-imagen {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  /* "top" en vez de "center" (default): al recortar la imagen por el alto,
+     prioriza la parte de arriba de la foto para que no se corte la cabeza
+     de los personajes. */
+  object-position: center top;
+  border-bottom: 6px solid #a30000;
+  /* Degrade muy sutil que aparece al pasar el mouse (ver .carta:hover). */
+  transition: box-shadow 0.3s ease;
+}
+
+.carta:hover .carta-imagen {
+  box-shadow: inset 0 -90px 60px -30px rgba(0, 0, 0, 0.28);
+}
+
+.carta-info {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 22px;
+}
+
+.carta-bando {
+  justify-self: start;
+  padding: 4px 14px;
+  border: 2px solid #a30000;
+  border-radius: 999px;
+  background-color: #a30000;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.carta-info h2 {
+  margin: 4px 0;
+  color: #1a1a1a;
+  font-size: 2rem;
+}
+
+.carta-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.carta-info p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.4;
+}
+
+.stat {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fafafa;
+}
+
+.stat strong {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #a30000;
+}
+
+.stat-poder {
+  grid-column: 1 / -1;
+}
+
+.barra-poder {
+  display: block;
+  width: 100%;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background-color: #e2d5c0;
+  overflow: hidden;
+}
+
+.barra-poder-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a30000, #ff5b3d);
+  transition: width 0.8s ease;
+}
+
+.carta-info ul {
+  margin: 0;
+  padding: 10px 10px 10px 26px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background-color: #fafafa;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.carta-info li {
+  margin-bottom: 3px;
+}
+
+.carta-descripcion {
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-left: 4px solid #a30000;
+  border-radius: 10px;
+  background-color: #fafafa;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* Modo oscuro: la noche del Rey Espiritual, mas negro y con destello carmesi */
+body.oscuro {
+  background-color: #030103;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 25%, rgba(255, 217, 130, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 30% 70%, rgba(255, 217, 130, 0.4), transparent 60%),
+    radial-gradient(1.5px 1.5px at 55% 40%, rgba(255, 217, 130, 0.5), transparent 60%),
+    radial-gradient(1px 1px at 80% 65%, rgba(255, 217, 130, 0.35), transparent 60%),
+    radial-gradient(1px 1px at 90% 20%, rgba(255, 217, 130, 0.4), transparent 60%),
+    radial-gradient(circle at 50% 40%, rgba(163, 0, 0, 0.28), transparent 60%),
+    linear-gradient(180deg, #020002 0%, #150307 50%, #020002 100%);
+}
+
+body.oscuro h1 {
+  color: #f2e6c8;
+  text-shadow: 0 0 12px rgba(163, 0, 0, 0.6);
+}
+
+body.oscuro #btnModoOscuro {
+  background-color: #f2e6c8;
+  color: #150307;
+  border-color: rgba(212, 175, 55, 0.6);
+}
+
+body.oscuro .carta {
+  background-color: #242424;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+
+body.oscuro .carta-info h2,
+body.oscuro .carta-info p,
+body.oscuro .carta-info ul,
+body.oscuro .carta-descripcion {
+  color: #e0e0e0;
+}
+
+body.oscuro .stat,
+body.oscuro .carta-info ul,
+body.oscuro .carta-descripcion {
+  background-color: #1a1a1a;
+  border-color: #3a3a3a;
+}
+
+body.oscuro .barra-poder {
+  background-color: #3a3a3a;
+}
+
+/* Modal de detalle: fondo oscuro semitransparente cubriendo toda la
+   pantalla, con la tarjeta de detalle centrada adentro. Arranca oculto
+   (display: none) y JS le agrega la clase "visible" al hacer click en
+   una carta. */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: rgba(10, 5, 5, 0.75);
+}
+
+.modal-overlay.visible {
+  display: flex;
+}
+
+/* Evita que se pueda scrollear la pagina de fondo mientras el modal esta abierto */
+body.modal-abierto {
+  overflow: hidden;
+}
+
+.modal-contenido {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background-color: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modal-cerrar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+body.oscuro .modal-contenido {
+  background-color: #242424;
+}
+
+/* Breakpoint 1: tablets */
+@media (max-width: 900px) {
+  #contenedor {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+}
+
+/* Breakpoint 2: pantallas medianas */
+@media (max-width: 768px) {
+  .carta-imagen {
+    height: 340px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Breakpoint 3: moviles pequeños */
+@media (max-width: 480px) {
+  body {
+    padding: 12px;
+  }
+
+  #contenedor {
+    grid-template-columns: 1fr;
+  }
+
+  .carta-imagen {
+    height: 280px;
+  }
+
+  .carta-info {
+    padding: 18px;
+  }
+
+  .carta-info h2 {
+    font-size: 1.4rem;
+  }
+
+  .carta-stats {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+}

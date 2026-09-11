@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objetos en JavaScript</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Objetos en JavaScript</h1>
+
+  <!-- Al hacer click, index.js agrega/quita la clase "oscuro" en el body -->
+  <button id="btnModoOscuro">🌙 Modo oscuro</button>
+
+  <!-- Galeria de villanos: aqui es donde terminan cayendo las 12 tarjetas.
+       El div#contenedor arranca vacio a proposito, index.js lo llena con JS
+       usando los datos del arreglo "villanos" y la plantilla de abajo. -->
+    <section class="galeria" id="galeria">
+        <section class="card-container">
+            <div id="contenedor"></div>
+        </section>
+    </section>
+
+  <!-- Esto es un <template>: el navegador NO lo muestra en pantalla, es solo
+       un "molde" de una tarjeta vacia que index.js clona una vez por cada
+       villano (con plantilla.content.cloneNode). Por eso usa clases en vez
+       de ids: los ids no pueden repetirse, pero vamos a crear 12 copias. -->
+  <template id="plantilla-carta">
+    <div class="carta">
+      <img class="carta-imagen imagen" src="" alt="">
+      <div class="carta-info">
+        <span class="carta-bando bando"></span>
+        <h2 class="nombre"></h2>
+        <div class="carta-stats">
+          <p class="stat"><strong>Universo</strong><span class="universo"></span></p>
+          <p class="stat"><strong>Raza</strong><span class="raza"></span></p>
+          <p class="stat"><strong>Edad</strong><span class="edad"></span></p>
+          <p class="stat"><strong>Altura</strong><span class="altura"></span></p>
+          <p class="stat stat-poder">
+            <strong>Nivel de fuerza</strong>
+            <span class="nivelDeFuerza"></span>
+            <!-- Barra vacia: index.js le pone el ancho en % segun nivelDeFuerza -->
+            <span class="barra-poder">
+              <span class="barra-poder-fill"></span>
+            </span>
+          </p>
+        </div>
+        <p><strong>Poderes:</strong></p>
+        <ul class="poderes"></ul>
+        <p class="carta-descripcion descripcion"></p>
+      </div>
+    </div>
+  </template>
+
+  <!-- Modal de detalle: un solo elemento (no se repite como la tarjeta), se
+       muestra al hacer click en cualquier carta y index.js lo llena con los
+       datos de ESE villano. Reutiliza clases (carta-info, carta-stats, etc.)
+       para heredar el mismo estilo que las tarjetas, incluido el modo oscuro. -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal-contenido">
+      <button id="modalCerrar" class="modal-cerrar" aria-label="Cerrar">&times;</button>
+      <img id="modalImagen" class="carta-imagen" src="" alt="">
+      <div class="carta-info">
+        <span id="modalBando" class="carta-bando"></span>
+        <h2 id="modalNombre"></h2>
+        <div class="carta-stats">
+          <p class="stat"><strong>Universo</strong><span id="modalUniverso"></span></p>
+          <p class="stat"><strong>Raza</strong><span id="modalRaza"></span></p>
+          <p class="stat"><strong>Edad</strong><span id="modalEdad"></span></p>
+          <p class="stat"><strong>Altura</strong><span id="modalAltura"></span></p>
+          <p class="stat stat-poder">
+            <strong>Nivel de fuerza</strong>
+            <span id="modalNivelDeFuerza"></span>
+            <span class="barra-poder">
+              <span id="modalBarraPoderFill" class="barra-poder-fill"></span>
+            </span>
+          </p>
+        </div>
+        <p><strong>Poderes:</strong></p>
+        <ul id="modalPoderes"></ul>
+        <p id="modalDescripcion" class="carta-descripcion"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- defer: espera a que el HTML esté cargado antes de ejecutar el JS -->
+  <script src="index.js" defer></script>
+</body>
+</html>
