@@ -4,17 +4,27 @@ Una entrada breve por sesión de clase: qué se aprendió o qué costó más, es
 sesión. **No es la bitácora del curso** (esa la lleva el profesor, en `bitacora_sesiones_curso.csv`,
 fuera de esta carpeta) — esta es la reflexión personal del estudiante sobre su propio proceso.
 
-## 2026-08-20
+## 2026-08-21
 
-Hoy entendí la diferencia entre declarar una variable con `let` y usarla sin declararla — el
-`ReferenceError` dejó de sentirse aleatorio en cuanto vi que siempre es la misma causa: un nombre
-que nunca definí.
+Hoy comenzamos a ver como crear un agente de IA dandole una historia y personalidad, tambien se intento
+que el agente comitiera un fallo y ver como reaccionaba. Lo que mas me costo de esta actividad fue saber 
+que historia le daba a mi agente, ya que no se me ocurrian tantas ideas que fueran bizarras y quedaran bien
+al menos para mi.
 
-## 2026-08-22
+## 2026-08-27
 
-Me costó organizar las referencias visuales por tema en vez de por sitio de origen. Al principio
-quería agruparlas por dónde las encontré, pero agruparlas por lo que inspiran (color, tipografía,
-layout) tiene más sentido para el proyecto.
+En esta sesión se continuo el tema de los agentes, esta vez con uno ya más definido tanto en papel como en caracteristicas.
+Con este agente se desarrollarón pruebas e incluso se le dio un código erroneo a proposito para saber como respondia y de que
+manera daba la solución y nos guiaba hacia ella.
+Lo que mas me costo de la clase fue cuando el profesor nos pidio hacer un bucle for, ya que aunque se como funciona y para que sirve
+en un inicio no supe como era la estructura de este.
+
+## 2026-08-28
+
+En esta sesión utilizamos una página para ayudarnos en temas de css de manera más facil de comprender sin la necesidad de hacer dódigo de 0.
+En esta página que era para armar bien contenidos que usan el grid de css, la usamos para crear una card similar a las de pokemon con cualquier
+contenido que quisieramos y con ayuda del agente la refinamos de mejor manera tanto en contenido como en diseño.
+En este caso no hubo nada que se me complicara o dificultara, pude desarrollar y entender todo de buena forma.
 
 ## 2026-09-03
 

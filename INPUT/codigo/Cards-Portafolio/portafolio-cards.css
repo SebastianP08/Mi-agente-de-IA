@@ -1,0 +1,487 @@
+/* portafolio-cards.css
+   Diseño simple y basico para la tarjeta de un proyecto del portafolio. */
+
+/* @import tiene que ir antes que cualquier otra regla del archivo (fuera
+   de comentarios), si no el navegador lo ignora. Trae la fuente que se usa
+   en el titulo y los subtitulos (ver "font-family: 'Permanent Marker'" mas
+   abajo). */
+@import url('https://fonts.googleapis.com/css2?family=Pangolin&family=Permanent+Marker&display=swap');
+
+/* Color de acento del proyecto: el mismo morado del boton de modo oscuro,
+   reutilizado en la raya de la imagen y el borde de la descripcion para
+   que todo se vea conectado. En modo oscuro lo aclaramos un poco (ver
+   body.oscuro mas abajo) para que siga contrastando bien. */
+:root {
+  --color-acento: #6a5acd;
+}
+
+/* Centramos todo el contenido de la pagina y usamos una fuente simple.
+   La transition hace que el cambio a modo oscuro se vea suave y no de golpe. */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  color: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Animacion de ola: cada letra sube y vuelve a bajar. Sola no dice mucho,
+   pero combinada con el animation-delay de .titulo-ola span (que crece
+   letra por letra) hace que no se muevan todas juntas, sino una despues
+   de la otra, como una ola. infinite = se repite para siempre, así que de
+   sobra cumple con que la ola complete el recorrido al menos 2 veces. */
+@keyframes letra-ola {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+h1 {
+  font-family: "Permanent Marker", cursive;
+  font-size: 4.5rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--color-acento);
+  letter-spacing: 0.03em;
+}
+
+/* display: inline-block es necesario para que transform (usado en
+   letra-ola) funcione sobre cada letra por separado -- un <span> normal
+   (inline) ignora transform. */
+.titulo-ola span {
+  display: inline-block;
+  animation: letra-ola 1.4s ease-in-out infinite;
+  /* --i lo pone cada <span> en el HTML (0, 1, 2...): al multiplicarlo
+     aca por 0.08s, la letra 0 arranca sin retraso, la 1 arranca 0.08s
+     despues, la 2 0.16s despues, etc. -- ese retraso creciente es lo que
+     se ve como una ola viajando de izquierda a derecha. */
+  animation-delay: calc(var(--i, 0) * 0.08s);
+}
+
+/* Grilla de tarjetas: 2 columnas fijas, cada una hasta 1fr del ancho
+   disponible (con un tope de 1180px en total para que no queden gigantes
+   en pantallas muy anchas). perspective le da profundidad al
+   rotateX/rotateY de cada .tarjeta: sin esto la rotacion 3D se ve
+   aplastada, como si fuera 2D. Va en este wrapper (no en el body) porque
+   "perspective" convierte al elemento que lo tiene en el punto de
+   referencia de cualquier descendiente con position: fixed -- si
+   estuviera en el body, .fondo-decorativo y el modal (ambos position:
+   fixed) dejarian de cubrir toda la pantalla y se recortarian a la altura
+   del contenido del body. */
+.escena-tarjeta {
+  perspective: 1000px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px;
+  width: 100%;
+  max-width: 1180px;
+}
+
+/* Fondo decorativo: ocupa toda la pantalla, fijo (no se mueve al hacer
+   scroll) y detras de todo lo demas (z-index negativo). pointer-events:
+   none para que las imagenes de adentro no bloqueen ningun click. */
+.fondo-decorativo {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Cada imagen de fondo: portafolio-cards.js le pone su propio top/left/
+   width/rotate por JS (son distintos en cada una), aca solo dejamos fija
+   la posicion absoluta y una opacidad baja para que no compitan con la
+   tarjeta. */
+.fondo-decorativo img {
+  position: absolute;
+  opacity: 0.6;
+}
+
+/* Boton de modo oscuro: este si tiene un diseño mas elaborado (gradiente,
+   sombra y una pequeña animacion al pasar el mouse), a diferencia del
+   resto de la pagina que es bien basico. */
+#btnModoOscuro {
+  background: linear-gradient(135deg, #6a5acd, #836fff);
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 0.95em;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(106, 90, 205, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 30px;
+}
+
+#btnModoOscuro:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(106, 90, 205, 0.5);
+}
+
+#btnModoOscuro:active {
+  transform: translateY(0);
+}
+
+/* La tarjeta: un rectangulo blanco con borde suave y sombra ligera. El
+   ancho ya no lo define un max-width fijo, sino la columna de la grilla
+   de .escena-tarjeta (asi las 8 tarjetas quedan del mismo tamaño). */
+.tarjeta {
+  /* position: relative para que .tarjeta-brillo (position: absolute) se
+     ubique tomando esta tarjeta como referencia, no toda la pagina. */
+  position: relative;
+  background-color: #ffffff;
+  color: #222;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  overflow: hidden;
+  /* --rx/--ry las actualiza portafolio-cards.js en cada pointermove sobre
+     la tarjeta: son los angulos que la inclinan levemente, como si la
+     estuvieras sosteniendo con la mano bajo la luz. */
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.4s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Mientras el mouse se mueve encima (clase "activa"), la transicion del
+   tilt es casi instantanea para que siga al cursor sin retraso; al salir
+   el mouse se le quita la clase y vuelve a la transicion lenta de arriba,
+   por eso se ve un regreso suave a la posicion plana. */
+.tarjeta.activa {
+  transition: transform 0.05s linear, box-shadow 0.2s ease;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* La imagen ocupa todo el ancho de la tarjeta. Le damos una altura fija y
+   object-fit: cover para que se vea grande y recortada de forma prolija,
+   sin importar las proporciones originales de cada foto. La raya de
+   color de abajo (inspirada en las cartas de villanos) marca la
+   transicion entre la imagen y el texto. */
+.tarjeta-imagen {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  /* "top" en vez de "center" (default): al recortar la imagen por el
+     alto, prioriza la parte de arriba de la foto en vez de recortar
+     parejo arriba y abajo, asi no se pierde el contenido importante que
+     suele estar arriba (como el header de una pagina web). */
+  object-position: center top;
+  display: block;
+  border-bottom: 6px solid var(--color-acento);
+}
+
+/* Capa de brillo: cubre toda la tarjeta por encima de todo lo demas, pero
+   pointer-events: none deja que los clicks/hover pasen "a traves" de ella.
+   Arranca invisible (opacity: 0) y solo se muestra cuando la tarjeta tiene
+   la clase "activa" (el mouse esta encima).
+   En vez de un circulo centrado en el cursor, es una franja diagonal
+   (linear-gradient a 115deg) sobre un fondo mucho mas grande que la propia
+   tarjeta (background-size: 250%): al mover background-position con
+   --mx/--my, esa franja se desliza por toda la carta, como el reflejo del
+   sol deslizandose sobre un objeto brillante al moverlo.
+   El color y el mix-blend-mode cambian entre modo claro/oscuro (ver mas
+   abajo): "overlay" no se nota sobre blanco puro, asi que en modo claro
+   usamos "multiply" con gris (oscurece un poco, como una sombra de luz) y
+   en modo oscuro "screen" con blanco (aclara, se ve como un brillo). */
+.tarjeta-brillo {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background-image: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(90, 90, 90, 0.35) 48%,
+    transparent 62%
+  );
+  background-size: 250% 250%;
+  background-position: var(--mx, 50%) var(--my, 50%);
+  mix-blend-mode: multiply;
+}
+
+.tarjeta.activa .tarjeta-brillo {
+  opacity: 1;
+  transition: opacity 0.1s ease;
+}
+
+/* Espacio interno para el texto de la tarjeta. */
+.tarjeta-info {
+  padding: 16px;
+}
+
+/* Quitamos los margenes por defecto de cada bloque (h2, p, span) para que
+   el espaciado entre ellos lo controle solo la raya divisoria de abajo. */
+.tarjeta-info > * {
+  margin: 0;
+}
+
+/* Subtitulo de cada tarjeta (el nombre del proyecto): Pangolin en vez de
+   Permanent Marker -- misma familia de fuentes manuscritas, pero mas
+   pareja/regular y facil de leer en textos mas chicos que el h1. */
+.tarjeta-nombre {
+  font-family: "Pangolin", cursive;
+  letter-spacing: 0.02em;
+}
+
+/* Raya divisoria: le agregamos un borde inferior a cada bloque de texto
+   menos al ultimo (el estado), asi queda "titulo - raya - categoria -
+   raya - herramienta - raya - descripcion - raya - estado". */
+.tarjeta-info > *:not(:last-child) {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.tarjeta-categoria {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.tarjeta-dato {
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Badge de la herramienta: mismo estilo de pildora que el estado, para
+   darle mas peso visual. El color de fondo/texto lo pone la clase que le
+   agrega el JS (herramienta-vscode, herramienta-blender, etc). */
+.tarjeta-herramienta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.tarjeta-herramienta.herramienta-vscode {
+  background-color: #d6ebff;
+  color: #0057a8;
+}
+
+.tarjeta-herramienta.herramienta-blender {
+  background-color: #ffe3d0;
+  color: #b34d00;
+}
+
+.tarjeta-herramienta.herramienta-figma-word {
+  background-color: #ede0ff;
+  color: #6b21c9;
+}
+
+/* Icono de la herramienta (vive en Icons-Herramientas/, es un SVG). */
+.tarjeta-icono-herramienta {
+  width: 18px;
+  height: 18px;
+}
+
+/* Borde izquierdo de color, mismo recurso que usan las cartas de
+   villanos para resaltar el bloque de descripcion del resto del texto. */
+.tarjeta-descripcion {
+  font-size: 0.95em;
+  line-height: 1.4;
+  border-left: 4px solid var(--color-acento);
+  padding-left: 10px;
+}
+
+/* Etiqueta de estado (En proceso / Terminado): forma de pildora, con un
+   puntito de color antes del texto y un color de fondo distinto segun
+   el estado (naranja = en proceso, verde = terminado). */
+.tarjeta-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tarjeta-estado::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.tarjeta-estado.en-proceso {
+  background-color: #fff1d6;
+  color: #b8720a;
+}
+
+.tarjeta-estado.terminado {
+  background-color: #dcf5e3;
+  color: #1f8b45;
+}
+
+/* --- Modo oscuro --- */
+/* Cuando el JS agrega la clase "oscuro" al body, sobreescribimos los
+   colores de fondo/texto del body, la tarjeta y la etiqueta de estado. */
+body.oscuro {
+  --color-acento: #9d8cff;
+  background-color: #16151b;
+  color: #f2f2f2;
+}
+
+body.oscuro .tarjeta {
+  background-color: #2b2b2b;
+  color: #f2f2f2;
+}
+
+body.oscuro .tarjeta-categoria {
+  color: #bbbbbb;
+}
+
+body.oscuro .tarjeta-brillo {
+  background-image: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.55) 48%,
+    transparent 62%
+  );
+  mix-blend-mode: screen;
+}
+
+body.oscuro .tarjeta-info > *:not(:last-child) {
+  border-bottom-color: #444444;
+}
+
+body.oscuro .tarjeta-herramienta.herramienta-vscode {
+  background-color: #0a3a63;
+  color: #8ec9ff;
+}
+
+body.oscuro .tarjeta-herramienta.herramienta-blender {
+  background-color: #5c2c00;
+  color: #ffb277;
+}
+
+body.oscuro .tarjeta-herramienta.herramienta-figma-word {
+  background-color: #3a1a66;
+  color: #caa4ff;
+}
+
+body.oscuro .tarjeta-estado.en-proceso {
+  background-color: #4a3410;
+  color: #ffc169;
+}
+
+body.oscuro .tarjeta-estado.terminado {
+  background-color: #143c22;
+  color: #6fe097;
+}
+
+/* --- Modal de detalle --- */
+/* Fondo oscuro semitransparente cubriendo toda la pantalla, con la
+   tarjeta de detalle centrada adentro. Arranca oculto (display: none) y
+   el JS le agrega la clase "visible" al hacer click en la tarjeta. */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-overlay.visible {
+  display: flex;
+}
+
+/* Evita que se pueda scrollear la pagina de fondo mientras el modal esta abierto */
+body.modal-abierto {
+  overflow: hidden;
+}
+
+.modal-contenido {
+  position: relative;
+  width: 100%;
+  /* Mas grande que la tarjeta chica (520px), sobre todo para que la
+     imagen del proyecto se vea con mas detalle. */
+  max-width: 760px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.3s ease;
+}
+
+/* La imagen dentro del modal reusa .tarjeta-imagen, pero con mas alto que
+   en la tarjeta chica (320px) para aprovechar el modal mas grande. */
+.modal-contenido .tarjeta-imagen {
+  height: 420px;
+}
+
+.modal-cerrar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+body.oscuro .modal-contenido {
+  background-color: #2b2b2b;
+}
+
+/* --- Responsive --- */
+/* Con 2 columnas fijas, en pantallas angostas cada tarjeta queda demasiado
+   apretada (menos de 350px de ancho). Antes de eso pasa, colapsamos la
+   grilla a 1 sola columna: cada tarjeta pasa a ocupar todo el ancho
+   disponible, igual que un forEach de villanos con menos columnas. */
+@media (max-width: 720px) {
+  .escena-tarjeta {
+    grid-template-columns: 1fr;
+    max-width: 520px;
+  }
+}
+
+/* La imagen tiene un alto FIJO (320px en la tarjeta, 420px en el modal),
+   pero en pantallas angostas la tarjeta se achica de ancho igual. Con el
+   alto sin tocar, object-fit: cover tiene que "hacer zoom" para tapar esa
+   franja tan angosta y termina recortando demasiado. Bajamos el alto en
+   dos pasos para que el recorte sea mucho mas suave. */
+@media (max-width: 600px) {
+  .tarjeta-imagen {
+    height: 220px;
+  }
+
+  .modal-contenido .tarjeta-imagen {
+    height: 260px;
+  }
+}
+
+@media (max-width: 400px) {
+  .tarjeta-imagen {
+    height: 180px;
+  }
+
+  .modal-contenido .tarjeta-imagen {
+    height: 200px;
+  }
+}

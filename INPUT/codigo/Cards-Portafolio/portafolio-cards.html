@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Portafolio</title>
+  <!-- Estilos simples y basicos, aparte del JS/HTML -->
+  <link rel="stylesheet" href="portafolio-cards.css">
+</head>
+<body>
+
+  <!-- Fondo decorativo: arranca vacio, portafolio-cards.js lo llena con
+       varias copias de un puñado de imagenes, cada una en una posicion,
+       tamaño y rotacion al azar (ver CANTIDAD_IMAGENES_FONDO en el JS). -->
+  <div class="fondo-decorativo" id="fondoDecorativo"></div>
+
+  <!-- Cada letra en su propio <span> con una custom property --i (su
+       posicion) para poder animarlas con un pequeño retraso creciente
+       entre una y la siguiente (ver .titulo-ola en portafolio-cards.css):
+       eso es lo que arma el efecto de "ola" en vez de que todas las letras
+       se muevan al mismo tiempo. -->
+  <h1 class="titulo-ola"><span style="--i:0">M</span><span style="--i:1">i</span><span style="--i:2">&nbsp;</span><span style="--i:3">P</span><span style="--i:4">o</span><span style="--i:5">r</span><span style="--i:6">t</span><span style="--i:7">a</span><span style="--i:8">f</span><span style="--i:9">o</span><span style="--i:10">l</span><span style="--i:11">i</span><span style="--i:12">o</span></h1>
+
+  <!-- Al hacer click, portafolio-cards.js agrega/quita la clase "oscuro"
+       en el body y cambia el texto del boton. -->
+  <button id="btnModoOscuro">🌙 Modo oscuro</button>
+
+  <!-- "Escena": envuelve la grilla de tarjetas. El perspective que le da
+       profundidad al tilt 3D vive aca (ver portafolio-cards.css) en vez de
+       en el body. Ponerlo en el body convertia al body en el "punto de
+       referencia" de cualquier elemento position: fixed de adentro (como
+       .fondo-decorativo y el modal), cortando el fondo a la altura del
+       contenido en vez de cubrir toda la pantalla. -->
+  <div class="escena-tarjeta" id="galeria"></div>
+
+  <!-- Plantilla de tarjeta: el navegador NO la muestra en pantalla, es solo
+       un "molde" vacio que portafolio-cards.js clona una vez por cada
+       proyecto (con plantilla.content.cloneNode) y llena con sus datos.
+       Por eso usa clases en vez de ids: los ids no pueden repetirse, pero
+       vamos a crear 8 copias, una por proyecto. -->
+  <template id="plantillaTarjeta">
+    <section class="tarjeta">
+      <!-- Capa de brillo: vacia y sin texto, solo pinta un gradiente que
+           portafolio-cards.js mueve segun la posicion del mouse (ver --mx/--my
+           en el CSS). pointer-events: none para que no bloquee el click/hover
+           de la tarjeta de abajo. -->
+      <div class="tarjeta-brillo"></div>
+      <img class="tarjeta-imagen" src="" alt="">
+      <div class="tarjeta-info">
+        <h2 class="tarjeta-nombre"></h2>
+        <p class="tarjeta-categoria"></p>
+        <p class="tarjeta-dato">
+          <strong>Herramienta:</strong>
+          <!-- El JS le pone el src del icono, el texto y un color de fondo
+               segun la herramienta (ver iconosPorHerramienta/coloresPorHerramienta
+               en portafolio-cards.js). Va en un span redondeado, igual que el
+               estado, para darle mas peso visual. -->
+          <span class="tarjeta-herramienta">
+            <img class="tarjeta-icono-herramienta" src="" alt="">
+            <span class="tarjeta-herramienta-nombre"></span>
+          </span>
+        </p>
+        <p class="tarjeta-descripcion"></p>
+        <span class="tarjeta-estado"></span>
+      </div>
+    </section>
+  </template>
+
+  <!-- Modal de detalle: arranca oculto (sin la clase "visible") y
+       portafolio-cards.js lo llena y lo muestra al hacer click en la
+       tarjeta. Reutiliza las mismas clases de la tarjeta (tarjeta-imagen,
+       tarjeta-info, tarjeta-herramienta, tarjeta-estado, etc.) para verse
+       igual sin repetir CSS. -->
+  <div id="modal" class="modal-overlay">
+    <div class="modal-contenido">
+      <button id="modalCerrar" class="modal-cerrar" aria-label="Cerrar">&times;</button>
+      <img id="modalImagen" class="tarjeta-imagen" src="" alt="">
+      <div class="tarjeta-info">
+        <h2 class="tarjeta-nombre" id="modalNombre"></h2>
+        <p class="tarjeta-categoria" id="modalCategoria"></p>
+        <p class="tarjeta-dato">
+          <strong>Herramienta:</strong>
+          <span class="tarjeta-herramienta" id="modalHerramientaBadge">
+            <img id="modalIconoHerramienta" class="tarjeta-icono-herramienta" src="" alt="">
+            <span id="modalHerramienta"></span>
+          </span>
+        </p>
+        <p class="tarjeta-descripcion" id="modalDescripcion"></p>
+        <span class="tarjeta-estado" id="modalEstado"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- defer: espera a que el HTML este cargado antes de correr el JS -->
+  <script src="portafolio-cards.js" defer></script>
+</body>
+</html>
