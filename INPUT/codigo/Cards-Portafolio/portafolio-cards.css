@@ -328,6 +328,45 @@ h1 {
   color: #1f8b45;
 }
 
+/* Animacion de "saltito": sube y vuelve a bajar, igual idea que
+   letra-ola del titulo pero en un solo eje y mas sutil (6px en vez de
+   16px). Solo se usa en :hover (ver mas abajo), asi que el boton se queda
+   quieto todo el tiempo y arranca a saltar apenas el mouse entra. */
+@keyframes boton-salto {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Boton "Ver proyecto": mismo estilo de pildora que el estado/herramienta,
+   pero usando el color de acento como fondo solido para que se note que
+   es un boton clickeable, no solo otra etiqueta informativa. display:
+   block + width: fit-content centra el "salto" sin que el boton ocupe
+   todo el ancho de la tarjeta. */
+.tarjeta-enlace {
+  display: block;
+  width: fit-content;
+  background-color: var(--color-acento);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 0.85em;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+/* La animacion corre SOLO mientras el mouse esta encima: al salir, el
+   boton vuelve solo a transform: none (su estado normal), sin necesidad
+   de codigo en el JS. */
+.tarjeta-enlace:hover {
+  animation: boton-salto 0.5s ease-in-out infinite;
+}
+
 /* --- Modo oscuro --- */
 /* Cuando el JS agrega la clase "oscuro" al body, sobreescribimos los
    colores de fondo/texto del body, la tarjeta y la etiqueta de estado. */

@@ -111,6 +111,7 @@ const proyectos = [
     descripcion:
       "Página web para la aseguradora GlobalSeguros, con foco en seguros educativos. Se desarrolló como parte de un hackathon en el que la empresa buscaba una forma más dinámica y creativa de mostrar este servicio, corrigiendo errores de su página original como el exceso de información y los colores muy fuertes.",
     enProceso: false,
+    enlace: "https://sebastianp08.github.io/GH2026_UniversidadElBosque_Harkan_GlobalSeguros/",
   },
   {
     nombre: "Elementos 3D para GlobalSeguros",
@@ -120,6 +121,7 @@ const proyectos = [
     descripcion:
       'Elementos 3D en forma de llave creados para la página de GlobalSeguros, pensados para reforzar el mensaje "la llave ideal para el futuro de tu hijo" y darle un tono más original y dinámico a la página.',
     enProceso: false,
+    enlace: "https://drive.google.com/file/d/1V9n9VbLC3lZGp0suZTQsnfpOKQG5fnjT/view?usp=drive_link",
   },
   {
     nombre: "Bestia de Fantasía 3D",
@@ -129,6 +131,7 @@ const proyectos = [
     descripcion:
       "Bestia con forma de lobo modelada en 3D, hecha como trabajo para la Universidad.",
     enProceso: false,
+    enlace: "https://drive.google.com/file/d/1p5Qhqh_VaGi7J4yXFTtFmX-oRB8RXciR/view?usp=drive_link",
   },
   {
     nombre: "Animación de una Pelota 3D",
@@ -138,6 +141,7 @@ const proyectos = [
     descripcion:
       "Animación de una pelota rebotando, hecha para entender el rebote y los principios básicos de la animación. Trabajo para la Universidad.",
     enProceso: false,
+    enlace: "https://drive.google.com/file/d/1Eg3cOiGRkQ9daqbJozuU15CPSflZA6PB/view?usp=drive_link",
   },
   {
     nombre: "Animación de Péndulo 3D",
@@ -147,6 +151,7 @@ const proyectos = [
     descripcion:
       "Animación en loop de un péndulo, hecha para practicar los principios de la animación. Trabajo para la Universidad.",
     enProceso: false,
+    enlace: "https://drive.google.com/file/d/1A0mF8o80x8IP74ObnvxjPlVHeWTnMmtn/view?usp=drive_link",
   },
   {
     nombre: "Esculpido de Mano Realista",
@@ -165,6 +170,7 @@ const proyectos = [
     descripcion:
       "GDD (Game Design Document) para un videojuego en desarrollo, con el objetivo de definir un MVP. El concepto se trabajó paso a paso en Figma y luego se redactó en Word, exportado finalmente a PDF.",
     enProceso: true,
+    enlace: "https://docs.google.com/document/d/18DPJSW0Ffx5YKwzCsVJE7skcESSO3qReEeVpR250S7Y/edit?usp=sharing",
   },
 ];
 
@@ -216,6 +222,14 @@ function mostrarProyecto(elementos, proyecto) {
   // le agregamos la clase de color que le corresponde a ese estado.
   elementos.estado.textContent = proyecto.enProceso ? "En proceso" : "Terminado";
   elementos.estado.className = `tarjeta-estado ${proyecto.enProceso ? "en-proceso" : "terminado"}`;
+
+  // No todos los proyectos tienen "enlace" (Jaziz y Mano Realista no).
+  // Boolean(proyecto.enlace) da false para undefined, asi que el boton se
+  // muestra (hidden = false) solo cuando SI hay un link cargado.
+  elementos.enlace.hidden = !proyecto.enlace;
+  if (proyecto.enlace) {
+    elementos.enlace.href = proyecto.enlace;
+  }
 }
 
 // --- Generamos una tarjeta por cada proyecto ---
@@ -243,9 +257,16 @@ function crearTarjeta(proyecto) {
     herramienta: tarjetaClon.querySelector(".tarjeta-herramienta-nombre"),
     descripcion: tarjetaClon.querySelector(".tarjeta-descripcion"),
     estado: tarjetaClon.querySelector(".tarjeta-estado"),
+    enlace: tarjetaClon.querySelector(".tarjeta-enlace"),
   };
 
   mostrarProyecto(elementos, proyecto);
+
+  // El boton "Ver proyecto" ya abre su propio link en una pestaña nueva;
+  // sin este stopPropagation, el click tambien "burbujearia" hasta
+  // tarjetaEl y ademas abriria el modal (ver el addEventListener("click")
+  // de tarjetaEl mas abajo).
+  elementos.enlace.addEventListener("click", (e) => e.stopPropagation());
 
   // --- Tilt 3D + reflejo diagonal que siguen el mouse (por tarjeta) ---
   // Mismo truco que la carta de villanos en Objetos/index.js: en cada
@@ -323,6 +344,7 @@ const elementosModal = {
   herramienta: document.getElementById("modalHerramienta"),
   descripcion: document.getElementById("modalDescripcion"),
   estado: document.getElementById("modalEstado"),
+  enlace: document.getElementById("modalEnlace"),
 };
 
 function abrirModal(proyecto) {

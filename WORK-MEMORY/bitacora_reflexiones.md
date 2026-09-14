@@ -46,3 +46,11 @@ distinta y más limpia.
 El día de hoy vimos como es el funcionamiento de objetos con javascript aplicando primero la
 creación de un solo objeto y una plantilla para una carta, despues con la ayuda de la IA generamos
 12 objetos en total cada uno con el estilo de la plantilla que se hizo.
+
+## 2026-09-14
+
+Hoy seguimos con las tarjetas de portafolio, agregando los links de cada proyecto y un hover con
+animación de saltito en el botón. Aunque ya lo sabía, hoy volví a confirmar que con pocas cositas
+de CSS y algo de JS se le puede dar muchísimo dinamismo a una página. También me quedó claro que
+trabajar con una IA siempre requiere paciencia e ir paso a paso en cada cosa para que el resultado
+quede mejor desarrollado.

@@ -62,6 +62,13 @@
         </p>
         <p class="tarjeta-descripcion"></p>
         <span class="tarjeta-estado"></span>
+        <!-- Boton "Ver proyecto": arranca oculto con el atributo "hidden".
+             portafolio-cards.js solo lo muestra (le saca el hidden) cuando
+             el proyecto tiene un campo "enlace" -- por eso Jaziz y Mano
+             Realista, que no tienen link, se quedan sin boton. target/rel
+             abren el link en una pestaña nueva sin exponer la pagina de
+             origen. -->
+        <a class="tarjeta-enlace" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver proyecto ↗</a>
       </div>
     </section>
   </template>
@@ -87,6 +94,7 @@
         </p>
         <p class="tarjeta-descripcion" id="modalDescripcion"></p>
         <span class="tarjeta-estado" id="modalEstado"></span>
+        <a class="tarjeta-enlace" id="modalEnlace" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver proyecto ↗</a>
       </div>
     </div>
   </div>
