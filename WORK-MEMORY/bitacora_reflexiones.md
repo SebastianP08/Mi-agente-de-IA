@@ -54,3 +54,43 @@ animación de saltito en el botón. Aunque ya lo sabía, hoy volví a confirmar 
 de CSS y algo de JS se le puede dar muchísimo dinamismo a una página. También me quedó claro que
 trabajar con una IA siempre requiere paciencia e ir paso a paso en cada cosa para que el resultado
 quede mejor desarrollado.
+
+**Exploración de estilos de las cards (qué se probó, qué se descartó y qué quedó):**
+
+- *Reflejo de la tarjeta al mover el mouse*: primero probamos un círculo de luz que sigue al
+  cursor (radial-gradient) — se descartó porque no se sentía como un reflejo real, sino como una
+  linterna. Se reemplazó por una franja diagonal que se desliza por toda la tarjeta (como el
+  reflejo del sol al mover un objeto), inspirada en el efecto "holo" de una carta de referencia.
+  De paso apareció un bug: el eje vertical salía invertido (el brillo aparecía arriba cuando el
+  mouse estaba abajo) al final se dejo ese error ya que al verlo más detenidamente no quedaba realmente mal, pero en modo claro el efecto no se notaba sobre fondo blanco, por lo que se resolvio
+  cambiando el `mix-blend-mode` (`multiply` + gris en claro, `screen` + blanco en oscuro).
+
+- *Inclinación 3D de la tarjeta al mover el mouse*: se agregó un tilt leve, pero poner la
+  propiedad `perspective` directo en el `body` rompía el fondo decorativo y el modal (dejaban de
+  cubrir toda la pantalla). Se dejó el `perspective` en un `div` propio que envuelve solo las
+  tarjetas.
+
+- *Modo oscuro*: probamos primero un gris (#1a1a1a), después negro puro (#000000, se sentía muy
+  fuerte/plano), y terminamos en un gris intermedio distinto al original (#16151b) — ninguno de
+  los dos extremos convenció, el punto medio sí.
+
+- *Título*: se probó un efecto de neón con `text-shadow` pulsante y letras en contorno hueco
+  (`-webkit-text-stroke` + texto transparente) — se descartó porque la letra no se veia nada y era muy brillante.
+  Se reemplazó por una animación de ola: cada letra en su propio `<span>`, subiendo y bajando con
+  un pequeño retraso entre una y la siguiente. La fuente también cambió más de una vez: se probó
+  Anton, y al final quedó Permanent Marker para el título y Pangolin para los nombres de proyecto
+  (subtítulos), por ser más pareja/regular de leer.
+
+- *Fondo decorativo (cubos y esferas)*: al principio las imágenes eran chicas, de opacidad baja
+  (0.35) y quedaban muy amontonadas entre sí. Se fue ajustando: más cantidad, tamaños más grandes
+  y variados, 4 imágenes fijas en las esquinas con tamaños bien distintos, un chequeo de distancia
+  mínima entre imágenes para que no se pisen 2 o 3 en el mismo lugar, y la opacidad subió a 1
+  (invisible en modo oscuro) y bajó de nuevo a un punto medio (0.6).
+
+- *Íconos de herramienta*: se pensó primero en usar emojis (rápido, sin depender de archivos
+  externos) pero se descartó a favor de íconos SVG reales de cada herramienta (VS Code, Blender,
+  Figma, Word), que se ven más profesionales.
+
+- *Layout general*: la tarjeta pasó de un tamaño fijo de 350px a 520px, y al mostrar las 8 juntas
+  se armó una grilla de 2 columnas (con un límite de ancho para que no quedaran gigantes en
+  pantallas anchas).

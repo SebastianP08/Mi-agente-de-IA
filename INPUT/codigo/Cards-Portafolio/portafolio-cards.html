@@ -61,6 +61,17 @@
           </span>
         </p>
         <p class="tarjeta-descripcion"></p>
+        <p class="tarjeta-dato">
+          <strong>Horas invertidas:</strong>
+          <span class="tarjeta-horas"></span>
+        </p>
+        <!-- Lista de etapas: portafolio-cards.js arma un <li> por cada
+             string del array "etapas" del proyecto (mismo truco que la
+             lista de poderes en Objetos/index.js). -->
+        <div class="tarjeta-etapas">
+          <strong>Etapas:</strong>
+          <ol class="tarjeta-etapas-lista"></ol>
+        </div>
         <span class="tarjeta-estado"></span>
         <!-- Boton "Ver proyecto": arranca oculto con el atributo "hidden".
              portafolio-cards.js solo lo muestra (le saca el hidden) cuando
@@ -93,6 +104,14 @@
           </span>
         </p>
         <p class="tarjeta-descripcion" id="modalDescripcion"></p>
+        <p class="tarjeta-dato">
+          <strong>Horas invertidas:</strong>
+          <span class="tarjeta-horas" id="modalHoras"></span>
+        </p>
+        <div class="tarjeta-etapas">
+          <strong>Etapas:</strong>
+          <ol class="tarjeta-etapas-lista" id="modalEtapas"></ol>
+        </div>
         <span class="tarjeta-estado" id="modalEstado"></span>
         <a class="tarjeta-enlace" id="modalEnlace" href="#" target="_blank" rel="noopener noreferrer" hidden>Ver proyecto ↗</a>
       </div>

@@ -295,6 +295,30 @@ h1 {
   padding-left: 10px;
 }
 
+/* Lista de etapas: en vez de una debajo de otra, una grilla fija de 2
+   columnas (list-style: none le saca el numero por defecto del <ol>,
+   ya no hace falta porque el orden queda claro con la posicion en la
+   grilla). Como las 8 etapas siempre son 4 elementos, queda una grilla
+   pareja de 2x2. */
+.tarjeta-etapas-lista {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada etapa con su propio contorno de color de acento, como una
+   pequeña ficha/chip. */
+.tarjeta-etapas-lista li {
+  border: 1px solid var(--color-acento);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.8em;
+  text-align: center;
+}
+
 /* Etiqueta de estado (En proceso / Terminado): forma de pildora, con un
    puntito de color antes del texto y un color de fondo distinto segun
    el estado (naranja = en proceso, verde = terminado). */
