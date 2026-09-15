@@ -384,6 +384,18 @@ h1 {
   transition: background-color 0.3s ease;
 }
 
+/* Este es el fix del bug donde el boton salia en Jaziz y Mano Realista
+   aunque no tuvieran "enlace": el navegador oculta los elementos con el
+   atributo hidden usando su propia regla interna "[hidden] { display:
+   none }", pero como esa regla es del navegador (no nuestra), CUALQUIER
+   regla nuestra le gana, sin importar la especificidad -- por eso
+   ".tarjeta-enlace { display: block }" de arriba lo ignoraba por completo.
+   Al escribir la regla ACA, en nuestro propio CSS, el "hidden" vuelve a
+   funcionar. */
+.tarjeta-enlace[hidden] {
+  display: none;
+}
+
 /* La animacion corre SOLO mientras el mouse esta encima: al salir, el
    boton vuelve solo a transform: none (su estado normal), sin necesidad
    de codigo en el JS. */
