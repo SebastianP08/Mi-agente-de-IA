@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Actividad Array</title>
+</head>
+<body>
+
+  <input type="text" id="input">
+  <button id="button">Enviar</button>
+  <button id="button2">Eliminar</button>
+  <button id="button3" onclick="eliminarUltimo()">Eliminar Primero</button>
+  <button id="button4">Mostrar lista</button>
+  <button id="button5">Buscar</button>
+  <p id="resultado"></p>
+  <ul id="lista"></ul>
+
+  <script>
+    // Array base sobre el que trabajan todos los botones
+    let arr = ["malenia", "knight gael", "dreglord", "balancers",
+         "radhan", "maliketh", "placidusax", "lord of the night",
+        "godskin apostles", "fortisax"]
+
+    // Referencias a los elementos del DOM (se buscan una sola vez y se reutilizan)
+    const input = document.getElementById("input");
+    const button = document.getElementById("button");
+    const resultado = document.getElementById("resultado");
+    const button2 = document.getElementById("button2");
+    const button3 = document.getElementById("button3");
+    const button4 = document.getElementById("button4");
+    const button5 = document.getElementById("button5");
+    const lista = document.getElementById("lista");
+
+    // Botón "Enviar": agrega el texto del input al inicio del array
+    button.addEventListener("click", function(){
+        console.log("input:", input.value.trim().toLowerCase());
+        resultado.textContent = "Valor ingresado: " + input.value.trim().toLowerCase();
+        //Agregar el valor ingresado al arreglo al final
+        //arr.push(input.value.trim().toLowerCase());
+        //Agregar el valor ingresado al arreglo al inicio
+        arr.unshift(input.value.trim().toLowerCase());
+        mostrarLista();
+    })
+
+    // Quita y devuelve el último elemento del array (pop)
+    function eliminarUltimo(){
+        if (arr.length > 0){
+            let eliminado = arr.pop();
+            resultado.textContent = "Elemento eliminado: " + eliminado;
+            mostrarLista();
+        } else {
+            resultado.textContent = "El arreglo esta vacio.";
+        }
+    }
+
+    // Botón "Eliminar": dispara eliminarUltimo()
+    button2.addEventListener("click", eliminarUltimo);
+
+    // Quita y devuelve el primer elemento del array (shift)
+    function eliminarPrimero(){
+        if (arr.length > 0){
+            let eliminado = arr.shift();
+            resultado.textContent = "Elemento eliminado: " + eliminado;
+            mostrarLista();
+        } else {
+            resultado.textContent = "El arreglo esta vacio.";
+        }
+    }
+
+    // Botón "Eliminar Primero": dispara eliminarPrimero() por este addEventListener,
+    // pero en el HTML (línea 12) también tiene onclick="eliminarUltimo()" —
+    // eso significa que cada clic ejecuta las DOS funciones (pop y shift a la vez)
+    button3.addEventListener("click", eliminarPrimero);
+
+    // Recorre el array y crea un <li> por cada elemento dentro del <ul id="lista">
+    // Se limpia el <ul> primero (innerHTML = "") para no ir acumulando <li> viejos
+    function mostrarLista(){
+        lista.innerHTML = "";
+        arr.forEach(function(item){
+            let li = document.createElement("li");
+            li.textContent = item;
+            lista.appendChild(li);
+        });
+    }
+
+    // Botón "Mostrar lista": renderiza el array completo en el <ul>
+    button4.addEventListener("click", mostrarLista);
+
+    // Busca el texto del input dentro del array con indexOf
+    // indexOf devuelve -1 si no encuentra el valor
+    function buscarElemento(){
+        let valorBuscado = input.value.trim().toLowerCase();
+        let indice = arr.indexOf(valorBuscado);
+        if(indice !== -1) {
+            resultado.textContent = "Elemento encontrado en la posicion: " + indice;
+        } else{
+             resultado.textContent = "Elemento no encontrado."
+        }
+    }
+
+    // Botón "Buscar": dispara buscarElemento()
+    // El addEventListener va aquí afuera de la función, no adentro,
+    // porque el código dentro de una función solo corre cuando la función se llama
+    button5.addEventListener("click", buscarElemento);
+
+  </script>
+
+</body>
+</html>

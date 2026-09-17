@@ -94,3 +94,8 @@ quede mejor desarrollado.
 - *Layout general*: la tarjeta pasó de un tamaño fijo de 350px a 520px, y al mostrar las 8 juntas
   se armó una grilla de 2 columnas (con un límite de ancho para que no quedaran gigantes en
   pantallas anchas).
+
+## 2026-09-17
+
+El día de hoy vimos más a fondo el tema de las listas y los array, como se pueden buscar datos
+concreto, añadir, eliminar y mostrar
