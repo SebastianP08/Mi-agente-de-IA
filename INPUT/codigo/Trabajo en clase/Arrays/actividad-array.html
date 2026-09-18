@@ -12,6 +12,8 @@
   <button id="button3" onclick="eliminarUltimo()">Eliminar Primero</button>
   <button id="button4">Mostrar lista</button>
   <button id="button5">Buscar</button>
+  <button id="button6">Eliminar por nombre</button>
+  <button id="button7">Modificar Valor</button>
   <p id="resultado"></p>
   <ul id="lista"></ul>
 
@@ -29,6 +31,8 @@
     const button3 = document.getElementById("button3");
     const button4 = document.getElementById("button4");
     const button5 = document.getElementById("button5");
+    const button6 = document.getElementById("button6");
+    const button7 = document.getElementById("button7");
     const lista = document.getElementById("lista");
 
     // Botón "Enviar": agrega el texto del input al inicio del array
@@ -102,6 +106,50 @@
     // El addEventListener va aquí afuera de la función, no adentro,
     // porque el código dentro de una función solo corre cuando la función se llama
     button5.addEventListener("click", buscarElemento);
+
+    function eliminarElemento(){
+        let valorBuscado = input.value.trim().toLowerCase();
+        if(valorBuscado === ""){
+            resultado.textContent = "Por favor, ingrese un valor para eliminar. "
+            return;
+        }
+        let indice = arr.indexOf(valorBuscado);
+        if(indice !== -1) {
+            resultado.textContent = "Elemento eliminado de la posición: " + indice;
+            arr.splice(indice, 1);
+            mostrarLista();
+        } else{
+             resultado.textContent = "Elemento no encontrado en el arreglo."
+        }
+    }
+    button6.addEventListener("click", eliminarElemento);
+
+    function cambiarElemento(){
+        let valorBuscado = input.value.trim().toLowerCase();
+        if(valorBuscado === ""){
+            resultado.textContent = "Por favor, ingrese un valor para eliminar. "
+            return;
+        }
+        let indice = arr.indexOf(valorBuscado);
+        if(indice !== -1) {
+            let nuevoValor = prompt("Ingrese el nuevo valor para remplazar " + valorBuscado)
+            if (nuevoValor !== null && nuevoValor.trim()!==""){
+                arr[indice] = nuevoValor.trim().toLocaleLowerCase();
+            }
+           else{
+             resultado.textContent = "No se ingreso ningun valor valido."
+        }
+            mostrarLista();
+        }else{
+             resultado.textContent = "Elemento no encontrado en el arreglo."
+        }
+    }
+
+    button7.addEventListener("click", cambiarElemento);
+
+    
+
+    mostrarLista();
 
   </script>
 

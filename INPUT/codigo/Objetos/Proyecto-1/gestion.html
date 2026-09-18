@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Portafolio</title>
+  <link rel="stylesheet" href="portafolio-cards.css">
+  <!-- Estilos propios de esta pagina (sidebar + layout), separados de
+       portafolio-cards.css para no mezclar reglas que solo aplican aca. -->
+  <link rel="stylesheet" href="gestion.css">
+</head>
+<body class="pagina-gestion">
+
+  <div class="layout-gestion">
+
+    <!-- Sidebar: cada link cambia de vista al hacer click (ver
+         gestion.js), menos Leer/Actualizar/Eliminar que todavia quedan
+         vacios. -->
+    <aside class="sidebar">
+      <h2 class="sidebar-titulo">Gestión</h2>
+      <nav>
+        <ul class="sidebar-lista">
+          <li><a href="#" class="sidebar-item" data-vista="mostrar-todos">Mostrar todos</a></li>
+          <li><a href="#" class="sidebar-item" data-vista="crear">Crear</a></li>
+          <li><a href="#" class="sidebar-item" data-vista="leer">Leer</a></li>
+          <li><a href="#" class="sidebar-item" data-vista="actualizar">Actualizar</a></li>
+          <li><a href="#" class="sidebar-item" data-vista="eliminar">Eliminar</a></li>
+        </ul>
+      </nav>
+
+      <!-- Separado del resto: no es una vista, borra todo lo guardado en
+           localStorage y vuelve a los 8 proyectos originales. Pensado
+           para mientras esto sigue siendo pruebas. -->
+      <button id="btnReiniciar" class="btn-reiniciar">Reiniciar a los 8 originales</button>
+    </aside>
+
+    <main id="gestion" class="contenido-gestion">
+      <h1 class="titulo-ola"><span style="--i:0">G</span><span style="--i:1">e</span><span style="--i:2">s</span><span style="--i:3">t</span><span style="--i:4">i</span><span style="--i:5">&oacute;</span><span style="--i:6">n</span></h1>
+
+      <!-- Una "vista" por cada item del sidebar. gestion.js muestra solo
+           la que coincide con el item activo y oculta el resto con el
+           atributo hidden. -->
+      <section class="vista" id="vista-mostrar-todos" data-vista="mostrar-todos" hidden>
+        <!-- Todavia sin logica: aca va a ir la lista completa de proyectos. -->
+      </section>
+
+      <section class="vista" id="vista-crear" data-vista="crear">
+        <h2>Crear proyecto</h2>
+
+        <!-- Un campo por cada propiedad de los objetos de "proyectos" en
+             data.js. herramienta es un <select> (no texto libre) porque
+             solo esas 3 opciones tienen icono y color de badge definidos
+             en portafolio-cards.js (iconosPorHerramienta/clasesPorHerramienta). -->
+        <form id="formCrear" class="form-proyecto">
+          <label for="campoNombre">Nombre</label>
+          <input type="text" id="campoNombre" name="nombre" required>
+
+          <label for="campoCategoria">Categoría</label>
+          <input type="text" id="campoCategoria" name="categoria" required>
+
+          <label for="campoHerramienta">Herramienta</label>
+          <select id="campoHerramienta" name="herramienta" required>
+            <option value="" disabled selected>Elegí una herramienta</option>
+            <option value="Visual Studio Code">Visual Studio Code</option>
+            <option value="Blender">Blender</option>
+            <option value="Figma y Word">Figma y Word</option>
+          </select>
+
+          <label for="campoImagen">Imagen (opcional, ruta dentro de Imgs-proyectos)</label>
+          <input type="text" id="campoImagen" name="imagen" placeholder="Imgs-proyectos/nombre.png">
+
+          <label for="campoDescripcion">Descripción</label>
+          <textarea id="campoDescripcion" name="descripcion" rows="3" required></textarea>
+
+          <label for="campoHoras">Horas invertidas</label>
+          <input type="number" id="campoHoras" name="horasInvertidas" min="0" required>
+
+          <label for="campoEtapas">Etapas (separadas por coma)</label>
+          <input type="text" id="campoEtapas" name="etapas" placeholder="Boceto, Modelado, Render">
+
+          <label for="campoEnlace">Enlace (opcional)</label>
+          <input type="url" id="campoEnlace" name="enlace" placeholder="https://...">
+
+          <label class="campo-checkbox">
+            <input type="checkbox" id="campoEnProceso" name="enProceso">
+            En proceso
+          </label>
+
+          <button type="submit" class="tarjeta-enlace boton-agregar">Agregar proyecto</button>
+        </form>
+
+        <p id="mensajeCrear" class="mensaje-crear" hidden></p>
+      </section>
+
+      <section class="vista" id="vista-leer" data-vista="leer" hidden>
+        <!-- Todavia sin logica. -->
+      </section>
+
+      <section class="vista" id="vista-actualizar" data-vista="actualizar" hidden>
+        <h2>Actualizar proyecto</h2>
+
+        <!-- Elegis con que proyecto trabajar (gestion.js arma una fila
+             por cada uno, con boton "Editar"); recien ahi aparece el
+             formulario de abajo, ya cargado con sus datos actuales. -->
+        <div id="listaActualizar" class="lista-eliminar"></div>
+
+        <form id="formActualizar" class="form-proyecto" hidden>
+          <label for="actNombre">Nombre</label>
+          <input type="text" id="actNombre" name="nombre" required>
+
+          <label for="actCategoria">Categoría</label>
+          <input type="text" id="actCategoria" name="categoria" required>
+
+          <label for="actHerramienta">Herramienta</label>
+          <select id="actHerramienta" name="herramienta" required>
+            <option value="Visual Studio Code">Visual Studio Code</option>
+            <option value="Blender">Blender</option>
+            <option value="Figma y Word">Figma y Word</option>
+          </select>
+
+          <label for="actImagen">Imagen (opcional, ruta dentro de Imgs-proyectos)</label>
+          <input type="text" id="actImagen" name="imagen" placeholder="Imgs-proyectos/nombre.png">
+
+          <label for="actDescripcion">Descripción</label>
+          <textarea id="actDescripcion" name="descripcion" rows="3" required></textarea>
+
+          <label for="actHoras">Horas invertidas</label>
+          <input type="number" id="actHoras" name="horasInvertidas" min="0" required>
+
+          <label for="actEtapas">Etapas (separadas por coma)</label>
+          <input type="text" id="actEtapas" name="etapas" placeholder="Boceto, Modelado, Render">
+
+          <label for="actEnlace">Enlace (opcional)</label>
+          <input type="url" id="actEnlace" name="enlace" placeholder="https://...">
+
+          <label class="campo-checkbox">
+            <input type="checkbox" id="actEnProceso" name="enProceso">
+            En proceso
+          </label>
+
+          <div class="acciones-formulario">
+            <button type="submit" class="tarjeta-enlace boton-agregar">Guardar cambios</button>
+            <button type="button" id="btnCancelarActualizar" class="btn-cancelar">Cancelar</button>
+          </div>
+        </form>
+
+        <p id="mensajeActualizar" class="mensaje-crear" hidden></p>
+      </section>
+
+      <section class="vista" id="vista-eliminar" data-vista="eliminar" hidden>
+        <h2>Eliminar proyecto</h2>
+        <!-- gestion.js arma una fila por proyecto, cada una con su propio
+             boton "Eliminar" (ver renderizarEliminar). -->
+        <div id="listaEliminar" class="lista-eliminar"></div>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- data.js primero, para tener "proyectos" disponible cuando sumemos
+       logica propia de esta pagina. -->
+  <script src="data.js" defer></script>
+  <script src="gestion.js" defer></script>
+</body>
+</html>

@@ -99,3 +99,10 @@ quede mejor desarrollado.
 
 El día de hoy vimos más a fondo el tema de las listas y los array, como se pueden buscar datos
 concreto, añadir, eliminar y mostrar
+
+## 2026-09-18
+
+El día de hoy comenzamos a ver un poco el tema de bases de datos y los métodos CRUD, para qué
+sirven, cómo funcionan y cómo se hacen. Aunque quiero seguir expandiendo mis conocimientos de este
+tema, quizás lo que más me costó fue entender en su totalidad cómo se conecta todo, pero espero con
+algo más de práctica entenderlo mejor.
