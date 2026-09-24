@@ -11,11 +11,30 @@
 </head>
 <body class="pagina-gestion">
 
-  <div class="layout-gestion">
+  <!-- Login: es lo unico visible al cargar la pagina. gestion.js compara
+       lo que se escribe con "usuario" y "password" de credenciales.js, y
+       solo si coinciden oculta esto y muestra .layout-gestion. -->
+  <section id="login" class="login">
+    <form id="formLogin" class="form-proyecto login-tarjeta">
+      <h2 class="sidebar-titulo">Acceso</h2>
+
+      <label for="loginUsuario">Usuario</label>
+      <input type="text" id="loginUsuario" name="loginUsuario" autocomplete="username" required>
+
+      <label for="loginPassword">Contraseña</label>
+      <input type="password" id="loginPassword" name="loginPassword" autocomplete="current-password" required>
+
+      <button type="submit" class="tarjeta-enlace boton-agregar">Entrar</button>
+
+      <p id="mensajeLogin" class="mensaje-login" hidden></p>
+    </form>
+  </section>
+
+  <!-- hidden: el CRUD arranca oculto hasta que el login sea correcto. -->
+  <div class="layout-gestion" hidden>
 
     <!-- Sidebar: cada link cambia de vista al hacer click (ver
-         gestion.js), menos Leer/Actualizar/Eliminar que todavia quedan
-         vacios. -->
+         mostrarVista en gestion.js). -->
     <aside class="sidebar">
       <h2 class="sidebar-titulo">Gestión</h2>
       <nav>
@@ -93,7 +112,19 @@
       </section>
 
       <section class="vista" id="vista-leer" data-vista="leer" hidden>
-        <!-- Todavia sin logica. -->
+        <h2>Leer proyecto</h2>
+
+        <!-- Busca UN proyecto por su id (el #numero que aparece en cada
+             tarjeta de "Mostrar todos") y muestra su ficha completa abajo. -->
+        <form id="formLeer" class="form-proyecto">
+          <label for="leerId">Id del proyecto</label>
+          <input type="number" id="leerId" name="leerId" min="1" placeholder="Ej: 3" required>
+
+          <button type="submit" class="tarjeta-enlace boton-agregar">Buscar</button>
+        </form>
+
+        <p id="mensajeLeer" class="mensaje-no-encontrado" hidden></p>
+        <div id="resultadoLeer" class="resultado-leer"></div>
       </section>
 
       <section class="vista" id="vista-actualizar" data-vista="actualizar" hidden>
@@ -160,6 +191,12 @@
   <!-- data.js primero, para tener "proyectos" disponible cuando sumemos
        logica propia de esta pagina. -->
   <script src="data.js" defer></script>
+  <!-- credenciales.js antes que gestion.js, para que "usuario" y
+       "passwordHash" ya existan cuando se valide el login. -->
+  <script src="credenciales.js" defer></script>
+  <!-- login.js despues de credenciales.js (las usa para comparar) y antes
+       de gestion.js (que llama a validarCredenciales). -->
+  <script src="login.js" defer></script>
   <script src="gestion.js" defer></script>
 </body>
 </html>

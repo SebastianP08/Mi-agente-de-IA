@@ -164,6 +164,30 @@ body.pagina-gestion {
   color: var(--color-acento);
 }
 
+/* --- Leer --- */
+/* Un solo proyecto: sin la grilla de 2 columnas de "Mostrar todos", con
+   un ancho maximo para que la tarjeta no quede estirada. */
+.resultado-leer {
+  max-width: 560px;
+  margin-top: 20px;
+}
+
+/* Mismo rojo de alerta que .mensaje-login y .btn-eliminar-fila. */
+.mensaje-no-encontrado {
+  margin-top: 16px;
+  font-weight: bold;
+  color: #d64545;
+}
+
+/* "#3" arriba del nombre en cada tarjeta: chico y gris, es un dato de
+   referencia, no el titulo. */
+.tarjeta-id {
+  margin: 0;
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #888888;
+}
+
 /* --- Eliminar --- */
 .lista-eliminar {
   display: flex;
@@ -267,6 +291,52 @@ body.pagina-gestion {
 .btn-cancelar:hover {
   background-color: #999999;
   color: #ffffff;
+}
+
+/* --- Login --- */
+/* .layout-gestion (display: flex) y .login (display: flex) le ganan a la
+   regla interna del navegador "[hidden] { display: none }" -- mismo caso
+   que .tarjeta-enlace[hidden] en portafolio-cards.css. Sin esto el CRUD
+   se veria aunque tenga hidden. */
+.layout-gestion[hidden],
+.login[hidden] {
+  display: none;
+}
+
+/* Ocupa toda la pantalla y centra la tarjeta en los dos ejes. */
+.login {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* Reusa .form-proyecto (labels/inputs) y le suma el fondo blanco y la
+   sombra del sidebar para que se vea como tarjeta. */
+.login-tarjeta {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 0;
+  background-color: #ffffff;
+  padding: 32px 28px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.login-tarjeta .sidebar-titulo {
+  margin-bottom: 8px;
+}
+
+/* Mismo rojo de alerta que .btn-reiniciar / .btn-eliminar-fila. */
+.mensaje-login {
+  margin: 12px 0 0;
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #d64545;
+  text-align: center;
 }
 
 /* En pantallas angostas el sidebar pasa a ocupar todo el ancho, arriba

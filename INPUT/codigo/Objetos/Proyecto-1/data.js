@@ -7,6 +7,7 @@ const CLAVE_LOCALSTORAGE = "portafolio-proyectos";
 // abre la pagina, o si localStorage todavia esta vacio.
 const proyectosPorDefecto = [
   {
+    id: 1,
     nombre: "Página Web Jaziz",
     categoria: "Diseño Web",
     herramienta: "Visual Studio Code",
@@ -18,6 +19,7 @@ const proyectosPorDefecto = [
     etapas: ["Wireframe", "Diseño visual", "Maquetado HTML/CSS", "Desarrollo JS"],
   },
   {
+    id: 2,
     nombre: "Página Web GlobalSeguros",
     categoria: "Diseño Web",
     herramienta: "Visual Studio Code",
@@ -30,6 +32,7 @@ const proyectosPorDefecto = [
     etapas: ["Wireframe", "Concepto visual", "Maquetado", "Desarrollo"],
   },
   {
+    id: 3,
     nombre: "Elementos 3D para GlobalSeguros",
     categoria: "Modelado 3D",
     herramienta: "Blender",
@@ -42,6 +45,7 @@ const proyectosPorDefecto = [
     etapas: ["Boceto", "Modelado", "Texturizado", "Render"],
   },
   {
+    id: 4,
     nombre: "Bestia de Fantasía 3D",
     categoria: "Modelado 3D",
     herramienta: "Blender",
@@ -54,6 +58,7 @@ const proyectosPorDefecto = [
     etapas: ["Boceto", "Modelado", "Texturizado", "Bloqueo de poses", "Timing", "Refinamiento", "Render"],
   },
   {
+    id: 5,
     nombre: "Animación de una Pelota 3D",
     categoria: "Animación 3D",
     herramienta: "Blender",
@@ -66,6 +71,7 @@ const proyectosPorDefecto = [
     etapas: ["Bloqueo de poses", "Timing", "Refinamiento", "Render"],
   },
   {
+    id: 6,
     nombre: "Animación de Péndulo 3D",
     categoria: "Animación 3D",
     herramienta: "Blender",
@@ -78,6 +84,7 @@ const proyectosPorDefecto = [
     etapas: ["Bloqueo de poses", "Timing", "Refinamiento", "Render"],
   },
   {
+    id: 7,
     nombre: "Esculpido de Mano Realista",
     categoria: "Escultura 3D",
     herramienta: "Blender",
@@ -89,6 +96,7 @@ const proyectosPorDefecto = [
     etapas: ["Boceto", "Esculpido base", "Detalles", "Render"],
   },
   {
+    id: 8,
     nombre: "Documento GDD",
     categoria: "Documento de Diseño",
     herramienta: "Figma y Word",
@@ -108,6 +116,15 @@ const proyectosPorDefecto = [
 // vuelta a un array de objetos.
 const proyectosGuardados = localStorage.getItem(CLAVE_LOCALSTORAGE);
 const proyectos = proyectosGuardados ? JSON.parse(proyectosGuardados) : proyectosPorDefecto;
+
+// Id que va a recibir el proximo proyecto creado en gestion.html. No se
+// escribe fijo (ej. 9) porque despues de recargar la pagina volveria a
+// arrancar en 9 y repetiria ids ya guardados en localStorage. En cambio se
+// calcula a partir del id mas alto que ya existe: map saca solo los ids,
+// el spread (...) los pasa sueltos a Math.max, y se le suma 1.
+// El "0" extra es por si "proyectos" queda vacio: Math.max() sin nada
+// devuelve -Infinity, asi que con el 0 el primer id seria 1.
+let siguienteId = Math.max(0, ...proyectos.map((proyecto) => proyecto.id)) + 1;
 
 // Icono SVG segun la herramienta usada en cada proyecto (viven en la
 // carpeta Icons-Herramientas). La key tiene que ser identica al texto

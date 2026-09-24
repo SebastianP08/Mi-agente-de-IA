@@ -2,7 +2,69 @@
 // Logica de la pagina de gestion (agregar, editar, borrar proyectos del
 // portafolio). data.js ya cargo antes que este script, asi que
 // "proyectos", "iconosPorHerramienta" y "clasesPorHerramienta" estan
-// disponibles para usarlos aca.
+// disponibles para usarlos aca. login.js tambien cargo antes, asi que
+// "validarCredenciales" existe para verificar el login.
+
+// IIFE (funcion que se ejecuta apenas se define): todo lo que se declara
+// adentro vive en el scope de esta funcion, no en el global. Por eso desde
+// la consola no se puede leer ni cambiar sesionIniciada, ni llamar a
+// mostrarVista, renderizarEliminar, etc. Se cierra al final del archivo.
+(() => {
+
+// --- Sesion ---
+// Solo el login correcto la pone en true. Cada operacion del CRUD la
+// revisa antes de hacer algo: asi, aunque alguien le quite el hidden a
+// .layout-gestion desde la consola, los botones no hacen nada.
+let sesionIniciada = false;
+
+// --- Login ---
+// Mientras el login no sea correcto, .layout-gestion sigue con hidden
+// (ver gestion.html) y el CRUD no se ve.
+const seccionLogin = document.getElementById("login");
+const formLogin = document.getElementById("formLogin");
+const mensajeLogin = document.getElementById("mensajeLogin");
+const layoutGestion = document.querySelector(".layout-gestion");
+
+function mostrarErrorLogin(texto) {
+  mensajeLogin.textContent = texto;
+  mensajeLogin.hidden = false;
+  formLogin.loginPassword.value = "";
+}
+
+formLogin.addEventListener("submit", async (e) => {
+  e.preventDefault(); // evita que el form recargue la pagina
+
+  // crypto.subtle solo existe en contextos seguros (https, localhost o
+  // archivo local). Si no esta, avisamos en vez de fallar en silencio.
+  if (!window.crypto?.subtle) {
+    mostrarErrorLogin("Este navegador no permite validar el login aquí.");
+    return;
+  }
+
+  // La verificacion vive en login.js; aca solo se decide que hacer con
+  // el resultado. await porque validarCredenciales devuelve una Promise.
+  const credencialesCorrectas = await validarCredenciales(
+    formLogin.loginUsuario.value.trim(),
+    formLogin.loginPassword.value
+  );
+
+  if (credencialesCorrectas) {
+    sesionIniciada = true;
+    seccionLogin.hidden = true;
+
+    // Vuelve a meter el CRUD en la pagina (se saco con remove() al final
+    // de este archivo). Los addEventListener que se le pusieron siguen
+    // funcionando: se guardan en el elemento, no en el DOM.
+    document.body.prepend(layoutGestion);
+    layoutGestion.hidden = false;
+
+    // Recien ahora se arma la primera vista (antes se hacia al cargar la
+    // pagina, con o sin login).
+    mostrarVista("crear");
+  } else {
+    mostrarErrorLogin("Usuario o contraseña incorrectos.");
+  }
+});
 
 // --- Cambio de vista por el sidebar ---
 // Cada item tiene un data-vista (ver gestion.html) que coincide con el
@@ -12,6 +74,8 @@ const itemsSidebar = document.querySelectorAll(".sidebar-item");
 const vistas = document.querySelectorAll(".vista");
 
 function mostrarVista(nombreVista) {
+  if (!sesionIniciada) return;
+
   vistas.forEach((vista) => {
     vista.hidden = vista.dataset.vista !== nombreVista;
   });
@@ -25,6 +89,10 @@ function mostrarVista(nombreVista) {
   // agregado en Crear).
   if (nombreVista === "mostrar-todos") {
     renderizarListado();
+  }
+
+  if (nombreVista === "leer") {
+    renderizarLeer();
   }
 
   if (nombreVista === "eliminar") {
@@ -42,9 +110,6 @@ itemsSidebar.forEach((item) => {
     mostrarVista(item.dataset.vista);
   });
 });
-
-// Vista inicial al cargar la pagina.
-mostrarVista("crear");
 
 // --- Mostrar todos: lista completa de proyectos ---
 const vistaMostrarTodos = document.getElementById("vista-mostrar-todos");
@@ -74,9 +139,14 @@ function crearTarjetaListado(proyecto) {
     ? `<a class="tarjeta-enlace" href="${proyecto.enlace}" target="_blank" rel="noopener noreferrer">Ver proyecto ↗</a>`
     : "";
 
+  // El id se muestra para saber cual escribir en "Leer". Si un proyecto
+  // viejo de localStorage no tiene id, simplemente no se muestra.
+  const idHtml = proyecto.id !== undefined ? `<p class="tarjeta-id">#${proyecto.id}</p>` : "";
+
   tarjeta.innerHTML = `
     ${imagenHtml}
     <div class="tarjeta-info">
+      ${idHtml}
       <h2 class="tarjeta-nombre">${proyecto.nombre}</h2>
       <p class="tarjeta-categoria">${proyecto.categoria}</p>
       <p class="tarjeta-dato">
@@ -116,6 +186,44 @@ function renderizarListado() {
   vistaMostrarTodos.appendChild(grilla);
 }
 
+// --- Leer: buscar UN proyecto por su id ---
+const formLeer = document.getElementById("formLeer");
+const mensajeLeer = document.getElementById("mensajeLeer");
+const resultadoLeer = document.getElementById("resultadoLeer");
+
+// Cada vez que se entra a la vista se limpia la busqueda anterior, para
+// no ver la ficha de un proyecto que quizas ya se elimino o se edito.
+function renderizarLeer() {
+  formLeer.reset();
+  mensajeLeer.hidden = true;
+  resultadoLeer.innerHTML = "";
+}
+
+formLeer.addEventListener("submit", (e) => {
+  e.preventDefault(); // evita que el form recargue la pagina
+  if (!sesionIniciada) return;
+
+  // El value de un input SIEMPRE es texto (aunque sea type="number"): sin
+  // Number(), "3" === 3 da false y nunca encontraria nada.
+  const idBuscado = Number(formLeer.leerId.value);
+
+  // find (no filter): devuelve EL primer objeto que cumple la condicion, o
+  // undefined si ninguno la cumple. filter devolveria siempre un array
+  // (vacio o con elementos), y aca buscamos uno solo, porque el id no se
+  // repite.
+  const proyectoEncontrado = proyectos.find((proyecto) => proyecto.id === idBuscado);
+
+  resultadoLeer.innerHTML = "";
+
+  if (proyectoEncontrado) {
+    mensajeLeer.hidden = true;
+    resultadoLeer.appendChild(crearTarjetaListado(proyectoEncontrado));
+  } else {
+    mensajeLeer.textContent = `No existe un proyecto con el id ${idBuscado}.`;
+    mensajeLeer.hidden = false;
+  }
+});
+
 // --- Eliminar: una fila por proyecto, cada una con su boton --
 const listaEliminar = document.getElementById("listaEliminar");
 
@@ -137,6 +245,8 @@ function crearFilaEliminar(proyecto) {
   botonEliminar.className = "btn-eliminar-fila";
   botonEliminar.textContent = "Eliminar";
   botonEliminar.addEventListener("click", () => {
+    if (!sesionIniciada) return;
+
     const confirmado = confirm(`¿Eliminar "${proyecto.nombre}"? No se puede deshacer.`);
     if (!confirmado) return;
 
@@ -216,6 +326,8 @@ function renderizarActualizar() {
 // Llena el formulario con los datos ACTUALES del proyecto elegido y lo
 // muestra.
 function cargarFormularioActualizar(proyecto) {
+  if (!sesionIniciada) return;
+
   proyectoEnEdicion = proyecto;
 
   formActualizar.actNombre.value = proyecto.nombre;
@@ -234,7 +346,7 @@ function cargarFormularioActualizar(proyecto) {
 
 formActualizar.addEventListener("submit", (e) => {
   e.preventDefault();
-  if (!proyectoEnEdicion) return;
+  if (!sesionIniciada || !proyectoEnEdicion) return;
 
   // A diferencia de Crear (que arma un objeto nuevo), aca reescribimos
   // las propiedades del objeto QUE YA ESTA en "proyectos" -- asi no
@@ -292,10 +404,13 @@ const mensajeCrear = document.getElementById("mensajeCrear");
 
 formCrear.addEventListener("submit", (e) => {
   e.preventDefault(); // evita que el form recargue la pagina
+  if (!sesionIniciada) return;
 
   // Mismo patron que cada objeto de "proyectos" en data.js: mismas keys,
   // mismos tipos (horasInvertidas numero, etapas array de strings).
+  // El id sale de siguienteId (declarado en data.js).
   const nuevoProyecto = {
+    id: siguienteId,
     nombre: formCrear.campoNombre.value.trim(),
     categoria: formCrear.campoCategoria.value.trim(),
     herramienta: formCrear.campoHerramienta.value,
@@ -326,6 +441,10 @@ formCrear.addEventListener("submit", (e) => {
   // que comparten el mismo array.
   proyectos.unshift(nuevoProyecto);
 
+  // Se suma 1 para que el proximo proyecto creado (sin recargar la
+  // pagina) no reciba el mismo id que este.
+  siguienteId++;
+
   // Guarda TODO el array actualizado en localStorage (no solo el nuevo
   // proyecto), para que la proxima vez que se abra data.js -- aca o en
   // portafolio-cards.html -- lo lea de vuelta en vez de los 8 originales.
@@ -344,6 +463,8 @@ formCrear.addEventListener("submit", (e) => {
 const btnReiniciar = document.getElementById("btnReiniciar");
 
 btnReiniciar.addEventListener("click", () => {
+  if (!sesionIniciada) return;
+
   const confirmado = confirm(
     "Esto borra todos los proyectos que agregaste y vuelve a los 8 originales. ¿Seguro?"
   );
@@ -352,3 +473,15 @@ btnReiniciar.addEventListener("click", () => {
   localStorage.removeItem(CLAVE_LOCALSTORAGE);
   location.reload();
 });
+
+// --- Sacar el CRUD de la pagina hasta el login ---
+// hidden solo OCULTA el CRUD: sigue en el DOM y desde la consola se le
+// puede quitar el hidden. remove() lo SACA de la pagina; la unica
+// referencia que queda es layoutGestion, dentro de esta IIFE. Hasta el
+// login correcto, document.querySelector(".layout-gestion") da null.
+// Va al FINAL a proposito: todos los getElementById/querySelectorAll de
+// arriba buscan en document, asi que tienen que correr antes de que el
+// CRUD salga de la pagina.
+layoutGestion.remove();
+
+})(); // fin de la IIFE que empieza arriba del login

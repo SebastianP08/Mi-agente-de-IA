@@ -106,3 +106,10 @@ El día de hoy comenzamos a ver un poco el tema de bases de datos y los métodos
 sirven, cómo funcionan y cómo se hacen. Aunque quiero seguir expandiendo mis conocimientos de este
 tema, quizás lo que más me costó fue entender en su totalidad cómo se conecta todo, pero espero con
 algo más de práctica entenderlo mejor.
+
+## 2026-09-24
+
+Hoy terminamos el CRUD (agregamos ids, login, filtros por herramienta y la parte de Leer). Al
+principio esos comandos me dejan algo enredado, y ya cuando se miran paso a paso se entienden
+mejor. Considero que todo el tema del CRUD es super interesante, pero algo enredado y super
+extenso. Espero poder aplicar estas cosas a una página que estoy creando para un familiar.

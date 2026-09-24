@@ -280,6 +280,56 @@ h1 {
   color: #6b21c9;
 }
 
+/* --- Filtros por herramienta (arriba de las tarjetas) --- */
+/* flex-wrap: en pantallas angostas los botones bajan de linea en vez de
+   salirse de la pantalla. */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 1180px;
+  margin-bottom: 28px;
+}
+
+/* Cada boton de herramienta ya trae forma y color de .tarjeta-herramienta
+   + herramienta-xxx (ver portafolio-cards.js). Aca solo lo volvemos un
+   boton: cursor, fuente, y un borde transparente que se pinta al estar
+   activo (reservarlo desde antes evita que el boton "salte" de tamaño). */
+.filtro-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 0.9em;
+  font-weight: bold;
+  border: 2px solid transparent;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.filtro-boton:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* currentColor = el mismo color del texto de ese boton, asi el borde
+   combina con cada herramienta sin escribir un color por cada una. */
+.filtro-boton.activo {
+  opacity: 1;
+  border-color: currentColor;
+}
+
+/* "Todos" no tiene herramienta, asi que usa el color de acento. */
+.filtro-todos {
+  background-color: #ffffff;
+  color: var(--color-acento);
+}
+
 /* Icono de la herramienta (vive en Icons-Herramientas/, es un SVG). */
 .tarjeta-icono-herramienta {
   width: 18px;
@@ -433,6 +483,11 @@ body.oscuro .tarjeta-brillo {
 
 body.oscuro .tarjeta-info > *:not(:last-child) {
   border-bottom-color: #444444;
+}
+
+/* Mismo fondo que body.oscuro .tarjeta, para que combine con las cards. */
+body.oscuro .filtro-todos {
+  background-color: #2b2b2b;
 }
 
 body.oscuro .tarjeta-herramienta.herramienta-vscode {

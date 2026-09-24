@@ -149,8 +149,9 @@ const plantillaTarjeta = document.getElementById("plantillaTarjeta");
 
 // Recibe UN objeto proyecto y devuelve UNA tarjeta de HTML ya llena con sus
 // datos y con sus propios eventos (tilt, brillo, click para abrir el
-// modal). Se usa una vez por cada elemento de "proyectos" (ver el forEach
-// mas abajo) -- mismo patron que crearCarta en Objetos/index.js.
+// modal). Se usa una vez por cada elemento de la lista que se pinta (ver
+// renderizarObjetos mas abajo) -- mismo patron que crearCarta en
+// Objetos/index.js.
 function crearTarjeta(proyecto) {
   // plantillaTarjeta.content.cloneNode(true) copia el contenido del
   // <template> sin tocar el original, para poder repetirlo 8 veces sin que
@@ -225,9 +226,81 @@ function crearTarjeta(proyecto) {
   return tarjetaClon;
 }
 
-// Por cada objeto del arreglo proyectos, se crea su tarjeta y se agrega
-// dentro de #galeria. Asi terminamos con las 8 tarjetas en pantalla.
-proyectos.forEach((proyecto) => galeria.appendChild(crearTarjeta(proyecto)));
+// Pinta en #galeria una tarjeta por cada objeto de listaObjetos (reusa
+// crearTarjeta para armar cada una). Recibe la lista por parametro en vez
+// de usar "proyectos" directo, para poder pintar cualquier array: el
+// completo, uno filtrado, uno ordenado, etc.
+function renderizarObjetos(listaObjetos) {
+  // Primero vacia el grid: si la funcion se llama una segunda vez, las
+  // tarjetas viejas se reemplazan en vez de quedar duplicadas debajo de
+  // las nuevas (mismo patron que renderizarListado en gestion.js).
+  galeria.innerHTML = "";
+
+  listaObjetos.forEach((objeto) => galeria.appendChild(crearTarjeta(objeto)));
+}
+
+renderizarObjetos(proyectos);
+
+// --- Filtros por herramienta ---
+const filtros = document.getElementById("filtros");
+
+// Lista de herramientas SIN repetir, sacada de los mismos datos:
+// 1) map arma un array con la herramienta de cada proyecto
+//    (ej. ["Visual Studio Code", "Visual Studio Code", "Blender", ...]).
+// 2) new Set(...) guarda cada valor una sola vez (un Set no admite
+//    repetidos).
+// 3) [...set] lo vuelve a convertir en array para poder recorrerlo.
+// Asi, si se agrega un proyecto con otra herramienta, su boton aparece
+// solo, y nunca hay un boton con 0 proyectos.
+const herramientas = [...new Set(proyectos.map((proyecto) => proyecto.herramienta))];
+
+// Marca como activo SOLO el boton que se clickeo (mismo criterio que
+// .sidebar-item.activo en gestion.js). aria-pressed le avisa a los
+// lectores de pantalla cual esta seleccionado.
+function activarFiltro(botonActivo) {
+  filtros.querySelectorAll(".filtro-boton").forEach((boton) => {
+    const esActivo = boton === botonActivo;
+    boton.classList.toggle("activo", esActivo);
+    boton.setAttribute("aria-pressed", esActivo);
+  });
+}
+
+// Crea UN boton de filtro. "obtenerLista" es una funcion (no el array ya
+// filtrado) para que el filtro se calcule en el momento del click, con el
+// contenido actual de "proyectos".
+function crearBotonFiltro(etiqueta, obtenerLista, claseColor, icono) {
+  const boton = document.createElement("button");
+  boton.type = "button";
+  boton.className = `filtro-boton ${claseColor}`;
+
+  const iconoHtml = icono ? `<img class="tarjeta-icono-herramienta" src="${icono}" alt="">` : "";
+  boton.innerHTML = `${iconoHtml}<span>${etiqueta} (${obtenerLista().length})</span>`;
+
+  boton.addEventListener("click", () => {
+    renderizarObjetos(obtenerLista());
+    activarFiltro(boton);
+  });
+
+  filtros.appendChild(boton);
+  return boton;
+}
+
+const botonTodos = crearBotonFiltro("Todos", () => proyectos, "filtro-todos");
+
+herramientas.forEach((herramienta) => {
+  // Reusa las mismas clases de color que el badge de las tarjetas
+  // (tarjeta-herramienta + herramienta-blender, etc.), asi cada filtro
+  // combina con sus tarjetas, tambien en modo oscuro.
+  crearBotonFiltro(
+    herramienta,
+    () => proyectos.filter((proyecto) => proyecto.herramienta === herramienta),
+    `tarjeta-herramienta ${clasesPorHerramienta[herramienta] ?? ""}`,
+    iconosPorHerramienta[herramienta]
+  );
+});
+
+// Al cargar la pagina se ven todos, asi que "Todos" arranca activo.
+activarFiltro(botonTodos);
 
 // --- Boton de modo oscuro/claro ---
 // Cada click agrega o quita la clase "oscuro" en el body. El CSS
