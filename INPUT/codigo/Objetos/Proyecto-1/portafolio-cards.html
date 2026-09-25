@@ -25,10 +25,40 @@
        en el body y cambia el texto del boton. -->
   <button id="btnModoOscuro">🌙 Modo oscuro</button>
 
-  <!-- Filtros por herramienta: arranca vacio, portafolio-cards.js crea un
-       boton "Todos" + uno por cada herramienta que aparece en "proyectos"
-       (ver crearBotonFiltro). -->
-  <section class="filtros" id="filtros" aria-label="Filtrar proyectos por herramienta"></section>
+  <!-- Filtros de arriba: portafolio-cards.js crea un boton "Todos" + uno
+       por cada herramienta que aparece en "proyectos" (ver
+       crearBotonFiltro), y despues mueve el select de tipo al final de la
+       fila, para que quede a la derecha de los botones. -->
+  <section class="filtros" id="filtros" aria-label="Filtrar proyectos">
+    <!-- Select de tipo de proyecto: el navegador ya lo abre y lo cierra
+         con un click. Las <option> las arma portafolio-cards.js con las
+         categorias reales de "proyectos" (ver llenarSelectCategoria). -->
+    <div class="filtro-categoria" id="filtroCategoriaContenedor">
+      <label for="filtroCategoria">Tipo:</label>
+      <select id="filtroCategoria" class="filtro-categoria-select"></select>
+    </div>
+
+    <!-- Vuelve todos los filtros a su valor inicial (ver limpiarFiltros en
+         portafolio-cards.js). Arranca "disabled" porque al cargar no hay
+         ningun filtro puesto; el JS lo habilita apenas se usa alguno.
+         Tambien lo mueve el JS al final de la fila, despues del select. -->
+    <button type="button" class="btn-limpiar-filtros" id="btnLimpiarFiltros" disabled>✕ Limpiar filtros</button>
+  </section>
+
+  <!-- Filtro por horas invertidas: panel flotante fijo a la izquierda
+       (position: fixed en portafolio-cards.css), con un slider vertical.
+       min/max/value arrancan vacios: portafolio-cards.js los calcula con
+       las horas reales de "proyectos", asi si cambia la data el slider se
+       ajusta solo. Muestra los proyectos con horasInvertidas <= valor. -->
+  <aside class="filtro-horas" aria-label="Filtrar proyectos por horas invertidas">
+    <label class="filtro-horas-titulo" for="sliderHoras">Horas</label>
+    <span class="filtro-horas-limite" id="horasMaximo"></span>
+    <input type="range" id="sliderHoras" class="filtro-horas-slider" step="1">
+    <span class="filtro-horas-limite" id="horasMinimo"></span>
+    <!-- aria-live="polite": los lectores de pantalla leen el nuevo valor
+         cada vez que cambia, sin interrumpir lo que estaban diciendo. -->
+    <output class="filtro-horas-valor" id="horasValor" for="sliderHoras" aria-live="polite"></output>
+  </aside>
 
   <!-- "Escena": envuelve la grilla de tarjetas. El perspective que le da
        profundidad al tilt 3D vive aca (ver portafolio-cards.css) en vez de
@@ -37,6 +67,10 @@
        .fondo-decorativo y el modal), cortando el fondo a la altura del
        contenido en vez de cubrir toda la pantalla. -->
   <div class="escena-tarjeta" id="galeria"></div>
+
+  <!-- Mensaje de "sin resultados": arranca oculto y portafolio-cards.js
+       lo muestra solo cuando los filtros no dejan ningun proyecto. -->
+  <p class="galeria-vacia" id="galeriaVacia" hidden>Ningún proyecto coincide con estos filtros.</p>
 
   <!-- Plantilla de tarjeta: el navegador NO la muestra en pantalla, es solo
        un "molde" vacio que portafolio-cards.js clona una vez por cada

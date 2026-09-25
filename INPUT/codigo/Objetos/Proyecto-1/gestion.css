@@ -339,6 +339,122 @@ body.pagina-gestion {
   text-align: center;
 }
 
+/* --- Usuarios (registrados en game.html) --- */
+/* La tabla puede ser mas ancha que la pantalla (el hash tiene 64
+   caracteres): el contenedor la deja scrollear de costado sin que se
+   salga toda la pagina. Mismo fondo/borde que .fila-eliminar. */
+.tabla-contenedor {
+  overflow-x: auto;
+  margin-top: 16px;
+  background-color: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+}
+
+/* border-collapse: collapse junta los bordes de celdas vecinas en una
+   sola linea (sin eso, cada celda dibuja el suyo y quedan dobles). */
+.tabla-usuarios {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.tabla-usuarios th,
+.tabla-usuarios td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e5e5e5;
+  white-space: nowrap; /* cada dato en una sola linea: se lee mejor */
+}
+
+.tabla-usuarios th {
+  background-color: #f5f3ff;
+  color: var(--color-acento);
+}
+
+/* La ultima fila no necesita linea abajo: ya la cierra el borde del
+   contenedor. */
+.tabla-usuarios tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Contraseña en texto plano resaltada en rojo de alerta (el mismo de
+   .mensaje-no-encontrado), como recordatorio de que esto NO se hace en
+   un proyecto real. */
+.celda-password {
+  font-family: monospace;
+  font-weight: bold;
+  color: #d64545;
+}
+
+/* El hash va en monospace (todos los caracteres del mismo ancho) y gris:
+   es un dato tecnico, de referencia. */
+.celda-hash {
+  font-family: monospace;
+  font-size: 0.85em;
+  color: #888888;
+}
+
+/* Boton "Ver"/"Ocultar" del historial: pildora de contorno con el color
+   de acento, chica para que entre en la celda. */
+.btn-historial {
+  font-family: inherit;
+  font-size: 0.85em;
+  font-weight: bold;
+  padding: 4px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--color-acento);
+  background-color: transparent;
+  color: var(--color-acento);
+  cursor: pointer;
+}
+
+.btn-historial:hover:not(:disabled) {
+  background-color: var(--color-acento);
+  color: #ffffff;
+}
+
+/* Sin partidas no hay historial: el boton queda apagado. */
+.btn-historial:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Fila desplegable con el historial: fondo lila muy claro para que se
+   note que "pertenece" al usuario de arriba. */
+.fila-historial > td {
+  background-color: #faf9ff;
+  padding: 12px 14px 16px;
+}
+
+/* Subtabla: mas chica que la principal y sin ocupar todo el ancho. */
+.tabla-historial {
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.tabla-historial th {
+  background-color: transparent;
+  font-size: 0.85em;
+}
+
+/* Estado de cada partida: mismos verde/naranja que "Terminado"/"En
+   proceso" en las tarjetas del portafolio. */
+.estado-ganada {
+  font-weight: bold;
+  color: #1f8b45;
+}
+
+.estado-abandonada {
+  font-weight: bold;
+  color: #b8720a;
+}
+
+.mensaje-sin-usuarios {
+  margin-top: 16px;
+  color: #666;
+}
+
 /* En pantallas angostas el sidebar pasa a ocupar todo el ancho, arriba
    del contenido, en vez de quedar apretado al costado. */
 @media (max-width: 720px) {

@@ -113,3 +113,9 @@ Hoy terminamos el CRUD (agregamos ids, login, filtros por herramienta y la parte
 principio esos comandos me dejan algo enredado, y ya cuando se miran paso a paso se entienden
 mejor. Considero que todo el tema del CRUD es super interesante, pero algo enredado y super
 extenso. Espero poder aplicar estas cosas a una página que estoy creando para un familiar.
+
+## 2026-09-25
+
+El día de hoy revisamos más el tema de las bases de datos e incluso un pequeño juego de cartas,
+bastante divertido hacer esto. Aunque si soy sincero, sí es un tema algo enredado y complicado,
+pero interesante jaja, espero aprender más.

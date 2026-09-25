@@ -1,0 +1,221 @@
+/* game.css
+   Estilos del login de game.html. Reusa el lenguaje visual de las
+   tarjetas del portafolio (portafolio-cards.css): mismas fuentes, mismo
+   color de acento, tarjeta blanca con sombra y pildoras de estado. */
+
+/* Igual que en portafolio-cards.css: @import tiene que ir antes que
+   cualquier otra regla, si no el navegador lo ignora. */
+@import url('https://fonts.googleapis.com/css2?family=Pangolin&family=Permanent+Marker&display=swap');
+
+/* Colores en variables: si cambias el acento aca, cambia en todo el
+   login. Los naranjas/verdes son los mismos de .tarjeta-estado.en-proceso
+   y .terminado del portafolio. */
+:root {
+  --color-acento: #6a5acd;
+  --color-pendiente-fondo: #fff1d6;
+  --color-pendiente-texto: #b8720a;
+  --color-cumple-fondo: #dcf5e3;
+  --color-cumple-texto: #1f8b45;
+  --color-error: #c62828;
+}
+
+/* El atributo hidden del HTML solo aplica un "display: none" con MUY
+   poca prioridad: cualquier display de este archivo (como el flex de
+   .tarjeta-login) le gana y el elemento se veria igual. Con !important
+   nos aseguramos de que "hidden" siempre esconda (#juego arranca asi). */
+[hidden] {
+  display: none !important;
+}
+
+/* min-height: 100vh + flex centrado = la tarjeta queda en el medio de la
+   pantalla, tanto horizontal como verticalmente. */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+  color: #222;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+/* --- Tarjeta (formulario y pantalla de juego) --- */
+/* Mismo look que .tarjeta del portafolio. El border-top imita la raya de
+   acento que tiene .tarjeta-imagen debajo de la foto. */
+.tarjeta-login {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border-top: 6px solid var(--color-acento);
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 28px 32px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-titulo {
+  font-family: "Permanent Marker", cursive;
+  font-size: 2.4rem;
+  color: var(--color-acento);
+  text-align: center;
+  margin: 0;
+}
+
+/* --- Campos --- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-family: "Pangolin", cursive;
+  font-size: 1.1em;
+}
+
+/* Borde de 2px lila claro desde el principio: al hacer foco solo cambia
+   de color (a acento), sin que el input "salte" de tamaño. */
+.campo input {
+  font-family: inherit;
+  font-size: 1em;
+  padding: 10px 14px;
+  border: 2px solid #d8d4f0;
+  border-radius: 999px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campo input:focus-visible {
+  border-color: var(--color-acento);
+  box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.2);
+}
+
+/* game.js le pone aria-invalid="true" al campo con error cuando intentas
+   continuar. Usar el atributo (y no una clase) sirve para las dos cosas:
+   pintar en rojo y avisarle al lector de pantalla. */
+.campo input[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+
+/* --- Checklist de requisitos (email y contraseña) --- */
+/* list-style: none quita los puntos de la lista: el ✔/✘ ya hace de viñeta. */
+.requisitos {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Cada requisito es una pildora como .tarjeta-estado del portafolio:
+   naranja mientras falta ("en proceso")... */
+.requisito {
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  background-color: var(--color-pendiente-fondo);
+  color: var(--color-pendiente-texto);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ...y verde cuando se cumple ("terminado"). game.js le suma la clase
+   "cumple" en cada tecla (ver pintarChecklist). */
+.requisito.cumple {
+  background-color: var(--color-cumple-fondo);
+  color: var(--color-cumple-texto);
+}
+
+/* --- Mensaje de error --- */
+.mensaje-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 4px solid var(--color-error);
+  background-color: #fdecea;
+  color: var(--color-error);
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+/* --- Boton Continuar --- */
+/* Mismo gradiente, sombra y animacion que #btnModoOscuro del portafolio. */
+.btn-continuar {
+  background: linear-gradient(135deg, #6a5acd, #836fff);
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-family: "Pangolin", cursive;
+  font-size: 1.15em;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(106, 90, 205, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-continuar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(106, 90, 205, 0.5);
+}
+
+.btn-continuar:active {
+  transform: translateY(0);
+}
+
+/* Mientras email o contraseña no cumplan, game.js le pone "incompleto":
+   se ve apagado, pero NO usamos disabled para que el click siga
+   mostrando que falta. */
+.btn-continuar.incompleto {
+  opacity: 0.55;
+}
+
+/* --- Pantalla de juego --- */
+#juego {
+  text-align: center;
+}
+
+/* Ola: misma animacion que el titulo del portafolio. Cada letra sube y
+   baja, y el animation-delay (que crece con --i, puesto por game.js)
+   hace que arranquen una despues de otra. */
+@keyframes letra-ola {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.titulo-ola {
+  font-family: "Permanent Marker", cursive;
+  font-size: 2.2rem;
+  color: var(--color-acento);
+  margin: 12px 0 0;
+}
+
+/* inline-block: un <span> normal (inline) ignora transform. */
+.titulo-ola span {
+  display: inline-block;
+  animation: letra-ola 1.4s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 0.08s);
+}
+
+.juego-detalle {
+  font-family: "Pangolin", cursive;
+  margin: 0;
+}
+
+/* Si la persona pidio "reducir movimiento" en su sistema operativo,
+   apagamos la ola (hay gente a la que las animaciones le marean). */
+@media (prefers-reduced-motion: reduce) {
+  .titulo-ola span {
+    animation: none;
+  }
+}

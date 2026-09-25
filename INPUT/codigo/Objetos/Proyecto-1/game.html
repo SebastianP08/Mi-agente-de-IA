@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game</title>
+  <!-- Estilos propios del login, con el mismo lenguaje visual que las
+       tarjetas del portafolio (fuentes, color de acento, pildoras). -->
+  <link rel="stylesheet" href="game.css">
+  <!-- Estilos del juego de memoria: despues de game.css porque usa sus
+       variables (--color-acento, etc.). -->
+  <link rel="stylesheet" href="memoria.css">
+</head>
+<body>
+
+  <!-- Formulario de login: game.js escucha su "submit" y solo deja
+       continuar si Nombre y Alias no estan vacios y Email y Contraseña
+       cumplen todas sus reglas. Despues busca el email en localStorage:
+       si existe compara la contraseña, si no existe pregunta (confirm) si
+       quiere registrarse. novalidate apaga la validacion automatica del
+       navegador (sus globitos genericos) para que la haga game.js con
+       mensajes propios. -->
+  <form id="formLogin" class="tarjeta-login" novalidate>
+    <h1 class="login-titulo">Iniciar partida</h1>
+
+    <div class="campo">
+      <label for="campoNombre">Nombre</label>
+      <input type="text" id="campoNombre" name="nombre" autocomplete="name">
+    </div>
+
+    <div class="campo">
+      <label for="campoAlias">Alias</label>
+      <input type="text" id="campoAlias" name="alias" autocomplete="nickname">
+    </div>
+
+    <div class="campo">
+      <label for="campoEmail">Email</label>
+      <!-- aria-describedby conecta el campo con su checklist: un lector
+           de pantalla la lee al entrar al campo. -->
+      <input type="email" id="campoEmail" name="email"
+             autocomplete="email" aria-describedby="requisitosEmail">
+      <!-- Checklist en vivo: arranca vacia, game.js arma un <li> por cada
+           regla de reglasEmail y los marca como "cumple" mientras escribes. -->
+      <ul class="requisitos" id="requisitosEmail"></ul>
+    </div>
+
+    <div class="campo">
+      <label for="campoPassword">Contraseña</label>
+      <input type="password" id="campoPassword" name="password"
+             autocomplete="current-password" aria-describedby="requisitosPassword">
+      <ul class="requisitos" id="requisitosPassword"></ul>
+    </div>
+
+    <!-- Mensaje de error al intentar continuar sin cumplir todo (o con la
+         contraseña equivocada). role="alert" hace que el lector de
+         pantalla lo anuncie apenas aparece. -->
+    <p class="mensaje-error" id="mensajeError" role="alert" hidden></p>
+
+    <button type="submit" class="btn-continuar" id="btnContinuar">Continuar</button>
+  </form>
+
+  <!-- Pantalla del juego: arranca oculta (hidden) y game.js la muestra
+       recien cuando el login (o el registro) sale bien. -->
+  <!-- tarjeta-juego: misma tarjeta que el login pero mas ancha, para que
+       entre el tablero de 4 columnas. -->
+  <section class="tarjeta-login tarjeta-juego" id="juego" hidden>
+    <!-- game.js arma el saludo letra por letra (un <span> por letra con
+         --i) para la animacion de ola, igual que el titulo del portafolio. -->
+    <h2 class="titulo-ola" id="saludoJuego"></h2>
+    <p class="juego-detalle" id="detalleJuego"></p>
+
+    <!-- --- Juego de memoria (logica en memoria.js) --- -->
+    <!-- HUD: tiempo, intentos y pares en vivo + boton de reiniciar. -->
+    <div class="memoria-hud">
+      <div class="memoria-hud-item">
+        <span class="memoria-hud-valor" id="hudTiempo">00:00</span>
+        <span class="memoria-hud-label">Tiempo</span>
+      </div>
+      <div class="memoria-hud-item">
+        <span class="memoria-hud-valor" id="hudIntentos">0</span>
+        <span class="memoria-hud-label">Intentos</span>
+      </div>
+      <div class="memoria-hud-item">
+        <span class="memoria-hud-valor" id="hudPares">0/0</span>
+        <span class="memoria-hud-label">Pares</span>
+      </div>
+      <button type="button" class="memoria-btn-secundario" id="btnReiniciarMemoria">↺ Reiniciar</button>
+    </div>
+
+    <!-- Mejor partida guardada de este usuario (o aviso si no tiene). -->
+    <p class="memoria-record" id="memoriaRecord"></p>
+
+    <!-- Aviso cuando no hay suficientes proyectos con imagen para jugar. -->
+    <p class="mensaje-error" id="memoriaAviso" hidden></p>
+
+    <!-- Tablero: arranca vacio, memoria.js crea una carta (<button>) por
+         cada proyecto, duplicado y mezclado. -->
+    <div class="memoria-tablero" id="tableroMemoria"></div>
+  </section>
+
+  <!-- Victoria: arranca oculta y memoria.js la muestra al encontrar todos
+       los pares. role="dialog" + aria-modal le avisan al lector de
+       pantalla que es una ventana encima de la pagina. -->
+  <div class="memoria-overlay" id="overlayVictoria" hidden>
+    <div class="memoria-victoria tarjeta-login" role="dialog" aria-modal="true" aria-labelledby="tituloVictoria">
+      <div class="memoria-trofeo" aria-hidden="true">🏆</div>
+      <h2 class="login-titulo" id="tituloVictoria">¡Lo lograste!</h2>
+      <p class="memoria-nuevo-record" id="nuevoRecord" hidden>¡Nuevo récord personal!</p>
+      <div class="memoria-hud">
+        <div class="memoria-hud-item">
+          <span class="memoria-hud-valor" id="victoriaTiempo">00:00</span>
+          <span class="memoria-hud-label">Tiempo</span>
+        </div>
+        <div class="memoria-hud-item">
+          <span class="memoria-hud-valor" id="victoriaIntentos">0</span>
+          <span class="memoria-hud-label">Intentos</span>
+        </div>
+        <div class="memoria-hud-item">
+          <span class="memoria-hud-valor" id="victoriaPares">0/0</span>
+          <span class="memoria-hud-label">Pares</span>
+        </div>
+      </div>
+      <button type="button" class="btn-continuar" id="btnJugarDeNuevo">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <!-- Orden de los scripts (defer respeta este orden):
+       1) data.js: define "proyectos" (de localStorage o los 8 por defecto).
+       2) usuarios-game.js: leer/guardar usuarios, ids y partidas
+          (compartido con gestion.html).
+       3) game.js: login/registro; al entrar llama a iniciarMemoria.
+       4) memoria.js: el juego; registra cada partida en el usuario. -->
+  <script src="data.js" defer></script>
+  <script src="usuarios-game.js" defer></script>
+  <script src="game.js" defer></script>
+  <script src="memoria.js" defer></script>
+</body>
+</html>

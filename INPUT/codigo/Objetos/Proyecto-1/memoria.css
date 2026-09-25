@@ -1,0 +1,267 @@
+/* memoria.css
+   Estilos del juego de memoria de game.html. Usa las variables y fuentes
+   que ya define game.css (--color-acento, Permanent Marker, Pangolin),
+   asi que tiene que cargarse DESPUES de game.css.
+   El efecto de flip 3D sigue la idea del ejemplo (ejemplo-juego/cardgame,
+   de Julian Bejarano, MIT). */
+
+/* --- Tarjeta del juego --- */
+/* Misma .tarjeta-login, pero mas ancha para que entren 4 columnas. */
+.tarjeta-juego {
+  max-width: 760px;
+}
+
+/* --- HUD (tiempo, intentos, pares) --- */
+.memoria-hud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+}
+
+.memoria-hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.memoria-hud-valor {
+  font-family: "Permanent Marker", cursive;
+  font-size: 1.6rem;
+  color: var(--color-acento);
+  line-height: 1;
+}
+
+.memoria-hud-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666;
+}
+
+/* Boton de reiniciar: contorno de acento (no relleno) para que no
+   compita con el boton principal. */
+.memoria-btn-secundario {
+  font-family: "Pangolin", cursive;
+  font-size: 1em;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 2px solid var(--color-acento);
+  background-color: transparent;
+  color: var(--color-acento);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.memoria-btn-secundario:hover {
+  background-color: var(--color-acento);
+  color: #ffffff;
+}
+
+.memoria-record {
+  font-family: "Pangolin", cursive;
+  text-align: center;
+  margin: 0;
+  color: #555;
+}
+
+/* --- Tablero --- */
+/* 4 columnas iguales, igual que el ejemplo (16 cartas = 4 x 4). */
+.memoria-tablero {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* --- Carta --- */
+/* El <button> es solo el "marco": le sacamos el estilo por defecto del
+   navegador (borde, fondo, padding). perspective le da profundidad al
+   giro: sin esto el rotateY se ve plano, como si la carta se achicara. */
+.memoria-carta {
+  aspect-ratio: 3 / 4;
+  perspective: 1000px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 8px;
+}
+
+.memoria-carta:disabled {
+  cursor: default;
+}
+
+/* Con teclado (Tab) se ve un contorno claro en la carta con foco. */
+.memoria-carta:focus-visible {
+  outline: 3px solid var(--color-acento);
+  outline-offset: 3px;
+}
+
+/* La parte que realmente gira. preserve-3d mantiene a los dos hijos
+   (reverso y frente) en el mismo espacio 3D, para que al girar se vea
+   uno o el otro. */
+.memoria-carta-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dada vuelta (en este turno) o ya encontrada: giramos 180°. */
+.memoria-carta.volteada .memoria-carta-inner,
+.memoria-carta.encontrada .memoria-carta-inner {
+  transform: rotateY(180deg);
+}
+
+/* Las dos caras, una encima de la otra (position: absolute + inset: 0).
+   backface-visibility: hidden esconde la cara cuando queda "de
+   espaldas": es lo que hace que al girar aparezca la otra. */
+.memoria-cara {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden; /* Safari */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Reverso: reemplaza la imagen externa del ejemplo por un gradiente con
+   el mismo morado del boton Continuar y un "?" grande. */
+.memoria-cara-reverso {
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #6a5acd, #836fff);
+  color: #ffffff;
+  font-family: "Permanent Marker", cursive;
+  font-size: 2.6rem;
+}
+
+.memoria-carta:not(:disabled):hover .memoria-cara-reverso {
+  filter: brightness(1.1);
+}
+
+/* Frente: ya viene girado 180°, asi queda "de espaldas" al principio y
+   se ve recien cuando el contenedor gira. Mismo look que .tarjeta del
+   portafolio: blanco con la raya de acento debajo de la imagen. */
+.memoria-cara-frente {
+  transform: rotateY(180deg);
+  background-color: #ffffff;
+  color: #222;
+  text-align: left;
+}
+
+.memoria-cara-frente img {
+  width: 100%;
+  height: 62%;
+  object-fit: cover;
+  border-bottom: 4px solid var(--color-acento);
+}
+
+.memoria-carta-nombre {
+  font-family: "Pangolin", cursive;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  padding: 6px 8px 0;
+}
+
+.memoria-carta-categoria {
+  font-size: 0.65rem;
+  color: #666;
+  padding: 2px 8px 6px;
+}
+
+/* Par encontrado: borde y nombre en el verde de "cumple"/"Terminado". */
+.memoria-carta.encontrada .memoria-cara-frente {
+  box-shadow: 0 0 0 3px var(--color-cumple-texto), 0 0 16px rgba(31, 139, 69, 0.3);
+}
+
+.memoria-carta.encontrada .memoria-carta-nombre {
+  color: var(--color-cumple-texto);
+}
+
+/* --- Ventana de victoria --- */
+/* Fondo oscuro fijo sobre toda la pantalla. El [hidden] de game.css (con
+   !important) le gana a este display: flex mientras este oculta. */
+.memoria-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background-color: rgba(22, 21, 27, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.memoria-victoria {
+  text-align: center;
+  align-items: center;
+  animation: memoria-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Aparece creciendo con un pequeño rebote (idea del ejemplo). */
+@keyframes memoria-pop {
+  from {
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.memoria-trofeo {
+  font-size: 3rem;
+}
+
+.memoria-nuevo-record {
+  margin: 0;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-weight: bold;
+  background-color: var(--color-cumple-fondo);
+  color: var(--color-cumple-texto);
+}
+
+/* --- Responsive --- */
+/* En celular las cartas quedan chicas: menos espacio entre ellas y el
+   nombre un poco mas chico. Siguen siendo 4 columnas para que 16 cartas
+   queden parejas (con 3 sobraria una fila incompleta). */
+@media (max-width: 520px) {
+  .memoria-tablero {
+    gap: 6px;
+  }
+
+  .memoria-carta-nombre {
+    font-size: 0.65rem;
+    padding: 4px 5px 0;
+  }
+
+  .memoria-carta-categoria {
+    display: none;
+  }
+
+  .memoria-cara-reverso {
+    font-size: 1.8rem;
+  }
+}
+
+/* Si la persona pidio "reducir movimiento" en su sistema, la carta
+   cambia de cara sin la animacion de giro. */
+@media (prefers-reduced-motion: reduce) {
+  .memoria-carta-inner,
+  .memoria-victoria {
+    transition: none;
+    animation: none;
+  }
+}

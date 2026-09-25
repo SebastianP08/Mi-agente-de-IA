@@ -44,6 +44,7 @@
           <li><a href="#" class="sidebar-item" data-vista="leer">Leer</a></li>
           <li><a href="#" class="sidebar-item" data-vista="actualizar">Actualizar</a></li>
           <li><a href="#" class="sidebar-item" data-vista="eliminar">Eliminar</a></li>
+          <li><a href="#" class="sidebar-item" data-vista="usuarios">Usuarios</a></li>
         </ul>
       </nav>
 
@@ -184,6 +185,36 @@
              boton "Eliminar" (ver renderizarEliminar). -->
         <div id="listaEliminar" class="lista-eliminar"></div>
       </section>
+
+      <section class="vista" id="vista-usuarios" data-vista="usuarios" hidden>
+        <h2>Usuarios registrados</h2>
+        <!-- Usuarios que se registraron en game.html (localStorage, clave
+             "game-usuarios"). gestion.js arma la tabla cada vez que se
+             entra a esta vista (ver renderizarUsuarios). El div con
+             overflow-x permite scrollear la tabla de costado en pantallas
+             angostas sin romper el resto de la pagina. -->
+        <div class="tabla-contenedor">
+          <table class="tabla-usuarios">
+            <thead>
+              <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Alias</th>
+                <th scope="col">Email</th>
+                <th scope="col">Contraseña</th>
+                <th scope="col">Hash (SHA-256)</th>
+                <th scope="col">Partidas</th>
+                <th scope="col">Intentos (total)</th>
+                <th scope="col">Tiempo (total)</th>
+                <th scope="col">Mejor partida</th>
+                <th scope="col">Historial</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpoUsuarios"></tbody>
+          </table>
+        </div>
+        <p id="mensajeUsuarios" class="mensaje-sin-usuarios" hidden>Todavía no hay usuarios registrados en game.html.</p>
+      </section>
     </main>
 
   </div>
@@ -197,6 +228,10 @@
   <!-- login.js despues de credenciales.js (las usa para comparar) y antes
        de gestion.js (que llama a validarCredenciales). -->
   <script src="login.js" defer></script>
+  <!-- usuarios-game.js: leer los usuarios de game.html (con sus ids y
+       partidas) para la pestaña "Usuarios". Es el mismo archivo que usa
+       game.html, asi las dos paginas leen los datos igual. -->
+  <script src="usuarios-game.js" defer></script>
   <script src="gestion.js" defer></script>
 </body>
 </html>

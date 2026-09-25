@@ -453,6 +453,133 @@ h1 {
   animation: boton-salto 0.5s ease-in-out infinite;
 }
 
+/* --- Filtro por tipo de proyecto (select) --- */
+/* Label + select juntos, alineados con la fila de botones. */
+.filtro-categoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9em;
+  font-weight: bold;
+  color: var(--color-acento);
+}
+
+/* Misma forma de pildora que .filtro-boton. El borde va siempre pintado
+   (no transparente) porque, a diferencia de un boton, el select tiene que
+   verse como un campo que se puede abrir. */
+.filtro-categoria-select {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 1em;
+  font-weight: bold;
+  background-color: #ffffff;
+  color: var(--color-acento);
+  border: 2px solid var(--color-acento);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.filtro-categoria-select:hover {
+  transform: translateY(-2px);
+}
+
+/* :focus-visible solo aparece al llegar con el teclado (Tab), no al
+   hacer click: asi se ve claro donde esta el foco sin molestar al mouse. */
+.filtro-categoria-select:focus-visible {
+  outline: 3px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+/* --- Boton "Limpiar filtros" --- */
+/* Relleno con el color de acento (a diferencia de los filtros, que son
+   claros) para que se lea como una ACCION y no como otro filtro mas. */
+.btn-limpiar-filtros {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 0.9em;
+  font-weight: bold;
+  background-color: var(--color-acento);
+  color: #ffffff;
+  border: 2px solid var(--color-acento);
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* :not(:disabled) para que el hover no "salte" cuando esta desactivado. */
+.btn-limpiar-filtros:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+/* Sin filtros puestos: el JS le pone "disabled" (ver aplicarFiltros).
+   Lo dejamos transparente y con cursor de "no permitido" para que se note
+   que ya estas viendo todo. */
+.btn-limpiar-filtros:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- Filtro por horas (panel flotante a la izquierda) --- */
+/* position: fixed lo saca del flujo de la pagina y lo pega a la ventana:
+   aunque hagas scroll, se queda en el mismo lugar. top: 50% + translateY
+   (-50%) lo centra en vertical: el top mueve su borde de arriba a la mitad
+   de la pantalla y el translate lo sube la mitad de su PROPIO alto. */
+.filtro-horas {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10; /* arriba de las tarjetas (5), debajo del modal (200) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+  background-color: #ffffff;
+  border: 1px solid var(--color-acento);
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(106, 90, 205, 0.25);
+  transition: background-color 0.3s ease;
+}
+
+.filtro-horas-titulo {
+  font-family: "Permanent Marker", cursive;
+  color: var(--color-acento);
+}
+
+.filtro-horas-limite {
+  font-size: 0.75em;
+  opacity: 0.7;
+}
+
+/* Slider vertical: writing-mode: vertical-lr pone el input "de pie", y
+   direction: rtl invierte el sentido para que el minimo quede ABAJO y el
+   maximo ARRIBA (sin rtl queda al reves, con el minimo arriba).
+   accent-color pinta la barra y la bolita con el color del proyecto. */
+.filtro-horas-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  height: 200px;
+  width: 24px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--color-acento);
+}
+
+.filtro-horas-valor {
+  min-width: 3.5em; /* reserva espacio para que el panel no "salte" al pasar de 9 a 10 */
+  text-align: center;
+  font-weight: bold;
+  color: var(--color-acento);
+}
+
+/* Aviso de "sin resultados" cuando los filtros no dejan ningun proyecto. */
+.galeria-vacia {
+  font-size: 1.1em;
+  opacity: 0.7;
+}
+
 /* --- Modo oscuro --- */
 /* Cuando el JS agrega la clase "oscuro" al body, sobreescribimos los
    colores de fondo/texto del body, la tarjeta y la etiqueta de estado. */
@@ -579,7 +706,72 @@ body.oscuro .modal-contenido {
   background-color: #2b2b2b;
 }
 
+/* color-scheme: dark le avisa al navegador que el select es oscuro, asi
+   la lista de opciones que ESTE dibuja (y que no podemos estilizar con
+   CSS) tambien sale oscura en vez de blanca. */
+body.oscuro .filtro-categoria-select {
+  background-color: #2b2b2b;
+  color-scheme: dark;
+}
+
+body.oscuro .filtro-horas {
+  background-color: #2b2b2b;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
 /* --- Responsive --- */
+/* La grilla mide hasta 1180px y va centrada: en pantallas de menos de
+   ~1440px ya no sobra espacio a los lados y el panel flotante de horas
+   taparia la primera columna de tarjetas. Le reservamos ese espacio al
+   body con un padding-left un poco mas ancho que el panel. */
+@media (max-width: 1440px) {
+  body {
+    padding-left: 110px;
+  }
+}
+
+/* En celular no hay lugar para un panel flotante al costado: lo volvemos
+   parte normal de la pagina (position: static, debajo de los filtros de
+   herramienta) y acostamos el slider en horizontal. */
+@media (max-width: 720px) {
+  body {
+    padding-left: 20px;
+  }
+
+  .filtro-horas {
+    position: static;
+    transform: none;
+    flex-direction: row;
+    margin-bottom: 28px;
+    padding: 10px 18px;
+  }
+
+  /* En el HTML el maximo va ARRIBA del slider (vertical), pero acostado
+     queremos: titulo, min, slider, max, valor. "order" reacomoda los hijos
+     de un flex sin tocar el HTML (el titulo queda en 0, el default). */
+  #horasMinimo {
+    order: 1;
+  }
+
+  .filtro-horas-slider {
+    order: 2;
+  }
+
+  #horasMaximo {
+    order: 3;
+  }
+
+  .filtro-horas-valor {
+    order: 4;
+  }
+
+  .filtro-horas-slider {
+    writing-mode: horizontal-tb;
+    direction: ltr;
+    width: 160px;
+    height: auto;
+  }
+}
 /* Con 2 columnas fijas, en pantallas angostas cada tarjeta queda demasiado
    apretada (menos de 350px de ancho). Antes de eso pasa, colapsamos la
    grilla a 1 sola columna: cada tarjeta pasa a ocupar todo el ancho

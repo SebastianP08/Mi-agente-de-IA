@@ -102,6 +102,10 @@ function mostrarVista(nombreVista) {
   if (nombreVista === "actualizar") {
     renderizarActualizar();
   }
+
+  if (nombreVista === "usuarios") {
+    renderizarUsuarios();
+  }
 }
 
 itemsSidebar.forEach((item) => {
@@ -271,6 +275,160 @@ function renderizarEliminar() {
   }
 
   proyectos.forEach((proyecto) => listaEliminar.appendChild(crearFilaEliminar(proyecto)));
+}
+
+// --- Usuarios: los que se registraron en game.html ---
+// game.html los guarda en localStorage (clave "game-usuarios"). Como las
+// dos paginas estan en la misma carpeta (mismo "origen"), comparten el
+// mismo localStorage. leerUsuarios, mejorPartida y formatearTiempo vienen
+// de usuarios-game.js, el mismo archivo que usa game.html.
+const cuerpoUsuarios = document.getElementById("cuerpoUsuarios");
+const mensajeUsuarios = document.getElementById("mensajeUsuarios");
+
+// Cantidad de columnas de la tabla principal (ver <thead> en
+// gestion.html): la fila del historial ocupa todas con colspan.
+const COLUMNAS_USUARIOS = 11;
+
+// Crea UNA celda <td> con el texto que recibe. textContent (no
+// innerHTML) porque nombre/alias/email los escribio cualquier persona en
+// game.html: si alguien pusiera "<img onerror=...>" como alias, con
+// innerHTML se ejecutaria aca, dentro del panel de gestion.
+function crearCelda(texto, clase) {
+  const celda = document.createElement("td");
+  celda.textContent = texto;
+  if (clase) celda.className = clase;
+  return celda;
+}
+
+// Resumen de la mejor partida GANADA, o "—" si no gano ninguna.
+function textoMejorPartida(partidas) {
+  const mejor = mejorPartida(partidas);
+  if (!mejor) return "—";
+  return `#${mejor.id} · ${mejor.intentos} intentos · ${formatearTiempo(mejor.segundos)}`;
+}
+
+// La fecha se guarda en formato ISO ("2026-09-25T18:30:00.000Z"), que es
+// bueno para guardar pero incomodo para leer. toLocaleString la muestra
+// en el formato de Colombia y en la hora local: "25 sept 2026, 1:30 p. m.".
+function formatearFecha(fechaIso) {
+  return new Date(fechaIso).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" });
+}
+
+// Arma la fila (oculta al principio) con la subtabla del historial de UN
+// usuario: una fila por partida, de la mas nueva a la mas vieja.
+function crearFilaHistorial(usuarioGame) {
+  const filaHistorial = document.createElement("tr");
+  filaHistorial.className = "fila-historial";
+  filaHistorial.hidden = true;
+
+  // Una sola celda que ocupa todo el ancho de la tabla principal.
+  const celda = document.createElement("td");
+  celda.colSpan = COLUMNAS_USUARIOS;
+
+  const tabla = document.createElement("table");
+  tabla.className = "tabla-historial";
+  tabla.innerHTML = `
+    <thead>
+      <tr>
+        <th scope="col">Id partida</th>
+        <th scope="col">Fecha</th>
+        <th scope="col">Estado</th>
+        <th scope="col">Pares</th>
+        <th scope="col">Intentos</th>
+        <th scope="col">Tiempo</th>
+      </tr>
+    </thead>
+  `;
+
+  const cuerpo = document.createElement("tbody");
+
+  // [...array].reverse(): reverse() da vuelta el array ORIGINAL, asi que
+  // lo hacemos sobre una copia para no desordenar los datos del usuario.
+  [...usuarioGame.partidas].reverse().forEach((partida) => {
+    const fila = document.createElement("tr");
+    fila.append(
+      crearCelda(`#${partida.id}`),
+      crearCelda(formatearFecha(partida.fecha)),
+      crearCelda(
+        partida.completada ? "Ganada" : "Abandonada",
+        partida.completada ? "estado-ganada" : "estado-abandonada"
+      ),
+      crearCelda(partida.pares),
+      crearCelda(partida.intentos),
+      crearCelda(formatearTiempo(partida.segundos))
+    );
+    cuerpo.appendChild(fila);
+  });
+
+  tabla.appendChild(cuerpo);
+  celda.appendChild(tabla);
+  filaHistorial.appendChild(celda);
+  return filaHistorial;
+}
+
+function renderizarUsuarios() {
+  // leerUsuarios (usuarios-game.js) ademas le pone id y partidas a los
+  // usuarios guardados con versiones anteriores, asi aca todos tienen la
+  // misma forma.
+  const usuarios = leerUsuarios();
+  cuerpoUsuarios.innerHTML = "";
+
+  // Sin usuarios: escondemos la tabla entera (no solo el cuerpo) y
+  // mostramos el aviso.
+  const hayUsuarios = usuarios.length > 0;
+  cuerpoUsuarios.closest(".tabla-contenedor").hidden = !hayUsuarios;
+  mensajeUsuarios.hidden = hayUsuarios;
+
+  usuarios.forEach((usuarioGame) => {
+    const fila = document.createElement("tr");
+
+    // Totales de TODAS sus partidas (ganadas y abandonadas). reduce va
+    // sumando: arranca en 0 y a cada vuelta le suma la de esa partida.
+    const intentosTotales = usuarioGame.partidas.reduce((suma, partida) => suma + partida.intentos, 0);
+    const segundosTotales = usuarioGame.partidas.reduce((suma, partida) => suma + partida.segundos, 0);
+
+    // Boton que muestra/esconde el historial. aria-expanded le dice al
+    // lector de pantalla si esta abierto o cerrado. Si no jugo nunca, el
+    // boton queda desactivado (no hay nada que mostrar).
+    const botonHistorial = document.createElement("button");
+    botonHistorial.type = "button";
+    botonHistorial.className = "btn-historial";
+    botonHistorial.textContent = "Ver";
+    botonHistorial.setAttribute("aria-expanded", "false");
+    botonHistorial.disabled = usuarioGame.partidas.length === 0;
+
+    const celdaBoton = document.createElement("td");
+    celdaBoton.appendChild(botonHistorial);
+
+    // ⚠ Contraseña en texto plano: solo para este ejercicio (ver el
+    // comentario en game.js). Los usuarios registrados ANTES de ese cambio
+    // no tienen "password", solo el hash, asi que les mostramos "—".
+    fila.append(
+      crearCelda(`#${usuarioGame.id}`),
+      crearCelda(usuarioGame.nombre),
+      crearCelda(usuarioGame.alias),
+      crearCelda(usuarioGame.email),
+      crearCelda(usuarioGame.password ?? "—", "celda-password"),
+      crearCelda(usuarioGame.passwordHash, "celda-hash"),
+      crearCelda(usuarioGame.partidas.length),
+      crearCelda(intentosTotales),
+      crearCelda(formatearTiempo(segundosTotales)),
+      crearCelda(textoMejorPartida(usuarioGame.partidas)),
+      celdaBoton
+    );
+
+    const filaHistorial = crearFilaHistorial(usuarioGame);
+
+    botonHistorial.addEventListener("click", () => {
+      filaHistorial.hidden = !filaHistorial.hidden;
+      const abierto = !filaHistorial.hidden;
+      botonHistorial.textContent = abierto ? "Ocultar" : "Ver";
+      botonHistorial.setAttribute("aria-expanded", abierto);
+    });
+
+    // La fila del historial va justo DEBAJO de la del usuario.
+    cuerpoUsuarios.append(fila, filaHistorial);
+  });
 }
 
 // --- Actualizar: elegir un proyecto de la lista y editar sus datos ---

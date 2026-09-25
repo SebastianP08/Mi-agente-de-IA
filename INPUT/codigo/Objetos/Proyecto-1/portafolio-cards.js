@@ -239,7 +239,40 @@ function renderizarObjetos(listaObjetos) {
   listaObjetos.forEach((objeto) => galeria.appendChild(crearTarjeta(objeto)));
 }
 
-renderizarObjetos(proyectos);
+// --- Estado de los filtros ---
+// Los dos filtros (herramienta y horas) se combinan: si eliges "Blender"
+// y bajas el slider a 10, ves solo los de Blender con 10 h o menos. Para
+// eso cada filtro NO pinta la galeria por su cuenta, sino que guarda su
+// valor en estas variables y llama a aplicarFiltros, que es la unica que
+// decide que se muestra.
+// herramientaActiva / categoriaActiva: null = "Todos" (sin filtrar).
+let herramientaActiva = null;
+let categoriaActiva = null;
+let horasMaximas = Infinity; // se ajusta al maximo real mas abajo
+
+const galeriaVacia = document.getElementById("galeriaVacia");
+
+function aplicarFiltros() {
+  const listaFiltrada = proyectos.filter((proyecto) => {
+    const coincideHerramienta = herramientaActiva === null || proyecto.herramienta === herramientaActiva;
+    const coincideCategoria = categoriaActiva === null || proyecto.categoria === categoriaActiva;
+    const coincideHoras = proyecto.horasInvertidas <= horasMaximas;
+    return coincideHerramienta && coincideCategoria && coincideHoras;
+  });
+
+  renderizarObjetos(listaFiltrada);
+
+  // Si no quedo ningun proyecto, mostramos el aviso en vez de dejar la
+  // galeria en blanco sin explicacion.
+  galeriaVacia.hidden = listaFiltrada.length > 0;
+
+  // "Limpiar filtros" solo tiene sentido si hay ALGUN filtro puesto: si
+  // todo esta en su valor inicial, lo desactivamos (ver btnLimpiarFiltros
+  // mas abajo). horasMax es el maximo real de horas, calculado en la
+  // seccion del slider.
+  const hayFiltros = herramientaActiva !== null || categoriaActiva !== null || horasMaximas < horasMax;
+  btnLimpiarFiltros.disabled = !hayFiltros;
+}
 
 // --- Filtros por herramienta ---
 const filtros = document.getElementById("filtros");
@@ -265,19 +298,26 @@ function activarFiltro(botonActivo) {
   });
 }
 
-// Crea UN boton de filtro. "obtenerLista" es una funcion (no el array ya
-// filtrado) para que el filtro se calcule en el momento del click, con el
-// contenido actual de "proyectos".
-function crearBotonFiltro(etiqueta, obtenerLista, claseColor, icono) {
+// Crea UN boton de filtro. "herramienta" es el nombre de la herramienta
+// que filtra, o null para el boton "Todos". El numero entre parentesis es
+// el total de proyectos de esa herramienta (sin contar el slider de horas).
+function crearBotonFiltro(etiqueta, herramienta, claseColor, icono) {
   const boton = document.createElement("button");
   boton.type = "button";
   boton.className = `filtro-boton ${claseColor}`;
 
-  const iconoHtml = icono ? `<img class="tarjeta-icono-herramienta" src="${icono}" alt="">` : "";
-  boton.innerHTML = `${iconoHtml}<span>${etiqueta} (${obtenerLista().length})</span>`;
+  const cantidad = herramienta === null
+    ? proyectos.length
+    : proyectos.filter((proyecto) => proyecto.herramienta === herramienta).length;
 
+  const iconoHtml = icono ? `<img class="tarjeta-icono-herramienta" src="${icono}" alt="">` : "";
+  boton.innerHTML = `${iconoHtml}<span>${etiqueta} (${cantidad})</span>`;
+
+  // El click ya no pinta la galeria directo: solo guarda cual herramienta
+  // se eligio y deja que aplicarFiltros la combine con el slider de horas.
   boton.addEventListener("click", () => {
-    renderizarObjetos(obtenerLista());
+    herramientaActiva = herramienta;
+    aplicarFiltros();
     activarFiltro(boton);
   });
 
@@ -285,7 +325,7 @@ function crearBotonFiltro(etiqueta, obtenerLista, claseColor, icono) {
   return boton;
 }
 
-const botonTodos = crearBotonFiltro("Todos", () => proyectos, "filtro-todos");
+const botonTodos = crearBotonFiltro("Todos", null, "filtro-todos");
 
 herramientas.forEach((herramienta) => {
   // Reusa las mismas clases de color que el badge de las tarjetas
@@ -293,7 +333,7 @@ herramientas.forEach((herramienta) => {
   // combina con sus tarjetas, tambien en modo oscuro.
   crearBotonFiltro(
     herramienta,
-    () => proyectos.filter((proyecto) => proyecto.herramienta === herramienta),
+    herramienta,
     `tarjeta-herramienta ${clasesPorHerramienta[herramienta] ?? ""}`,
     iconosPorHerramienta[herramienta]
   );
@@ -301,6 +341,109 @@ herramientas.forEach((herramienta) => {
 
 // Al cargar la pagina se ven todos, asi que "Todos" arranca activo.
 activarFiltro(botonTodos);
+
+// --- Filtro por tipo de proyecto (select) ---
+const filtroCategoria = document.getElementById("filtroCategoria");
+
+// Los botones se agregaron con appendChild DESPUES del select (que ya
+// estaba en el HTML), asi que el select quedo primero. appendChild con un
+// elemento que YA esta en la pagina no lo copia: lo MUEVE. Asi lo mandamos
+// al final de la fila, a la derecha de los botones.
+filtros.appendChild(document.getElementById("filtroCategoriaContenedor"));
+
+// Mismo truco que "herramientas": lista de categorias sin repetir.
+const categorias = [...new Set(proyectos.map((proyecto) => proyecto.categoria))];
+
+// Arma una <option> por categoria + una primera "Todos los tipos".
+// value="" en "Todos" porque un string vacio es facil de detectar abajo.
+function llenarSelectCategoria() {
+  const opcionTodos = `<option value="">Todos los tipos (${proyectos.length})</option>`;
+
+  const opcionesCategorias = categorias.map((categoria) => {
+    const cantidad = proyectos.filter((proyecto) => proyecto.categoria === categoria).length;
+    return `<option value="${categoria}">${categoria} (${cantidad})</option>`;
+  });
+
+  filtroCategoria.innerHTML = opcionTodos + opcionesCategorias.join("");
+}
+
+llenarSelectCategoria();
+
+// En un <select>, "change" se dispara UNA vez al elegir una opcion (a
+// diferencia del "input" del slider, que salta en cada movimiento).
+// filtroCategoria.value es el value de la <option> elegida; si es "" (la
+// de "Todos"), lo guardamos como null para no filtrar por tipo.
+filtroCategoria.addEventListener("change", () => {
+  categoriaActiva = filtroCategoria.value === "" ? null : filtroCategoria.value;
+  aplicarFiltros();
+});
+
+// --- Filtro por horas invertidas (slider vertical flotante) ---
+const sliderHoras = document.getElementById("sliderHoras");
+const horasValor = document.getElementById("horasValor");
+
+// Sacamos el minimo y maximo de horas de los mismos datos: map arma un
+// array solo con los numeros (ej. [14, 16, 12, ...]) y el spread (...) los
+// pasa como argumentos sueltos a Math.min/Math.max, que no aceptan arrays.
+const listaHoras = proyectos.map((proyecto) => proyecto.horasInvertidas);
+const horasMin = Math.min(...listaHoras);
+const horasMax = Math.max(...listaHoras);
+
+sliderHoras.min = horasMin;
+sliderHoras.max = horasMax;
+sliderHoras.value = horasMax; // arranca en el maximo: se ven todos
+horasMaximas = horasMax;
+
+document.getElementById("horasMinimo").textContent = `${horasMin} h`;
+document.getElementById("horasMaximo").textContent = `${horasMax} h`;
+
+function actualizarHoras() {
+  // .value de un input SIEMPRE es un string ("12"), aunque sea type=range.
+  // Number() lo convierte a numero para que el <= de aplicarFiltros compare
+  // numeros y no textos (con textos, "5" <= "12" da false, porque compara
+  // letra por letra: "5" va despues de "1").
+  horasMaximas = Number(sliderHoras.value);
+  horasValor.textContent = `≤ ${horasMaximas} h`;
+  aplicarFiltros();
+}
+
+// "input" se dispara en CADA movimiento del slider mientras lo arrastras;
+// "change" solo se dispararia al soltarlo. Por eso usamos "input": la
+// galeria se actualiza en vivo.
+sliderHoras.addEventListener("input", actualizarHoras);
+
+// --- Boton "Limpiar filtros" ---
+const btnLimpiarFiltros = document.getElementById("btnLimpiarFiltros");
+
+// Igual que el select de tipo: lo movemos al final de la fila de arriba.
+filtros.appendChild(btnLimpiarFiltros);
+
+// Vuelve CADA filtro a su valor inicial. Hay que tocar dos cosas por
+// filtro: la variable de estado (lo que usa aplicarFiltros) y el control
+// que se ve en pantalla (boton activo, opcion del select, posicion del
+// slider). Si solo cambiaramos la variable, la galeria mostraria todo
+// pero el select seguiria diciendo "Blender", por ejemplo.
+function limpiarFiltros() {
+  herramientaActiva = null;
+  activarFiltro(botonTodos);
+
+  categoriaActiva = null;
+  filtroCategoria.value = ""; // la <option> de "Todos los tipos"
+
+  // Cambiar .value por JS NO dispara el evento "input", asi que llamamos
+  // a actualizarHoras a mano: actualiza horasMaximas, el texto "≤ 16 h" y
+  // ademas llama a aplicarFiltros, que repinta la galeria.
+  sliderHoras.value = horasMax;
+  actualizarHoras();
+}
+
+btnLimpiarFiltros.addEventListener("click", limpiarFiltros);
+
+// Primer pintado de la galeria (con "Todos" y el slider al maximo). Va al
+// final porque aplicarFiltros usa btnLimpiarFiltros: si se llamara antes
+// de su "const", daria ReferenceError (una const no existe hasta que se
+// ejecuta la linea donde se declara).
+actualizarHoras();
 
 // --- Boton de modo oscuro/claro ---
 // Cada click agrega o quita la clase "oscuro" en el body. El CSS
