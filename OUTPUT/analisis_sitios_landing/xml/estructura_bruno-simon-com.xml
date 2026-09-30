@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Sitio de una sola página: todo el contenido vive dentro de un <canvas> WebGPU/WebGL.
+     Cada <section> corresponde a un "área" del mundo 3D, según las clases *Area del código (13 en total,
+     igual al logro "Traveler: visit every area"). El orden espacial en el mapa no se pudo confirmar;
+     se listan con landing primero y el resto en el orden del código. -->
+<sitio nombre="Bruno Simon" url="https://bruno-simon.com/">
+  <header>
+    <logo>No hay logo: el título "Bruno's Home" aparece dentro del menú</logo>
+    <nav tipo="hamburguesa">
+      <enlace>Home</enlace>
+      <enlace>Options</enlace>
+      <enlace>Controls</enlace>
+      <enlace>Achievements</enlace>
+      <enlace>Circuit</enlace>
+      <enlace>Whispers</enlace>
+      <enlace>Behind the scene</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">Landing: plataforma inicial con el carro y el texto "Click to start"</section>
+    <section tipo="logros">Achievements: logros (38) y recompensas</section>
+    <section tipo="altar">Altar</section>
+    <section tipo="detras-de-camaras">Behind the scene: créditos y enlaces técnicos</section>
+    <section tipo="bolos">Bowling: minijuego de bolos</section>
+    <section tipo="carrera">Career</section>
+    <section tipo="circuito">Circuit: carrera contrarreloj con tabla de puntajes</section>
+    <section tipo="cookies">Cookie: minijuego de aceptar cookies</section>
+    <section tipo="laboratorio">Lab: experimentos (13 proyectos)</section>
+    <section tipo="proyectos">Projects: proyectos de cliente (8 proyectos)</section>
+    <section tipo="social">Social</section>
+    <section tipo="toilet">Toilet</section>
+    <section tipo="maquina-del-tiempo">Time Machine</section>
+  </main>
+  <footer>
+    <redes>No hay footer en el DOM. Los enlaces están en el menú: GitHub (brunosimon/folio-2025), YouTube (devlogs), Discord (servidor público), Linktree (música)</redes>
+    <contacto>Mensaje directo por Discord (modal "Private messages")</contacto>
+  </footer>
+</sitio>

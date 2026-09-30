@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitio nombre="FromSoftware, Inc." url="https://www.fromsoftware.jp/ww/">
+  <header>
+    <logo>FROM SOFTWARE (SVG corp.svg, esquina superior izquierda)</logo>
+    <nav tipo="fija">
+      <enlace>COMPANY</enlace>
+      <enlace>PRODUCTS</enlace>
+      <enlace>PRESS RELEASE</enlace>
+      <enlace>RECRUIT</enlace>
+      <enlace>SUPPORT</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">
+      <h1>Galería de 6 paneles diagonales, uno por juego: Sekiro, The Duskbloods, Elden Ring Nightreign, Armored Core VI, Elden Ring, Bloodborne</h1>
+      <p>Hover resalta el panel a color; clic abre la ficha del producto</p>
+    </section>
+    <section tipo="noticias">
+      <time>2026.06.04</time>
+      <p>PRESS RELEASE: Nintendo Switch 2 "ELDEN RING Tarnished Edition" Releasing on August 28th (Fri) 2026</p>
+    </section>
+    <section tipo="ficha-producto">
+      <article>
+        <h1>Overlay a pantalla completa por juego</h1>
+        <p>Plataformas, fecha de lanzamiento, género, jugadores, tráiler de YouTube, enlace a sitio oficial y botón CLOSE</p>
+      </article>
+    </section>
+  </main>
+  <footer>
+    <redes>X (twitter.com/fromsoftware_pr), Facebook, Instagram, YouTube</redes>
+    <contacto>ACCESS (company_access.html) / SUPPORT (faq.html); enlaces a ARMORED CORE OFFICIAL SITE, DARK SOULS OFFICIAL SITE, SNS, PRIVACY POLICY, SITE POLICY, SITEMAP</contacto>
+  </footer>
+</sitio>

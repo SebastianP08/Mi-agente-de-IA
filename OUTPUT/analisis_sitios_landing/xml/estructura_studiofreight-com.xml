@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitio nombre="Studio Freight" url="https://studiofreight.com/">
+  <header>
+    <logo>Marca gráfica SF (mark.png, esquina superior izquierda)</logo>
+    <nav tipo="fija">
+      <enlace>Home</enlace>
+      <enlace>Work</enlace>
+      <enlace>Info</enlace>
+      <enlace>News</enlace>
+      <enlace>Aeon</enlace>
+      <enlace>Contact</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">
+      <h1>Moving Missions Forward</h1>
+    </section>
+    <section tipo="galeria-proyectos">
+      <p>Grilla 7x7 con 25 miniaturas enlazadas a casos de estudio: Optro, Argus Labs, Bad Boys, Thesis, Legend, Psyop, Orderful, Esther, Tabs, Studio Freight, Battleface, MetaMask Rewards, Path Robotics, Perplexity Comet, 0G, Pelé Foundation, La Marzocco, Applause, Lightfield, Telemetric, Morph, Brex, zkPass, Republic Note, IYO</p>
+    </section>
+  </main>
+  <footer>
+    <redes>Instagram (studio.freight), LinkedIn (studio-freight)</redes>
+    <contacto>Página /contact: hello@studiofreight.com, press@studiofreight.com, jobs@studiofreight.com; ©2026 / Terms</contacto>
+  </footer>
+</sitio>

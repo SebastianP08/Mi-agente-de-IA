@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitio nombre="HoYoverse" url="https://www.hoyoverse.com/es-es/">
+  <header>
+    <logo>HOYOVERSE (logotipo, esquina superior izquierda)</logo>
+    <nav tipo="fija">
+      <enlace>Página principal</enlace>
+      <enlace>Noticias</enlace>
+      <enlace>Sobre nosotros</enlace>
+      <enlace>Oportunidades de empleo</enlace>
+      <enlace>Centro de ayuda</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">
+      <h1>Carrusel de 4 slides con miniaturas: Zenless Zone Zero 3.2, Honkai: Star Rail 4.6, versión 7.1 «Un réquiem para el inframundo», Honkai Impact 3rd v9.0</h1>
+      <p>CTA "Más" por slide</p>
+    </section>
+    <section tipo="noticias">
+      <h2>Últimas noticias</h2>
+      <p>Grilla de tarjetas etiquetadas por juego; enlace "Más"</p>
+    </section>
+    <section tipo="franja-marca">
+      <p>Franja visual de 300px con el anillo del logo HoYoverse sobre fondo estrellado, sin texto</p>
+    </section>
+    <section tipo="productos">
+      <h2>Nuestros productos</h2>
+      <p>Tears of Themis, Honkai: Star Rail, Genshin Impact, Honkai Impact 3rd, HoYoLAB, Zenless Zone Zero</p>
+    </section>
+    <section tipo="nosotros-empleo">
+      <h2>Sobre nosotros</h2>
+      <h2>Oportunidades de empleo</h2>
+    </section>
+  </main>
+  <footer>
+    <redes>No hay enlaces a redes sociales en el footer</redes>
+    <contacto>Acuerdos comerciales (business_global@hoyoverse.com), Centro de ayuda, Política de privacidad, Términos de servicio; Copyright © COGNOSPHERE</contacto>
+  </footer>
+</sitio>

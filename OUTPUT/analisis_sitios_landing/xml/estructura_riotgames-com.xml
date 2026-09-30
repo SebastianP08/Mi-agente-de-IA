@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitio nombre="Riot Games" url="https://www.riotgames.com/es">
+  <header>
+    <logo>RIOT GAMES (Riotbar, con selector de apps al lado)</logo>
+    <nav tipo="fija">
+      <enlace>QUIÉNES SOMOS</enlace>
+      <enlace>TRABAJA CON NOSOTROS</enlace>
+      <enlace>NOTICIAS</enlace>
+      <enlace>Selector de idioma</enlace>
+      <enlace>Buscar</enlace>
+      <enlace>INICIAR SESIÓN</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">
+      <h1>Carrusel de 2 slides con video: VALORANT CHAMPIONS SHANGHAI / HEARTSTEEL "Los chicos han vuelto."</h1>
+      <p>CTA "Ver ahora"</p>
+    </section>
+    <section tipo="noticias">
+      <h2>Actualidad</h2>
+      <p>Noticia destacada y lista de noticias recientes; CTA "VER TODO"</p>
+    </section>
+    <section tipo="juegos">
+      <h2>Nuestros juegos</h2>
+      <p>Carrusel de tarjetas: League of Legends, VALORANT, Teamfight Tactics, Wild Rift, Legends of Runeterra, 2XKO, Riftbound</p>
+    </section>
+    <section tipo="esports-entretenimiento">
+      <h2>Esports y entretenimiento</h2>
+      <p>LoL Esports, VALORANT Esports, TFT competitivo, Arcane, Riot Games Music</p>
+    </section>
+    <section tipo="empleo">
+      <h2>¡Buscamos gente!</h2>
+      <p>167 puestos disponibles, 24 oficinas; CTA "Descubrir oportunidades"</p>
+    </section>
+  </main>
+  <footer>
+    <redes>Twitter/X, Instagram, TikTok, LinkedIn, Facebook, YouTube</redes>
+    <contacto>Prensa, Asistencia al jugador, Seguridad, Legal, Aviso de privacidad, Términos de servicio, Accesibilidad, Informes anuales, Pacto de la comunidad</contacto>
+  </footer>
+</sitio>

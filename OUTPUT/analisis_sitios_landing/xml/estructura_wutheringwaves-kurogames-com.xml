@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Home con scroll por secciones a pantalla completa; cada <section> corresponde a un hash de la URL. -->
+<sitio nombre="Wuthering Waves" url="https://wutheringwaves.kurogames.com/en/main#main">
+  <header>
+    <logo>WUTHERING WAVES (esquina superior izquierda)</logo>
+    <nav tipo="fija">
+      <enlace>HOME</enlace>
+      <enlace>NEWS</enlace>
+      <enlace>RESONATORS</enlace>
+      <enlace>LORE</enlace>
+      <enlace>REGIONS</enlace>
+      <enlace>TOP-UP Center</enlace>
+      <enlace>Selector de idioma (9 idiomas)</enlace>
+      <enlace>Cuenta de usuario</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">#main: video/tráiler con botón de reproducir, código QR, botones de descarga (Windows, Google Play, Google Play Games, App Store, Epic Games Store, PS5) y tarjeta "Version 3.7 Patch Notes"</section>
+    <section tipo="noticias">#news: NEWS con pestañas Latest / Notice / News / Event, lista de noticias e imagen destacada</section>
+    <section tipo="personajes">#resonators: personajes agrupados por región (ej. Huang Long) en carrusel de tarjetas</section>
+    <section tipo="lore">#lore: carrusel del mundo (ej. Solaris-3) con texto descriptivo</section>
+    <section tipo="regiones">#regions</section>
+    <section tipo="cierre">#end: frase con efecto de texto "descifrado" ("...MANKIND SET SAIL ON A NEW JOURNEY.") e iconos de redes</section>
+  </main>
+  <footer>
+    <redes>Twitter/X, Facebook, YouTube, Discord, Reddit, Instagram, TikTok</redes>
+    <contacto>wutheringwaves_ensupport@kurogames.com, Privacy Policy, Terms of Service; logo KURO GAMES, clasificaciones por edad y avisos de marcas</contacto>
+  </footer>
+</sitio>
