@@ -119,3 +119,7 @@ extenso. Espero poder aplicar estas cosas a una página que estoy creando para u
 El día de hoy revisamos más el tema de las bases de datos e incluso un pequeño juego de cartas,
 bastante divertido hacer esto. Aunque si soy sincero, sí es un tema algo enredado y complicado,
 pero interesante jaja, espero aprender más.
+
+## 2026-10-01
+
+Hoy fue muy interesante ver referencia para el proyecto de portafolio y fue entretenido ir juntando cosas para sumar a la nuestra
