@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mi-portafolio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "C:\\Users\\SEBAST~1\\AppData\\Local\\Temp\\claude\\C--Users-Sebastian-PC-OneDrive-UNIBOSQUE-Semestre-4-Lenguaje-Digital-4-Agente-de-IA-Mi-agente-de-IA\\67f56ca9-f5df-4e3f-86c0-026cedc39281\\scratchpad\\serve.js",
+        "C:\\Users\\Sebastian PC\\OneDrive\\UNIBOSQUE\\Semestre 4\\Lenguaje Digital 4\\Agente de IA\\Mi-agente-de-IA\\INPUT\\mi-portafolio",
+        "5173"
+      ],
+      "port": 5173
+    }
+  ]
+}
