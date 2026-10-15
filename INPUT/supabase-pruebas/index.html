@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Pruebas</title>
+</head>
+<body>
+  <header>
+    <h1>Supabase Pruebas</h1>
+  </header>
+
+  <main>
+    <section id="app">
+      <form id="item-form">
+        <input type="text" id="item-name" placeholder="New item" required>
+        <button type="submit">Add</button>
+      </form>
+
+      <ul id="item-list">
+        <li>Loading...</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Scripts at the end of <body> so the DOM exists before they run. Order matters. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <!-- 1° Supabase library -->
+  <script src="js/supabaseClient.js"></script>  <!-- 2° creates the client -->
+  <script src="js/datos.js"></script>           <!-- 3° data functions -->
+  <script src="js/gestion.js"></script>         <!-- 4° page logic -->
+</body>
+</html>
