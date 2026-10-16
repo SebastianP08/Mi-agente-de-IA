@@ -1,10 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- charset va PRIMERO en el <head>: le dice al navegador que lea este
+       archivo (y los .js que carga) como UTF-8. Sin esto, las tildes y la ñ
+       salen como "SÃ­" o "DescripciÃ³n" -->
+  <meta charset="UTF-8">
   <!-- CDN: trae la librería de Supabase ANTES que nuestros propios
        scripts — sin esta línea, "supabase.createClient" no existiría
        todavía cuando supabaseClient.js intente usarlo -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 1rem; background: #f5f5f5; color: #222; }
+    #resultado { margin-top: 1rem; }
+
+    /* Galería: auto-fill + minmax crea tantas columnas como quepan,
+       cada una de mínimo 220px. En el celular queda 1 columna,
+       en el PC 3 o 4, sin escribir media queries */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden; /* recorta las esquinas de la foto con el border-radius de la tarjeta */
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .card--unavailable { opacity: 0.55; }
+
+    /* aspect-ratio: 1 → la foto siempre es cuadrada; object-fit: cover la recorta sin deformarla */
+    .card-img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: #fff; }
+    .card-img--empty {
+      display: flex; align-items: center; justify-content: center;
+      background: #e0e0e0; color: #666; padding: 1rem; text-align: center; box-sizing: border-box;
+    }
+
+    .card-body { padding: 0.75rem 1rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .card-title { font-size: 1rem; margin: 0; }
+    .card-desc { font-size: 0.85rem; color: #555; margin: 0; }
+    .card-price { margin: 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .price-final { font-size: 1.15rem; font-weight: bold; }
+    .price-original { color: #888; font-size: 0.85rem; }
+    .card-stock { font-size: 0.8rem; color: #555; margin: 0; }
+
+    .badge { font-size: 0.75rem; padding: 0.1rem 0.4rem; border-radius: 4px; }
+    .badge--discount { background: #d32f2f; color: #fff; }
+
+    .card-tags { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .tag { font-size: 0.75rem; background: #eee; padding: 0.15rem 0.5rem; border-radius: 999px; }
+  </style>
 </head>
 <body>
 

@@ -123,3 +123,11 @@ pero interesante jaja, espero aprender más.
 ## 2026-10-01
 
 Hoy fue muy interesante ver referencia para el proyecto de portafolio y fue entretenido ir juntando cosas para sumar a la nuestra
+
+## 2026-10-15
+
+Ha sido muy interesante aprender sobre las bases de datos, aunque sí encuentro que el tema es algo enredado de entender a ratos y tiene tantas cosas que llega a sobrecargar, pero quiero seguir aprendiendo y poder aplicarlo a la página de Jaziz.
+
+## 2026-10-16
+
+Ha sido muy interesante aprender sobre las bases de datos, aunque sí encuentro que el tema es algo enredado de entender a ratos y tiene tantas cosas que llega a sobrecargar, pero quiero seguir aprendiendo y poder aplicarlo a la página de Jaziz.
