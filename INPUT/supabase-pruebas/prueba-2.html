@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- charset va PRIMERO en el <head>: le dice al navegador que lea este
+       archivo (y los .js que carga) como UTF-8. Sin esto, las tildes y la ñ
+       salen como "SÃ­" o "DescripciÃ³n" -->
+  <meta charset="UTF-8">
+  <!-- CDN: trae la librería de Supabase ANTES que nuestros propios
+       scripts — sin esta línea, "supabase.createClient" no existiría
+       todavía cuando supabaseClient.js intente usarlo -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+  <button id="btn-traer">Traer productos</button>
+
+  <div id="resultado"></div>
+  <div id="resultado2"></div>
+  <div id="descripcion"></div>
+  <div id="precio"></div>
+  <!-- Formulario para agregar productos: cada "name" coincide con una
+       columna de la tabla productos_practica -->
+  <form id="form-producto">
+    <label>Nombre <input type="text" name="nombre" required></label><br>
+    <label>Descripción <textarea name="descripcion"></textarea></label><br>
+    <label>Precio <input type="number" name="precio" min="0" step="any" required></label><br>
+    <label>Unidades <input type="number" name="unidades" min="0" step="1" value="0"></label><br>
+    <label>Descuento (%) <input type="number" name="descuento" min="0" max="100" step="any" value="0"></label><br>
+    <label><input type="checkbox" name="disponible" checked> Disponible</label><br>
+    <label>Categorías (separadas por coma) <input type="text" name="categorias" placeholder="videojuego, accion"></label><br>
+    <label>URL de imagen <input type="url" name="Img_url"></label><br>
+    <button type="submit">Agregar Producto</button>
+  </form>
+  <div id="notificacion"></div>
+
+  <!-- supabaseClient.js crea "db" (sección 4.3): el cliente ya
+       conectado a tu proyecto de Supabase. Lo vamos a usar en
+       prueba.js, por eso tiene que cargarse ANTES que ese archivo -->
+  <script src="js/supabaseClient.js"></script>
+  <!-- prueba.js: aquí escribes el código de los Pasos 2, 3 y 4 -->
+  <script src="js/prueba-2.js"></script>
+</body>
+</html>
