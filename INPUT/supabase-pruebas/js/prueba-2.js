@@ -134,3 +134,50 @@ document.getElementById('btn-traer').addEventListener('click', async () => {
             document.getElementById("notificacion").textContent = "Error al agregar el producto. Revisa la consola.";
         }
     });
+    // ↑ Aquí termina el listener de "agregar". Las funciones de búsqueda
+    // van AFUERA para que cualquier otro listener pueda usarlas.
+
+        async function buscarProductoPorId(id) {
+        const { data, error } = await db
+
+        
+            .from('productos_practica')
+            .select('*')
+            .eq('id', id)    // eq = "equal" (igual a) — equivalente a find(p => p.id === id)
+            .single();         // single() = "espero exactamente una fila, dámela
+                                // como objeto, no como array de un elemento"
+
+        if (error) return null;
+        return data;
+        }
+
+        async function buscarProductosPorNombre(texto) {
+        const { data, error } = await db
+            .from('productos_practica')
+            .select('*')
+            .ilike('nombre', `%${texto}%`);
+            // ilike = "like" insensible a mayúsculas/minúsculas.
+            // los símbolos % significan "cualquier texto antes/después" —
+            // equivalente a .toLowerCase().includes(texto)
+
+        if (error) return [];
+        return data;
+        }
+
+    const formBuscar = document.getElementById("form-buscar");
+
+    formBuscar.addEventListener("submit", async (e) => {
+        e.preventDefault();   // igual que en agregar: evita que se recargue la página
+
+        const texto = formBuscar.texto.value.trim();
+        const productos = await buscarProductosPorNombre(texto);
+
+        const contenedor = document.getElementById("resultado-busqueda");
+        if (productos.length === 0) {
+            contenedor.textContent = "No se encontraron productos.";
+            return;
+        }
+
+        contenedor.innerHTML =
+            '<ul>' + productos.map(p => `<li>${p.nombre} — $${p.precio}</li>`).join('') + '</ul>';
+    });

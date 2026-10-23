@@ -136,3 +136,7 @@ Ha sido muy interesante aprender sobre las bases de datos, aunque sí encuentro 
 ## 2026-10-22
 
 El día de hoy vimos más a detalle el proceso de agregar y traer algo de una base de datos, y vimos como funciona el metodo CRUD de Crear con bases de datos, es un tema que me parece muy interesante y quiero seguir avanzando para implementarlo en una web con productos reales.
+
+## 2026-10-23
+
+Hoy no se desarrollo mucho solo terminamos de ver el metodo crud de leer con bases de datos

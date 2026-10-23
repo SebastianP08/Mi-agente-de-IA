@@ -34,6 +34,13 @@
   </form>
   <div id="notificacion"></div>
 
+  <!-- Formulario de búsqueda: el "name" lo usamos en JS con formBuscar.texto -->
+  <form id="form-buscar">
+    <label>Buscar por nombre <input type="text" name="texto" required></label>
+    <button type="submit">Buscar</button>
+  </form>
+  <div id="resultado-busqueda"></div>
+
   <!-- supabaseClient.js crea "db" (sección 4.3): el cliente ya
        conectado a tu proyecto de Supabase. Lo vamos a usar en
        prueba.js, por eso tiene que cargarse ANTES que ese archivo -->
