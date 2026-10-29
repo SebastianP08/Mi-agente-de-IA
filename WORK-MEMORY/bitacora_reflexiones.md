@@ -140,3 +140,8 @@ El día de hoy vimos más a detalle el proceso de agregar y traer algo de una ba
 ## 2026-10-23
 
 Hoy no se desarrollo mucho solo terminamos de ver el metodo crud de leer con bases de datos
+
+
+## 2026-10-29
+
+Hoy terminamos los metodo de UPDATE y DELETE para estas pruebas con supabase para ya comenzar a ver como implementarlo en nuestro ecommerce, un tema algo enredado cuando se explora ya que vimos algo de Relaciones y claves entre tablas, una forma simplificada de como todo esta unido entre si y como surgen los cambio cuando se hace.

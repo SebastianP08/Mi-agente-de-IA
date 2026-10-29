@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="dark">
 <head>
   <!-- charset va PRIMERO en el <head>: le dice al navegador que lea este
        archivo (y los .js que carga) como UTF-8. Sin esto, las tildes y la ñ
@@ -10,36 +10,652 @@
        todavía cuando supabaseClient.js intente usarlo -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba 2 — Productos</title>
+  <!-- Asap: la fuente de títulos de Jaziz (marca.css). Solo cargamos esta,
+       no todas las del @import de Jaziz, para que la página cargue rápido -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Variables CSS (custom properties): definimos los colores UNA vez
+       y los usamos con var(--nombre). Para cambiar de tema no tocamos
+       cada regla, solo reemplazamos el valor de estas variables.
+
+       Estilo basado en Jaziz (https://sebastianp08.github.io/Jaziz/):
+         marca.css     → paleta, fuentes, .btn-nav, subrayado de #navbar
+         home.css      → .category-card, .reviews-card, títulos en dos tonos
+         productos.css → .card, .prev/.next
+       Paleta de marca.css:
+         --rosa-primario    #d67474
+         --rosa-texto       #b04a4a
+         --majenta-primario #520d24
+         --blanco-primario  #f2f2f2
+       Jaziz no tiene modo oscuro: el oscuro de aquí es un "vino" sacado
+       del #520d24 (mismo tono, pero casi negro) con acentos #d67474. */
+    :root {
+      --bg: #1a0a10;           /* #520d24 oscurecido casi a negro */
+      --surface: #26101a;      /* tarjetas y paneles, un paso más claro */
+      --surface-2: #341824;    /* inputs, hover */
+      --border: #4a2333;
+      --text: #f2f2f2;         /* --blanco-primario */
+      --text-muted: #c9a9b3;   /* rosa grisáceo, se lee bien sobre el vino */
+      --accent: #d67474;       /* --rosa-primario: sobre fondo oscuro sí contrasta */
+      --accent-hover: #e89a9a;
+      --accent-text: #1a0a10;
+      --underline: #d67474;    /* subrayado animado de los links, como en Jaziz */
+      --card-media: #3d1a29;   /* fondo detrás de la foto (en Jaziz es #e8c9cf) */
+      --tag-bg: #3d1a29;
+      --tag-text: #f2c4cf;
+      --shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+      --success: #6fcf97;
+      --danger: #ff6b6b;
+      --danger-text: #1a0a10;  /* blanco sobre #ff6b6b no se lee (2.8:1); oscuro sí (6.9:1) */
+      color-scheme: dark; /* inputs, checkbox y scrollbars también se ven oscuros */
+    }
+
+    /* Cuando el <html> tiene data-theme="light" (lo pone el botón desde JS),
+       estas variables pisan a las de arriba. Es casi igual al sitio de Jaziz */
+    :root[data-theme="light"] {
+      --bg: #f2f2f2;           /* --blanco-primario: fondo del body en Jaziz */
+      --surface: #ffffff;
+      --surface-2: #f8eeee;    /* rosa muy suave para inputs y hover */
+      --border: #ead7d7;
+      --text: #1a1a1a;
+      --text-muted: #6e5a5f;
+      --accent: #b04a4a;       /* --rosa-texto: el de .btn-nav, contraste AA con blanco */
+      --accent-hover: #7c1437; /* el hover de .prev/.next en Jaziz */
+      --accent-text: #ffffff;
+      --underline: #d67474;    /* --rosa-primario */
+      --card-media: #e8c9cf;   /* el fondo de .card y .category-card en Jaziz */
+      --tag-bg: #f6e3e6;
+      --tag-text: #520d24;     /* --majenta-primario */
+      --shadow: 0 10px 35px rgba(0, 0, 0, 0.08);   /* la de .products-empty en Jaziz */
+      --success: #2e7d32;
+      --danger: #9b1c1c;       /* rojo más profundo que el acento, para que "Eliminar" se distinga */
+      --danger-text: #ffffff;
+      color-scheme: light;
+    }
+
+    /* Medidas que se repiten: alto del header (lo usa el sidebar) y radios */
+    :root {
+      --header-h: 84px;
+      --radius: 20px;          /* el de .card en productos.css */
+      --radius-lg: 30px;       /* el de .category-card y .reviews-card */
+    }
+
+    * { box-sizing: border-box; }
+
+    /* Misma tipografía que Jaziz: Asap en títulos, Trebuchet MS en el resto */
+    h1, h2, h3 { font-family: "Asap", sans-serif; }
+
+    body {
+      font-family: "Trebuchet MS", sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ---------- Botones (como .btn-nav en marca.css) ---------- */
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;              /* el de .btn-nav */
+      padding: 0.85rem 1.6rem;          /* .btn-nav usa 14px 26px */
+      background: var(--accent);
+      color: var(--accent-text);
+      font-weight: bold;
+      transition: transform 0.3s, background 0.2s, color 0.2s;
+    }
+    button:hover { background: var(--accent-hover); }
+    /* El "salto" de .btn-nav:hover: translateY(-4px) scale(1.02).
+       Los botones del sidebar y del selector no saltan */
+    button:not(.sidebar-item):not(.toggle-btn):hover { transform: translateY(-4px) scale(1.02); }
+
+    /* Secundario: solo contorno en el color de acento */
+    .btn-secondary { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+    .btn-secondary:hover { background: var(--accent); color: var(--accent-text); }
+
+    .btn-danger { background: var(--danger); color: var(--danger-text); }
+    .btn-danger:hover { background: var(--danger); filter: brightness(1.1); }
+
+    .btn-small { padding: 0.5rem 1.1rem; font-size: 0.85rem; }
+
+    /* Botón redondo como .prev/.next de Jaziz: 50px, círculo, sube 5px */
+    .btn-round {
+      width: 50px;
+      height: 50px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 1.3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-round:hover { transform: translateY(-5px) !important; }
+
+    /* ---------- Header (como #navbar en marca.css) ---------- */
+
+    /* sticky + top: 0 → se queda pegado arriba al hacer scroll.
+       Mismo color del fondo y sin borde, igual que #navbar en Jaziz */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 0 clamp(1rem, 4vw, 3rem);
+      background: var(--bg);
+    }
+
+    /* Título en dos tonos, como ".categories-top h2" + su <span> rosa.
+       letter-spacing negativo = letras más juntas, el look de Jaziz */
+    .topbar-titulo { margin: 0; font-size: 1.7rem; font-weight: 700; letter-spacing: -1px; white-space: nowrap; }
+    .topbar-titulo span { color: var(--accent); }
+
+    /* flex: 1 → la búsqueda ocupa todo el espacio libre entre el título y
+       el botón; max-width + margin auto la deja centrada y no gigante */
+    .topbar .search-box { flex: 1; max-width: 560px; margin: 0 auto; }
+    #btn-tema { flex-shrink: 0; }
+
+    /* ---------- Layout: sidebar + contenido (como gestion.css) ---------- */
+
+    .layout { display: flex; min-height: calc(100vh - var(--header-h)); }
+
+    /* sticky + top: alto del header → el sidebar se queda quieto JUSTO
+       debajo del header mientras el contenido de la derecha hace scroll */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;            /* que el contenido no lo aplaste */
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      padding: 1.5rem 1rem 1.5rem clamp(1rem, 4vw, 3rem);
+    }
+    .sidebar-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.35rem; }
+
+    /* Como .nav-link de Jaziz: 14px, peso 600, letter-spacing 1px, sin fondo */
+    .sidebar-item {
+      position: relative;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      padding: 0.7rem 0;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .sidebar-item:hover { background: transparent; }
+    .sidebar-item.activo { color: var(--accent); }
+
+    /* Subrayado que crece de izquierda a derecha, igual que "#navbar a:after"
+       en Jaziz: un ::after de ancho 0 que pasa a 100% con el hover.
+       position: relative en .sidebar-item → el ::after se ubica respecto al botón.
+       La vista activa deja el subrayado completo, así sabes dónde estás */
+    .sidebar-item::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0.3rem;
+      width: 0;
+      height: 2px;
+      background: var(--underline);
+      transition: width 0.3s ease;
+    }
+    .sidebar-item:hover::after,
+    .sidebar-item.activo::after { width: 2.5rem; }
+
+    /* min-width: 0 → sin esto, la tabla ancha estira el <main> en vez de
+       usar su propio scroll horizontal (.table-wrap) */
+    .contenido { flex: 1; min-width: 0; max-width: 1200px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 3rem 1rem; }
+
+    /* ---------- Vistas ---------- */
+
+    /* Aparición suave al cambiar de vista. Es la idea de .reveal en Jaziz
+       (opacidad + translateY), pero en 0.4s y no 0.9s: aquí cambias de
+       vista seguido y no quieres esperar. La animación arranca sola cada
+       vez que la vista pasa de hidden a visible */
+    .vista { animation: aparecer 0.4s ease; }
+    @keyframes aparecer {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    /* Si la persona pidió "reducir movimiento" en su sistema, lo respetamos */
+    @media (prefers-reduced-motion: reduce) {
+      .vista { animation: none; }
+      button, .product-card, .product-card img { transition: none; }
+    }
+
+    .vista-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+
+    /* Títulos grandes y apretados como ".categories-top h2" y ".reviews-title":
+       line-height .95 + letter-spacing -2px, con una palabra en rosa */
+    .vista-titulo { margin: 0; font-size: clamp(2.2rem, 4.5vw, 3.4rem); line-height: 0.95; letter-spacing: -2px; }
+    .vista-titulo span { color: var(--accent); }
+
+    .vista-acciones { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+
+    /* Panel: esquinas de 20px y sombra suave en vez de borde, como Jaziz */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+    }
+
+    /* ---------- Selector Tarjetas / Tabla ---------- */
+
+    .toggle { display: inline-flex; background: var(--surface); border-radius: 999px; padding: 4px; box-shadow: var(--shadow); }
+    .toggle-btn { background: transparent; color: var(--text-muted); border-radius: 999px; padding: 0.5rem 1.1rem; font-size: 0.85rem; }
+    .toggle-btn:hover { background: transparent; color: var(--text); }
+    .toggle-btn.activo { background: var(--accent); color: var(--accent-text); }
+
+    /* ---------- Tarjetas de producto (como .category-card / .card) ---------- */
+
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.75rem; }
+    /* display: grid le gana a la regla del navegador "[hidden] { display: none }",
+       así que sin esta línea la grilla se vería aunque tenga hidden.
+       Es el mismo caso que .layout-gestion[hidden] en tu gestion.css */
+    .product-grid[hidden] { display: none; }
+
+    .product-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      overflow: hidden;          /* recorta la foto con las esquinas redondeadas */
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.4s;
+    }
+    /* Sube 10px al pasar el mouse, como .reviews-card:hover */
+    .product-card:hover { transform: translateY(-10px); }
+    .product-card--off .product-card-media img { filter: grayscale(0.7); }
+
+    /* Zona de la foto: el truco de Jaziz para fotos pequeñas. Detrás va la
+       MISMA foto difuminada (.card-bg) y encima la foto nítida centrada */
+    .product-card-media {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      background: var(--card-media);
+    }
+    .card-bg {
+      position: absolute;
+      inset: -40px;              /* más grande que la tarjeta: el blur no deja bordes */
+      background-size: cover;
+      background-position: center;
+      filter: blur(28px) saturate(1.1);
+      opacity: 0.75;
+    }
+    .product-card-media img {
+      position: absolute;
+      top: 44%;
+      left: 50%;
+      width: 68%;
+      aspect-ratio: 323 / 433;   /* la proporción de las fotos de Jaziz */
+      object-fit: cover;
+      transform: translate(-50%, -50%);
+      border-radius: 18px;
+      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.28);
+      transition: transform 0.6s;
+    }
+    .product-card:hover .product-card-media img { transform: translate(-50%, -50%) scale(1.04); }
+    .sin-imagen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--tag-text); font-size: 0.9rem; }
+
+    /* Degradado desde abajo para que el nombre se lea encima de la foto,
+       como ".category-card::before" + ".product-info" en Jaziz */
+    .product-card-info {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 2;
+      padding: 3rem 1.25rem 1.1rem;
+      background: linear-gradient(180deg, transparent, rgba(82, 13, 36, 0.35) 35%, rgba(0, 0, 0, 0.8));
+      color: #f2f2f2;
+    }
+    .product-card-info h3 { margin: 0; font-size: 1.4rem; line-height: 1; letter-spacing: -0.5px; text-transform: uppercase; }
+    .product-card-info .card-id { margin: 0 0 0.3rem; font-size: 0.75rem; letter-spacing: 1px; opacity: 0.85; }
+
+    /* Etiquetas arriba de la foto: estado y descuento */
+    .card-flags { position: absolute; top: 0.9rem; left: 0.9rem; right: 0.9rem; z-index: 2; display: flex; justify-content: space-between; gap: 0.5rem; }
+    .card-flags .badge { background: var(--surface); }
+    .card-descuento { background: var(--accent); color: var(--accent-text); font-size: 0.8rem; font-weight: bold; padding: 0.2rem 0.6rem; border-radius: 999px; }
+
+    .product-card-body { padding: 1.1rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+    .card-desc { margin: 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.45; }
+    .card-fila { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+    .card-precio { font-family: "Asap", sans-serif; font-size: 1.35rem; font-weight: 700; }
+    .card-precio .price-original { font-family: "Trebuchet MS", sans-serif; font-weight: normal; margin-left: 0.4rem; }
+    .card-stock { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+    .product-card-body button { margin-top: auto; align-self: flex-start; }   /* margin-top: auto → el botón queda abajo aunque la descripción sea corta */
+
+    /* ---------- Tabla de productos ---------- */
+
+    /* overflow-x: auto → si la tabla no cabe en el celular, se desplaza
+       ella sola de lado en vez de romper toda la página */
+    .table-wrap { overflow-x: auto; }
+
+    .product-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+    .product-table th,
+    .product-table td { padding: 0.8rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .product-table th { color: var(--accent); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+    .product-table tbody tr:last-child td { border-bottom: none; }
+    .product-table tbody tr:hover { background: var(--surface-2); }
+    .product-table .col-price { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .product-table .col-num { text-align: right; font-variant-numeric: tabular-nums; }
+    .product-table .col-id { color: var(--text-muted); font-size: 0.85rem; }
+    .product-table .col-name { font-weight: 600; min-width: 140px; }
+    /* min-width: sin esto, con tantas columnas la descripción queda de
+       una palabra por línea */
+    .product-table .col-desc { color: var(--text-muted); font-size: 0.9rem; min-width: 200px; }
+    .price-original { color: var(--text-muted); font-size: 0.8rem; }
+
+    /* Estado: verde si está disponible, rojo si no */
+    .badge { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 999px; white-space: nowrap; }
+    .badge--ok { color: var(--success); border: 1px solid var(--success); }
+    .badge--off { color: var(--danger); border: 1px solid var(--danger); }
+
+    /* Categorías como pastillas. En claro usan el --majenta-primario de Jaziz */
+    .tag { display: inline-block; font-size: 0.75rem; background: var(--tag-bg); color: var(--tag-text); padding: 0.2rem 0.6rem; border-radius: 999px; margin: 0.1rem 0; white-space: nowrap; }
+
+    /* <details> = bloque plegable nativo de HTML, no necesita JS */
+    details { margin-top: 1.75rem; }
+    summary { cursor: pointer; color: var(--text-muted); font-size: 0.9rem; }
+    pre {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.8rem;
+    }
+
+    /* ---------- Formularios ---------- */
+
+    /* Grid con auto-fill: los campos se acomodan en 2 columnas en PC
+       y en 1 columna en el celular, sin media queries */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.1rem; }
+    .form-grid .full { grid-column: 1 / -1; } /* ocupa toda la fila */
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+    .field-check { flex-direction: row; align-items: center; gap: 0.5rem; color: var(--text); text-transform: none; letter-spacing: 0; font-size: 0.95rem; }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="url"],
+    textarea {
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: normal;
+      letter-spacing: 0;
+      text-transform: none;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      transition: border-color 0.2s;
+    }
+    textarea { min-height: 5rem; resize: vertical; }
+    input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+    input[type="checkbox"] { accent-color: var(--accent); width: 1.1rem; height: 1.1rem; }
+
+    /* El <fieldset> trae borde y padding por defecto: los quitamos para
+       que se vea igual que el formulario de agregar */
+    fieldset { border: none; padding: 0; margin: 1.25rem 0 0; min-width: 0; }
+    fieldset:disabled { opacity: 0.5; }
+
+    /* ---------- Buscador con sugerencias ---------- */
+
+    .search-box { position: relative; }
+
+    /* Píldora blanca con sombra suave sobre el fondo gris de Jaziz.
+       El ícono de lupa es un SVG dentro de un data: URI */
+    .search-box--top input {
+      width: 100%;
+      font-size: 1rem;
+      background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23d67474' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 1.1rem center;
+      border-radius: 999px;
+      padding: 0.85rem 1.3rem 0.85rem 3rem;   /* espacio a la izquierda para la lupa */
+      box-shadow: var(--shadow);
+    }
+
+    .hint { margin: 0 0 0.5rem; color: var(--text-muted); font-size: 0.9rem; }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;          /* justo debajo del input */
+      left: 0;
+      right: 0;
+      z-index: 10;        /* encima del contenido */
+      margin: 0.5rem 0 0;
+      padding: 0.4rem;
+      list-style: none;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+      max-height: 340px;
+      overflow-y: auto;
+    }
+    .suggestions li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+    .suggestions li:hover { background: var(--surface-2); }
+    .suggestions .empty { color: var(--text-muted); cursor: default; }
+    .suggestion-name { flex: 1; font-weight: 600; }
+    .suggestion-meta { color: var(--text-muted); font-size: 0.8rem; white-space: nowrap; }
+
+    /* ---------- Miniaturas ---------- */
+
+    /* object-fit: cover → recorta la foto para llenar el cuadro sin deformarla */
+    .thumb {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      object-fit: cover;
+      display: block;
+      flex-shrink: 0;
+      background: var(--card-media);   /* se ve rosado si no hay imagen o no carga */
+    }
+    .suggestions .thumb { width: 36px; height: 36px; border-radius: 10px; }
+
+    /* ---------- Eliminar (como .fila-eliminar en gestion.css) ---------- */
+
+    .lista-eliminar { display: flex; flex-direction: column; gap: 0.75rem; }
+    .fila-eliminar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--surface-2);
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+    }
+    .fila-eliminar-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .fila-eliminar-info strong { font-family: "Asap", sans-serif; font-size: 1.05rem; }
+    .fila-eliminar-info span { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* ---------- Mensajes ---------- */
+
+    /* :empty → si el div no tiene texto, no se muestra la cajita vacía */
+    .message { margin-top: 1.25rem; padding: 0.85rem 1.1rem; border-radius: 12px; background: var(--surface-2); border-left: 4px solid var(--accent); }
+    .message:empty { display: none; }
+    .message--success { border-left-color: var(--success); }
+    .message--error { border-left-color: var(--danger); }
+
+    /* ---------- Celular ---------- */
+
+    /* En pantallas angostas el sidebar pasa arriba, a todo el ancho, y sus
+       botones quedan en fila (mismo breakpoint que gestion.css) */
+    @media (max-width: 720px) {
+      /* Header en 2 filas: título + botón arriba, búsqueda abajo a todo el ancho.
+         height: auto porque ya no mide 84px fijos */
+      .topbar { height: auto; flex-wrap: wrap; gap: 0.75rem; padding: 0.9rem 1rem; }
+      .topbar-titulo { flex: 1; font-size: 1.3rem; }
+      .topbar .search-box { order: 3; flex-basis: 100%; max-width: none; }   /* order: 3 → pasa al final */
+
+      .layout { flex-direction: column; min-height: 0; }
+      .sidebar { width: 100%; height: auto; position: static; padding: 0 1rem; }
+      .sidebar-lista { flex-direction: row; flex-wrap: wrap; gap: 0 1.25rem; }
+      .sidebar-item { width: auto; }
+      .contenido { padding: 1rem 1rem 2rem; }
+      .panel { padding: 1.1rem; }
+    }
+  </style>
 </head>
 <body>
+  <!-- Mismo esquema que gestion.html (Proyecto-1): sidebar a la izquierda
+       con las opciones del CRUD + contenido a la derecha, donde se ve UNA
+       sola vista a la vez -->
 
-  <button id="btn-traer">Traer productos</button>
+  <!-- Header: fijo arriba (position: sticky). Título, búsqueda y tema,
+       visibles en TODAS las vistas -->
+  <header class="topbar">
+    <!-- Dos tonos como en Jaziz: la palabra dentro del <span> va en rosa -->
+    <h1 class="topbar-titulo">Inventario de <span>productos</span></h1>
 
-  <div id="resultado"></div>
-  <div id="resultado2"></div>
-  <div id="descripcion"></div>
-  <div id="precio"></div>
-  <!-- Formulario para agregar productos: cada "name" coincide con una
-       columna de la tabla productos_practica -->
-  <form id="form-producto">
-    <label>Nombre <input type="text" name="nombre" required></label><br>
-    <label>Descripción <textarea name="descripcion"></textarea></label><br>
-    <label>Precio <input type="number" name="precio" min="0" step="any" required></label><br>
-    <label>Unidades <input type="number" name="unidades" min="0" step="1" value="0"></label><br>
-    <label>Descuento (%) <input type="number" name="descuento" min="0" max="100" step="any" value="0"></label><br>
-    <label><input type="checkbox" name="disponible" checked> Disponible</label><br>
-    <label>Categorías (separadas por coma) <input type="text" name="categorias" placeholder="videojuego, accion"></label><br>
-    <label>URL de imagen <input type="url" name="Img_url"></label><br>
-    <button type="submit">Agregar Producto</button>
-  </form>
-  <div id="notificacion"></div>
+    <!-- position: relative en .search-box → la lista de sugerencias
+         (position: absolute) se ubica justo debajo del input -->
+    <div class="search-box search-box--top">
+      <!-- autocomplete="off": apaga las sugerencias propias del
+           navegador para que no tapen las nuestras -->
+      <input type="search" id="input-busqueda" placeholder="Buscar producto por nombre o ID…" autocomplete="off" aria-label="Buscar producto por nombre o ID">
+      <ul id="sugerencias" class="suggestions" hidden></ul>
+    </div>
 
-  <!-- Formulario de búsqueda: el "name" lo usamos en JS con formBuscar.texto -->
-  <form id="form-buscar">
-    <label>Buscar por nombre <input type="text" name="texto" required></label>
-    <button type="submit">Buscar</button>
-  </form>
-  <div id="resultado-busqueda"></div>
+    <!-- Botón redondo como .prev/.next de Jaziz. El ícono (☀ / ☾) y el
+         aria-label los pone prueba-2.js según el tema activo -->
+    <button id="btn-tema" class="btn-round" type="button" aria-label="Cambiar tema">☀</button>
+  </header>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <!-- En gestion.html los items son <a href="#">; aquí son <button>
+           porque no llevan a otra página, solo cambian de vista. Así
+           tampoco hace falta e.preventDefault() para que no salte el "#" -->
+      <nav>
+        <ul class="sidebar-lista">
+          <li><button type="button" class="sidebar-item" data-vista="productos">Productos</button></li>
+          <li><button type="button" class="sidebar-item" data-vista="agregar">Agregar</button></li>
+          <li><button type="button" class="sidebar-item" data-vista="editar">Editar</button></li>
+          <li><button type="button" class="sidebar-item" data-vista="eliminar">Eliminar</button></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="contenido">
+
+      <!-- Una "vista" por cada botón del sidebar. mostrarVista() en
+           prueba-2.js deja visible solo la que coincide con data-vista
+           y oculta el resto con el atributo hidden -->
+
+      <!-- Vista: Productos -->
+      <section class="vista" data-vista="productos">
+        <div class="vista-header">
+          <h2 class="vista-titulo">Lista de <span>productos</span></h2>
+          <div class="vista-acciones">
+            <!-- Selector Tarjetas / Tabla: prueba-2.js muestra uno y oculta el otro -->
+            <div class="toggle" role="group" aria-label="Modo de vista">
+              <button type="button" class="toggle-btn" data-modo="tarjetas">Tarjetas</button>
+              <button type="button" class="toggle-btn" data-modo="tabla">Tabla</button>
+            </div>
+            <!-- Los productos se cargan solos al entrar a la vista; este botón
+                 es para volver a pedirlos a Supabase sin cambiar de vista -->
+            <button id="btn-traer" class="btn-secondary btn-small">Recargar</button>
+          </div>
+        </div>
+
+        <!-- Los dos contenedores van dentro de #productos-contenido: así un
+             solo listener (delegación) atiende los botones "Editar" de ambos -->
+        <div id="productos-contenido">
+          <!-- prueba-2.js inserta aquí una tarjeta por producto -->
+          <div id="tarjetas-productos" class="product-grid"></div>
+          <!-- …y aquí la <table> -->
+          <div id="tabla-productos" class="panel table-wrap" hidden></div>
+        </div>
+
+        <details>
+          <summary>Ver respuesta cruda (JSON)</summary>
+          <pre id="resultado"></pre>
+        </details>
+      </section>
+
+      <!-- Vista: Agregar -->
+      <section class="vista" data-vista="agregar" hidden>
+        <div class="vista-header">
+          <h2 class="vista-titulo">Agregar <span>producto</span></h2>
+        </div>
+        <div class="panel">
+          <!-- Formulario para agregar productos: cada "name" coincide con una
+               columna de la tabla productos_practica -->
+          <form id="form-producto" class="form-grid">
+            <label class="field">Nombre <input type="text" name="nombre" required></label>
+            <label class="field">URL de imagen <input type="url" name="Img_url"></label>
+            <label class="field full">Descripción <textarea name="descripcion"></textarea></label>
+            <label class="field">Precio <input type="number" name="precio" min="0" step="any" required></label>
+            <label class="field">Unidades <input type="number" name="unidades" min="0" step="1" value="0"></label>
+            <label class="field">Descuento (%) <input type="number" name="descuento" min="0" max="100" step="any" value="0"></label>
+            <label class="field">Categorías (separadas por coma) <input type="text" name="categorias" placeholder="collar, plata"></label>
+            <label class="field field-check full"><input type="checkbox" name="disponible" checked> Disponible</label>
+            <div class="full"><button type="submit">Agregar producto</button></div>
+          </form>
+          <div id="notificacion" class="message"></div>
+        </div>
+      </section>
+
+      <!-- Vista: Editar -->
+      <section class="vista" data-vista="editar" hidden>
+        <div class="vista-header">
+          <h2 class="vista-titulo">Editar <span>producto</span></h2>
+        </div>
+        <div class="panel">
+          <p class="hint">Busca un producto arriba o dale "Editar" en la lista de Productos.</p>
+          <form id="form-editar">
+            <!-- fieldset disabled: bloquea todos los campos de adentro hasta
+                 que se cargue un producto (JS le quita el disabled) -->
+            <fieldset id="campos-editar" class="form-grid" disabled>
+              <label class="field">Nombre <input type="text" name="nombre" required></label>
+              <label class="field">URL de imagen <input type="url" name="Img_url"></label>
+              <label class="field full">Descripción <textarea name="descripcion"></textarea></label>
+              <label class="field">Precio <input type="number" name="precio" min="0" step="any" required></label>
+              <label class="field">Unidades <input type="number" name="unidades" min="0" step="1"></label>
+              <label class="field">Descuento (%) <input type="number" name="descuento" min="0" max="100" step="any"></label>
+              <label class="field">Categorías (separadas por coma) <input type="text" name="categorias"></label>
+              <label class="field field-check full"><input type="checkbox" name="disponible"> Disponible</label>
+              <div class="full"><button type="submit">Guardar cambios</button></div>
+            </fieldset>
+          </form>
+          <div id="notificacion-editar" class="message"></div>
+        </div>
+      </section>
+
+      <!-- Vista: Eliminar -->
+      <section class="vista" data-vista="eliminar" hidden>
+        <div class="vista-header">
+          <h2 class="vista-titulo">Eliminar <span>producto</span></h2>
+        </div>
+        <div class="panel">
+          <p class="hint">Esto borra el producto de Supabase y no se puede deshacer.</p>
+          <!-- prueba-2.js arma una fila por producto, cada una con su botón
+               "Eliminar" (ver renderizarEliminar), como en gestion.html -->
+          <div id="lista-eliminar" class="lista-eliminar"></div>
+          <div id="notificacion-eliminar" class="message"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
 
   <!-- supabaseClient.js crea "db" (sección 4.3): el cliente ya
        conectado a tu proyecto de Supabase. Lo vamos a usar en
