@@ -145,3 +145,10 @@ Hoy no se desarrollo mucho solo terminamos de ver el metodo crud de leer con bas
 ## 2026-10-29
 
 Hoy terminamos los metodo de UPDATE y DELETE para estas pruebas con supabase para ya comenzar a ver como implementarlo en nuestro ecommerce, un tema algo enredado cuando se explora ya que vimos algo de Relaciones y claves entre tablas, una forma simplificada de como todo esta unido entre si y como surgen los cambio cuando se hace.
+
+
+## 2026-10-30
+
+Hoy hicimos todo el proceso de login viendo un poco su logica, durante el proceso hubo algunos errores como que no aceptaba un correo (eso era porque la confirmación de email estaba activada en supabase) por lo que no se podia inventar uno, aunque si es importante sabes que se desactivo al ser pruebas por ahora, todo este proceso se comenzo primero en supabase creando una tabla para ya luego ir anidando todo al código
+
+Después de eso le dimos el estilo de prueba-2 a la página de cuenta (con modo claro y un ojito para ver la contraseña), y ordenamos el login para que primero salga iniciar sesión y abajo la opción de crear una cuenta. Luego, al iniciar sesión, la página lee los datos del cliente desde la tabla clientes_practica y los muestra en un formulario donde se pueden actualizar (UPDATE) el nombre, el teléfono y la dirección; el correo y el rol quedaron de solo lectura. Al final cambiamos la sidebar por un círculo de perfil con un menú para ir a mi cuenta, editar datos o cerrar sesión. También salió un detalle de CSS: el ojito estaba corrido hacia abajo porque un selector con espacio (descendiente) le aplicaba un margen que era para otros botones, y se arregló con el selector de hijo directo (>).

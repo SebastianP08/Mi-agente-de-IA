@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mi cuenta</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Asap: la misma fuente de títulos que prueba-2.html (Jaziz) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Estilos copiados de prueba-2.html (opción A): solo las reglas que
+         usa esta página. Si cambias la paleta allá, cámbiala aquí también */
+      :root {
+        --bg: #1a0a10;
+        --surface: #26101a;
+        --surface-2: #341824;
+        --text: #f2f2f2;
+        --text-muted: #c9a9b3;
+        --accent: #d67474;
+        --accent-hover: #e89a9a;
+        --accent-text: #1a0a10;
+        --shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+        --success: #6fcf97;
+        --danger: #ff6b6b;
+        --header-h: 84px;
+        --radius: 20px;
+        color-scheme: dark;
+      }
+
+      :root[data-theme="light"] {
+        --bg: #f2f2f2;
+        --surface: #ffffff;
+        --surface-2: #f8eeee;
+        --text: #1a1a1a;
+        --text-muted: #6e5a5f;
+        --accent: #b04a4a;
+        --accent-hover: #7c1437;
+        --accent-text: #ffffff;
+        --shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        --success: #2e7d32;
+        --danger: #9b1c1c;
+        color-scheme: light;
+      }
+
+      * { box-sizing: border-box; }
+
+      h1, h2, h3 { font-family: "Asap", sans-serif; }
+
+      body {
+        font-family: "Trebuchet MS", sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      /* ---------- Botones (como .btn-nav en marca.css) ---------- */
+
+      button {
+        font: inherit;
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        padding: 0.85rem 1.6rem;
+        background: var(--accent);
+        color: var(--accent-text);
+        font-weight: bold;
+        transition: transform 0.3s, background 0.2s, color 0.2s;
+      }
+      button:hover { background: var(--accent-hover); transform: translateY(-4px) scale(1.02); }
+
+      .btn-secondary { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+      .btn-secondary:hover { background: var(--accent); color: var(--accent-text); }
+
+      .btn-small { padding: 0.5rem 1.1rem; font-size: 0.85rem; }
+
+      /* Botón redondo del tema, igual que en prueba-2.html */
+      .btn-round {
+        width: 50px;
+        height: 50px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 1.3rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn-round:hover { transform: translateY(-5px); }
+
+      /* ---------- Header ---------- */
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        height: var(--header-h);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        padding: 0 clamp(1rem, 4vw, 3rem);
+        background: var(--bg);
+      }
+      .topbar-titulo { margin: 0; font-size: 1.7rem; font-weight: 700; letter-spacing: -1px; white-space: nowrap; }
+      .topbar-titulo span { color: var(--accent); }
+      .topbar-acciones { display: flex; align-items: center; gap: 0.75rem; }
+
+      /* ---------- Contenido ---------- */
+
+      /* flex en columna + align-items: center → el título, el mensaje y la
+         tarjeta quedan centrados en horizontal, cada uno con su propio ancho */
+      .contenido {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1.5rem clamp(1rem, 4vw, 3rem) 3rem;
+      }
+
+      /* display: flex le gana a la regla del navegador "[hidden] { display: none }",
+         así que sin esto la zona se vería aunque tenga hidden. Es el mismo
+         caso que .product-grid[hidden] en prueba-2.html */
+      .contenido[hidden],
+      .menu-perfil[hidden] { display: none; }
+
+      /* Aparición suave al cargar y al cambiar de vista, igual que .vista
+         en prueba-2.html */
+      .contenido,
+      .vista { animation: aparecer 0.4s ease; }
+      @keyframes aparecer {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .contenido, .vista, .menu-perfil { animation: none; }
+        button { transition: none; }
+      }
+
+      /* ---------- Círculo de perfil + menú ---------- */
+
+      .perfil { position: relative; }
+
+      /* Mismo círculo que el botón del tema (.btn-round), con la inicial */
+      .btn-avatar { font-family: "Asap", sans-serif; font-weight: 700; font-size: 1.2rem; }
+
+      /* top: 100% = justo debajo del círculo; right: 0 = alineado a su
+         borde derecho, para que el menú no se salga de la pantalla */
+      .menu-perfil {
+        position: absolute;
+        top: calc(100% + 0.6rem);
+        right: 0;
+        z-index: 30;
+        min-width: 230px;
+        display: flex;
+        flex-direction: column;
+        padding: 0.4rem;
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+        animation: abrir-menu 0.2s ease;
+      }
+      @keyframes abrir-menu {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .menu-cabecera { display: flex; flex-direction: column; gap: 2px; padding: 0.7rem 0.8rem 0.8rem; margin-bottom: 0.3rem; border-bottom: 1px solid var(--surface-2); }
+      .menu-cabecera strong { font-family: "Asap", sans-serif; font-size: 1.05rem; }
+      .menu-cabecera span { font-size: 0.85rem; color: var(--text-muted); overflow-wrap: anywhere; }
+
+      .menu-item {
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        padding: 0.65rem 0.8rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+      /* Sin el "salto" de button:hover: en un menú se vería raro */
+      .menu-item:hover { background: var(--surface-2); transform: none; }
+      .menu-item--peligro { color: var(--danger); }
+
+      .menu-separador { border: none; border-top: 1px solid var(--surface-2); margin: 0.3rem 0; width: 100%; }
+
+      /* Las vistas ocupan el mismo ancho que su tarjeta, centradas */
+      .vista { width: 100%; max-width: 560px; }
+      .tarjeta-cuenta h3 { text-align: left; }
+
+      /* Lista de datos de la vista Inicio: etiqueta a la izquierda, valor
+         a la derecha, con una línea suave entre cada fila */
+      .datos-lista { margin: 0 0 1.5rem; }
+      .datos-lista div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--surface-2); }
+      .datos-lista div:last-child { border-bottom: none; }
+      .datos-lista dt { font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+      .datos-lista dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+
+      .vista-titulo { margin: 0 0 1.75rem; text-align: center; font-size: clamp(2.2rem, 4.5vw, 3.4rem); line-height: 0.95; letter-spacing: -2px; }
+      .vista-titulo span { color: var(--accent); }
+
+      /* Tarjeta angosta: un formulario de login no necesita todo el ancho */
+      .auth-card { width: 100%; max-width: 440px; }
+
+      .panel {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 1.75rem;
+        box-shadow: var(--shadow);
+      }
+      .panel h3 { margin: 0 0 1.25rem; text-align: center; font-size: 1.5rem; letter-spacing: -0.5px; }
+
+      /* ---------- Formularios ---------- */
+
+      .form-campos { display: flex; flex-direction: column; gap: 1.1rem; }
+
+      .field { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+
+      /* prueba-2.html no tiene email ni password, por eso se agregan aquí */
+      input[type="text"],
+      input[type="email"],
+      input[type="tel"],
+      input[type="password"] {
+        font: inherit;
+        font-size: 0.95rem;
+        font-weight: normal;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--text);
+        background: var(--surface-2);
+        border: 1px solid transparent;
+        border-radius: 10px;
+        padding: 0.75rem 0.9rem;
+        transition: border-color 0.2s;
+      }
+      input:focus { outline: none; border-color: var(--accent); }
+
+      /* Campos de solo lectura (correo y rol): más apagados para que se
+         note que no se pueden editar, y sin el borde de foco */
+      input[readonly] { opacity: 0.6; cursor: not-allowed; }
+      input[readonly]:focus { border-color: transparent; }
+
+      .hint { font-size: 0.8rem; font-weight: normal; letter-spacing: 0; text-transform: none; }
+
+      /* ---------- Ojito de la contraseña ---------- */
+
+      /* position: relative → el botón (position: absolute) se ubica
+         respecto a esta caja, o sea, encima del borde derecho del input */
+      .password-wrap { position: relative; display: flex; }
+      .password-wrap input { flex: 1; padding-right: 3rem; }   /* espacio para que el texto no quede debajo del ojo */
+
+      .btn-ojo {
+        position: absolute;
+        right: 0.5rem;
+        top: 50%;
+        transform: translateY(-50%);   /* top 50% + subir la mitad de su alto = centrado vertical */
+        display: inline-flex;
+        padding: 0.35rem;
+        background: transparent;
+        color: var(--text-muted);
+      }
+      /* Sin esto heredaría el "salto" de button:hover y se saldría del input */
+      .btn-ojo:hover { background: transparent; color: var(--accent); transform: translateY(-50%); }
+
+      /* aria-pressed lo cambia cliente.js: el CSS muestra un ícono u otro
+         según ese atributo, sin tocar el HTML desde JS */
+      .btn-ojo .ojo-cerrado,
+      .btn-ojo[aria-pressed="true"] .ojo-abierto { display: none; }
+      .btn-ojo[aria-pressed="true"] .ojo-cerrado { display: block; }
+
+      /* ">" = solo los botones HIJOS DIRECTOS del form (Crear cuenta /
+         Iniciar sesión). Sin el ">", también le llegaba al ojito, que está
+         más adentro, y el margin-top lo corría hacia abajo */
+      .form-campos > button { align-self: center; margin-top: 0.4rem; }
+
+      /* "¿No tienes cuenta? Crea una": un <button> que se ve como link.
+         Es <button> y no <a href="#"> porque no lleva a otra página,
+         solo cambia de formulario (igual que .sidebar-item en prueba-2) */
+      .cambiar-vista { margin: 1.5rem 0 0; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
+      .link-btn { background: transparent; color: var(--accent); padding: 0; border-radius: 0; text-decoration: underline; text-underline-offset: 3px; }
+      .link-btn:hover { background: transparent; color: var(--accent-hover); transform: none; }
+
+      /* ---------- Mensajes ---------- */
+
+      .message { width: 100%; max-width: 440px; margin: 0 0 1.75rem; padding: 0.85rem 1.1rem; border-radius: 12px; background: var(--surface-2); border-left: 4px solid var(--accent); }
+      .message:empty { display: none; }
+      .message--success { border-left-color: var(--success); }
+      .message--error { border-left-color: var(--danger); }
+      /* Dentro de la tarjeta el mensaje va debajo del botón, no encima */
+      .panel .message { margin: 1.25rem 0 0; }
+
+      /* ---------- Celular ---------- */
+
+      @media (max-width: 720px) {
+        .topbar { padding: 0 1rem; }
+        .topbar-titulo { font-size: 1.3rem; }
+        .panel { padding: 1.1rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <h1 class="topbar-titulo">Mi <span>cuenta</span></h1>
+      <div class="topbar-acciones">
+        <!-- Igual que en prueba-2.html: el ícono y el aria-label los pone
+             aplicarTema() en cliente.js -->
+        <button id="btn-tema" class="btn-round" type="button" aria-label="Cambiar tema">☀</button>
+
+        <!-- Círculo de perfil + menú. hidden: solo aparece con la sesión
+             iniciada (mostrarEstadoSesion). position: relative en .perfil →
+             el menú (position: absolute) se abre justo debajo del círculo -->
+        <div id="perfil" class="perfil" hidden>
+          <!-- aria-expanded: le dice al lector de pantalla si el menú está
+               abierto o cerrado. aria-controls: cuál es el menú que abre.
+               La inicial la pone renderizarInicio() en cliente.js -->
+          <button id="btn-perfil" class="btn-round btn-avatar" type="button"
+                  aria-expanded="false" aria-controls="menu-perfil" aria-label="Abrir menú de perfil">?</button>
+
+          <div id="menu-perfil" class="menu-perfil" hidden>
+            <div class="menu-cabecera">
+              <strong id="menu-nombre"></strong>
+              <span id="menu-correo"></span>
+            </div>
+            <button type="button" class="menu-item" data-ir-vista="inicio">Mi cuenta</button>
+            <button type="button" class="menu-item" data-ir-vista="configuracion">Editar datos</button>
+            <hr class="menu-separador" />
+            <button id="btn-logout" type="button" class="menu-item menu-item--peligro">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dos "zonas" y solo se ve una a la vez (mostrarEstadoSesion() en
+         cliente.js): #zona-auth sin sesión, #zona-cuenta con sesión -->
+
+    <!-- ===== Sin sesión: login / registro centrados ===== -->
+    <main id="zona-auth" class="contenido">
+      <h2 class="vista-titulo">Entra a tu <span>cuenta</span></h2>
+
+      <!-- Mismo id de antes: cliente.js sigue escribiendo aquí el estado -->
+      <p id="estado-sesion" class="message">No has iniciado sesión.</p>
+
+      <!-- Una sola tarjeta con dos formularios: se ve uno a la vez.
+           Primero el de iniciar sesión; el link de abajo cambia al de
+           registro (mostrarFormulario() en cliente.js) -->
+      <section id="tarjeta-auth" class="panel auth-card">
+        <div id="vista-login">
+          <h3>Iniciar sesión</h3>
+          <form id="form-login" class="form-campos">
+            <label class="field" for="login-correo">Correo
+              <input id="login-correo" type="email" required />
+            </label>
+
+            <label class="field" for="login-password">Contraseña
+              <span class="password-wrap">
+                <input id="login-password" type="password" required />
+                <button type="button" class="btn-ojo" aria-label="Mostrar contraseña" aria-pressed="false">
+                  <svg class="ojo-abierto" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="ojo-cerrado" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
+                </button>
+              </span>
+            </label>
+
+            <button type="submit">Iniciar sesión</button>
+          </form>
+          <p class="cambiar-vista">¿No tienes cuenta? <button type="button" class="link-btn" data-ir="registro">Crea una</button></p>
+        </div>
+
+        <div id="vista-registro" hidden>
+          <h3>Crear cuenta</h3>
+          <form id="form-registro" class="form-campos">
+            <label class="field" for="registro-nombre">Nombre
+              <input id="registro-nombre" type="text" required />
+            </label>
+
+            <label class="field" for="registro-correo">Correo
+              <input id="registro-correo" type="email" required />
+            </label>
+
+            <label class="field" for="registro-password">Contraseña
+              <span class="password-wrap">
+                <input id="registro-password" type="password" minlength="6" required />
+                <button type="button" class="btn-ojo" aria-label="Mostrar contraseña" aria-pressed="false">
+                  <svg class="ojo-abierto" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <svg class="ojo-cerrado" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
+                </button>
+              </span>
+            </label>
+
+            <button type="submit">Crear cuenta</button>
+          </form>
+          <p class="cambiar-vista">¿Ya tienes cuenta? <button type="button" class="link-btn" data-ir="login">Inicia sesión</button></p>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===== Con sesión: las vistas, centradas como el login. Se cambia
+         de una a otra desde el menú del círculo de perfil ===== -->
+    <main id="zona-cuenta" class="contenido" hidden>
+
+        <!-- Vista: Inicio (READ). Solo muestra los datos, no se editan aquí.
+             renderizarInicio() en cliente.js llena cada <dd> -->
+        <section class="vista" data-vista="inicio">
+          <h2 class="vista-titulo">Hola, <span id="saludo-nombre"></span></h2>
+          <div class="panel tarjeta-cuenta">
+            <h3>Tus datos</h3>
+            <!-- <dl> = lista de pares "nombre del dato → valor": <dt> es
+                 la etiqueta y <dd> el valor. Es justo para esto -->
+            <dl class="datos-lista">
+              <div><dt>Nombre</dt><dd id="dato-nombre"></dd></div>
+              <div><dt>Correo</dt><dd id="dato-correo"></dd></div>
+              <div><dt>Teléfono</dt><dd id="dato-telefono"></dd></div>
+              <div><dt>Dirección</dt><dd id="dato-direccion"></dd></div>
+              <div><dt>Rol</dt><dd id="dato-rol"></dd></div>
+            </dl>
+            <button type="button" class="btn-secondary btn-small" data-ir-vista="configuracion">Editar mis datos</button>
+            <div id="notificacion-inicio" class="message"></div>
+          </div>
+        </section>
+
+        <!-- Vista: Configuración (UPDATE). cliente.js llena estos campos con
+             lo que leyó y al guardar hace el update(). Cada "name" coincide
+             con una columna de clientes_practica -->
+        <section class="vista" data-vista="configuracion" hidden>
+          <h2 class="vista-titulo">Configuración de <span>usuario</span></h2>
+          <div class="panel tarjeta-cuenta">
+            <form id="form-perfil" class="form-campos">
+              <label class="field">Nombre
+                <input type="text" name="nombre" required />
+              </label>
+
+              <label class="field">Teléfono
+                <input type="tel" name="telefono" />
+              </label>
+
+              <label class="field">Dirección
+                <input type="text" name="direccion" />
+              </label>
+
+              <!-- readonly: se ve y se envía con el form, pero no se puede
+                   escribir. Igual cliente.js NO los manda en el update -->
+              <label class="field">Correo
+                <input type="email" name="correo" readonly />
+                <span class="hint">El correo es el de tu inicio de sesión y no se cambia aquí.</span>
+              </label>
+
+              <label class="field">Rol
+                <input type="text" name="rol" readonly />
+              </label>
+
+              <button type="submit">Guardar cambios</button>
+            </form>
+            <div id="notificacion-perfil" class="message"></div>
+          </div>
+        </section>
+
+    </main>
+
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/cliente.js"></script>
+  </body>
+</html>
