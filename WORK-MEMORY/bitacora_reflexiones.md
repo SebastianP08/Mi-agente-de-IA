@@ -152,3 +152,8 @@ Hoy terminamos los metodo de UPDATE y DELETE para estas pruebas con supabase par
 Hoy hicimos todo el proceso de login viendo un poco su logica, durante el proceso hubo algunos errores como que no aceptaba un correo (eso era porque la confirmación de email estaba activada en supabase) por lo que no se podia inventar uno, aunque si es importante sabes que se desactivo al ser pruebas por ahora, todo este proceso se comenzo primero en supabase creando una tabla para ya luego ir anidando todo al código
 
 Después de eso le dimos el estilo de prueba-2 a la página de cuenta (con modo claro y un ojito para ver la contraseña), y ordenamos el login para que primero salga iniciar sesión y abajo la opción de crear una cuenta. Luego, al iniciar sesión, la página lee los datos del cliente desde la tabla clientes_practica y los muestra en un formulario donde se pueden actualizar (UPDATE) el nombre, el teléfono y la dirección; el correo y el rol quedaron de solo lectura. Al final cambiamos la sidebar por un círculo de perfil con un menú para ir a mi cuenta, editar datos o cerrar sesión. También salió un detalle de CSS: el ojito estaba corrido hacia abajo porque un selector con espacio (descendiente) le aplicaba un margen que era para otros botones, y se arregló con el selector de hijo directo (>).
+
+
+## 2026-11-05
+
+Hoy vimos como crear una policy RLS en Supabase, como funciona y como restringir lo que se muestra dependiendo de si alguien es anonimo o alguien ingresado. Ademas vimos el CURL y como inyectar o atacar una pagina que no tiene RLS, por lo que alguien puede ver todos los usuarios registrados, sus correos, datos e ID, y al final se inyectaron usuarios a la base de datos con CURL. Se dejo como curiosidad revisar que es el .env
