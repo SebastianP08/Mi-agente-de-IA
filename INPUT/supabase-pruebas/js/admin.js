@@ -1,3 +1,160 @@
+// ---------- Ojito de la contraseña ----------
+// Mismo código que cliente.js: cambiar type="password" ↔ type="text"
+// previousElementSibling = el input justo antes del botón
+document.querySelectorAll('.btn-ojo').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    const input = boton.previousElementSibling;
+    const mostrar = input.type === 'password';
+    input.type = mostrar ? 'text' : 'password';
+    boton.setAttribute('aria-pressed', mostrar);
+    boton.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+  });
+});
+
+// ---------- Alternar login ↔ registro ----------
+// Misma idea que mostrarFormulario() en cliente.js: un solo panel con
+// dos vistas, se muestra una y se oculta la otra con hidden
+function mostrarFormularioAdmin(cual) {
+  document.getElementById('vista-login-admin').hidden = cual !== 'login';
+  document.getElementById('vista-registro-admin').hidden = cual !== 'registro';
+}
+
+// Los links "Crea una" / "Inicia sesión" dicen a dónde ir en data-ir
+document.querySelectorAll('[data-ir]').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    mostrarFormularioAdmin(boton.dataset.ir);
+  });
+});
+
+// ---------- Registro ----------
+document.getElementById('form-registro-admin').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const form = evento.target;
+
+  const { data, error } = await db.auth.signUp({
+    email: document.getElementById('admin-registro-correo').value.trim(),
+    password: document.getElementById('admin-registro-password').value,
+  });
+
+  if (error) {
+    document.getElementById('estado-sesion-admin').textContent = 'Error al registrar: ' + error.message;
+    return;
+  }
+
+  const { error: errorPerfil } = await db.from('admin_practica').insert([{
+    id: data.user.id,
+    nombre: document.getElementById('admin-registro-nombre').value.trim(),
+    correo: document.getElementById('admin-registro-correo').value.trim(),
+  }]);
+
+  if (errorPerfil) {
+    document.getElementById('estado-sesion-admin').textContent = 'Cuenta creada, pero falló el perfil: ' + errorPerfil.message;
+    return;
+  }
+
+  document.getElementById('estado-sesion-admin').textContent = 'Cuenta de administrador creada. Ya puedes iniciar sesión.';
+  form.reset();
+  mostrarFormularioAdmin('login');   // lo lleva al login, igual que en cliente.js
+});
+
+// ---------- Login ----------
+document.getElementById('form-login-admin').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const form = evento.target;
+
+  const { error } = await db.auth.signInWithPassword({
+    email: document.getElementById('admin-login-correo').value.trim(),
+    password: document.getElementById('admin-login-password').value,
+  });
+
+  if (error) {
+    document.getElementById('estado-sesion-admin').textContent = 'Error al iniciar sesión: ' + error.message;
+    return;
+  }
+
+  form.reset();
+  mostrarEstadoSesionAdmin();
+});
+
+async function mostrarEstadoSesionAdmin() {
+  const { data } = await db.auth.getUser();
+  const estado        = document.getElementById('estado-sesion-admin');
+  const zonaAcceso    = document.getElementById('zona-acceso-admin');
+  const zonaCrud      = document.getElementById('zona-crud');
+  const perfilAdmin   = document.getElementById('perfil-admin');
+  const btnFallback   = document.getElementById('btn-logout-fallback');
+
+  if (!data.user) {
+    estado.innerText    = 'No has iniciado sesión.';
+    zonaAcceso.hidden   = false;
+    zonaCrud.hidden     = true;
+    perfilAdmin.hidden  = true;
+    btnFallback.hidden  = true;
+    return;
+  }
+
+  const { data: perfil } = await db.from('admin_practica').select('nombre').eq('id', data.user.id).single();
+
+  if (perfil) {
+    estado.innerText    = 'Sesión iniciada como ' + perfil.nombre + ' (admin).';
+    zonaAcceso.hidden   = true;
+    zonaCrud.hidden     = false;
+    perfilAdmin.hidden  = false;
+    btnFallback.hidden  = true;
+
+    document.getElementById('btn-perfil-admin').textContent =
+      (perfil.nombre || data.user.email || '?').trim().charAt(0).toUpperCase();
+    document.getElementById('menu-nombre-admin').textContent = perfil.nombre || 'Admin';
+    document.getElementById('menu-correo-admin').textContent = data.user.email || '';
+
+    mostrarVista('productos');
+  } else {
+    estado.innerText    = 'Sesión iniciada, pero sin perfil de administrador.';
+    zonaAcceso.hidden   = false;
+    zonaCrud.hidden     = true;
+    perfilAdmin.hidden  = true;
+    btnFallback.hidden  = false;
+  }
+}
+
+// ---------- Menú del círculo de perfil ----------
+const btnPerfilAdmin  = document.getElementById('btn-perfil-admin');
+const menuPerfilAdmin = document.getElementById('menu-perfil-admin');
+
+function abrirMenuPerfilAdmin() {
+  menuPerfilAdmin.hidden = false;
+  btnPerfilAdmin.setAttribute('aria-expanded', 'true');
+}
+
+function cerrarMenuPerfilAdmin() {
+  menuPerfilAdmin.hidden = true;
+  btnPerfilAdmin.setAttribute('aria-expanded', 'false');
+}
+
+btnPerfilAdmin.addEventListener('click', () => {
+  if (menuPerfilAdmin.hidden) abrirMenuPerfilAdmin();
+  else cerrarMenuPerfilAdmin();
+});
+
+document.addEventListener('click', (event) => {
+  if (!document.getElementById('perfil-admin').contains(event.target)) {
+    cerrarMenuPerfilAdmin();
+  }
+});
+
+document.getElementById('btn-logout-admin').addEventListener('click', async () => {
+  cerrarMenuPerfilAdmin();
+  await db.auth.signOut();
+  mostrarEstadoSesionAdmin();
+});
+
+document.getElementById('btn-logout-fallback').addEventListener('click', async () => {
+  await db.auth.signOut();
+  mostrarEstadoSesionAdmin();
+});
+
+mostrarEstadoSesionAdmin();
+
 // ANTES era una función anónima dentro de addEventListener('click', ...).
 // AHORA tiene nombre, porque la llaman DOS lugares: el botón "Recargar" y
 // mostrarVista("productos") cada vez que entras a esa vista.
@@ -623,8 +780,7 @@ listaEliminar.addEventListener("click", async (e) => {
 });
 
 // ---------- Arranque ----------
-// Va AL FINAL del archivo a propósito: mostrarVista usa constantes como
-// "vistas", "listaEliminar" o "formEditar". Una const no se puede usar
-// antes de la línea donde se declara, así que llamamos a mostrarVista
-// cuando ya están todas creadas.
-mostrarVista("productos");
+// mostrarVista("productos") YA NO se llama aquí directamente: ahora lo
+// llama mostrarEstadoSesionAdmin() solo cuando confirma que hay sesión
+// de admin válida. Así no pedimos productos a Supabase antes de saber
+// quién está usando la página.

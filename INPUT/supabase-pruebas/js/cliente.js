@@ -1,5 +1,5 @@
 // ---------- Modo claro / oscuro ----------
-// Copiado de prueba-2.js: JS solo cambia data-theme en el <html> y el CSS
+// Copiado de admin.js: JS solo cambia data-theme en el <html> y el CSS
 // (:root[data-theme="light"]) cambia las variables de color. Usa la misma
 // clave "tema" en localStorage, así las dos páginas recuerdan el mismo tema
 const btnTema = document.getElementById('btn-tema');
@@ -37,7 +37,7 @@ document.querySelectorAll('.btn-ojo').forEach((boton) => {
 });
 
 // Muestra un formulario y oculta el otro con el atributo hidden — la
-// misma idea que mostrarVista() en prueba-2.js. cual = 'login' o 'registro'
+// misma idea que mostrarVista() en admin.js. cual = 'login' o 'registro'
 function mostrarFormulario(cual) {
   document.getElementById('vista-login').hidden = cual !== 'login';
   document.getElementById('vista-registro').hidden = cual !== 'registro';
@@ -247,7 +247,7 @@ function renderizarInicio(cliente) {
 }
 
 // ---------- Cambiar de vista ----------
-// Mismo patrón que mostrarVista() en prueba-2.js: deja visible solo la
+// Mismo patrón que mostrarVista() en admin.js: deja visible solo la
 // <section class="vista"> cuyo data-vista coincide con el nombre
 function mostrarVista(nombre) {
   document.querySelectorAll('section.vista').forEach((vista) => {

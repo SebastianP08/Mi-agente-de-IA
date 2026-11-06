@@ -10,7 +10,7 @@
        todavía cuando supabaseClient.js intente usarlo -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prueba 2 — Productos</title>
+  <title>Admin — Productos</title>
   <!-- Asap: la fuente de títulos de Jaziz (marca.css). Solo cargamos esta,
        no todas las del @import de Jaziz, para que la página cargue rápido -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,7 +112,7 @@
     button:hover { background: var(--accent-hover); }
     /* El "salto" de .btn-nav:hover: translateY(-4px) scale(1.02).
        Los botones del sidebar y del selector no saltan */
-    button:not(.sidebar-item):not(.toggle-btn):hover { transform: translateY(-4px) scale(1.02); }
+    button:not(.sidebar-item):not(.toggle-btn):not(.btn-ojo):not(.link-btn):not(.menu-item):hover { transform: translateY(-4px) scale(1.02); }
 
     /* Secundario: solo contorno en el color de acento */
     .btn-secondary { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
@@ -236,7 +236,7 @@
 
     /* Títulos grandes y apretados como ".categories-top h2" y ".reviews-title":
        line-height .95 + letter-spacing -2px, con una palabra en rosa */
-    .vista-titulo { margin: 0; font-size: clamp(2.2rem, 4.5vw, 3.4rem); line-height: 0.95; letter-spacing: -2px; }
+    .vista-titulo { margin: 0; font-size: clamp(2.2rem, 4.5vw, 3.4rem); line-height: 0.95; letter-spacing: -2px; margin-top: 50px; margin-bottom: 50px;}
     .vista-titulo span { color: var(--accent); }
 
     .vista-acciones { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
@@ -387,6 +387,8 @@
     .field-check { flex-direction: row; align-items: center; gap: 0.5rem; color: var(--text); text-transform: none; letter-spacing: 0; font-size: 0.95rem; }
 
     input[type="text"],
+    input[type="email"],
+    input[type="password"],
     input[type="number"],
     input[type="url"],
     textarea {
@@ -493,6 +495,107 @@
     .message--success { border-left-color: var(--success); }
     .message--error { border-left-color: var(--danger); }
 
+    /* ---------- Zona de acceso (login / registro) ---------- */
+    /* Misma estructura que cliente.html: una sola tarjeta centrada con
+       dos formularios que se alternan (login ↔ registro) */
+
+    /* Contenedor centrado, como .contenido de cliente.html */
+    .auth-contenido {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1.5rem clamp(1rem, 4vw, 3rem) 3rem;
+    }
+    .auth-contenido[hidden] { display: none; }
+
+    /* Tarjeta angosta: un formulario de login no necesita todo el ancho */
+    .auth-card { width: 100%; max-width: 440px; }
+    .auth-card h3 { margin: 0 0 1.25rem; text-align: center; font-size: 1.5rem; letter-spacing: -0.5px; }
+
+    /* Campos en columna con separación uniforme */
+    .form-campos { display: flex; flex-direction: column; gap: 1.1rem; }
+    /* ">" = solo los botones HIJOS DIRECTOS del form (Crear cuenta /
+       Iniciar sesión). Sin el ">", también le llegaría al ojito */
+    .form-campos > button { align-self: center; margin-top: 0.4rem; }
+
+    /* ---------- Ojito de la contraseña ---------- */
+
+    /* position: relative → el botón (position: absolute) se ubica
+       respecto a esta caja, encima del borde derecho del input */
+    .password-wrap { position: relative; display: flex; }
+    .password-wrap input { flex: 1; padding-right: 3rem; }
+
+    .btn-ojo {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: inline-flex;
+      padding: 0.35rem;
+      background: transparent;
+      color: var(--text-muted);
+    }
+    .btn-ojo:hover { background: transparent; color: var(--accent); transform: translateY(-50%); }
+
+    /* aria-pressed lo cambia admin.js: el CSS muestra un ícono u otro
+       según ese atributo, sin tocar el HTML desde JS */
+    .btn-ojo .ojo-cerrado,
+    .btn-ojo[aria-pressed="true"] .ojo-abierto { display: none; }
+    .btn-ojo[aria-pressed="true"] .ojo-cerrado { display: block; }
+
+    /* "¿No tienes cuenta? Crea una" / "¿Ya tienes cuenta? Inicia sesión" */
+    .cambiar-vista { margin: 1.5rem 0 0; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
+    .link-btn { background: transparent; color: var(--accent); padding: 0; border-radius: 0; text-decoration: underline; text-underline-offset: 3px; }
+    .link-btn:hover { background: transparent; color: var(--accent-hover); transform: none; }
+
+    /* Mensaje de estado del login, como en cliente.html */
+    .auth-contenido .message { width: 100%; max-width: 440px; margin: 0 0 1.75rem; }
+    .panel .message { margin: 1.25rem 0 0; }
+
+    /* ---------- Círculo de perfil + menú ---------- */
+
+    .perfil { position: relative; }
+    .btn-avatar { font-family: "Asap", sans-serif; font-weight: 700; font-size: 1.2rem; }
+
+    .menu-perfil {
+      position: absolute;
+      top: calc(100% + 0.6rem);
+      right: 0;
+      z-index: 30;
+      min-width: 230px;
+      display: flex;
+      flex-direction: column;
+      padding: 0.4rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+      animation: abrir-menu 0.2s ease;
+    }
+    .menu-perfil[hidden] { display: none; }
+    @keyframes abrir-menu {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .menu-cabecera { display: flex; flex-direction: column; gap: 2px; padding: 0.7rem 0.8rem 0.8rem; margin-bottom: 0.3rem; border-bottom: 1px solid var(--surface-2); }
+    .menu-cabecera strong { font-family: "Asap", sans-serif; font-size: 1.05rem; }
+    .menu-cabecera span { font-size: 0.85rem; color: var(--text-muted); overflow-wrap: anywhere; }
+
+    .menu-item {
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      padding: 0.65rem 0.8rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .menu-item:hover { background: var(--surface-2); transform: none; }
+    .menu-item--peligro { color: var(--danger); }
+    .menu-separador { border: none; border-top: 1px solid var(--surface-2); margin: 0.2rem 0.4rem; }
+
     /* ---------- Celular ---------- */
 
     /* En pantallas angostas el sidebar pasa arriba, a todo el ancho, y sus
@@ -514,6 +617,71 @@
   </style>
 </head>
 <body>
+<!-- ===== Sin sesión: login / registro centrados (igual que cliente.html) ===== -->
+<main id="zona-acceso-admin" class="auth-contenido">
+  <h2 class="vista-titulo">Panel de <span>administración</span></h2>
+
+  <p id="estado-sesion-admin" class="message" role="status">No has iniciado sesión.</p>
+  <button id="btn-logout-fallback" class="btn-secondary btn-small" type="button" hidden>Cerrar sesión</button>
+
+  <!-- Una sola tarjeta con dos formularios: se ve uno a la vez.
+       Primero el de iniciar sesión; el link de abajo cambia al de
+       registro (mostrarFormularioAdmin() en admin.js) -->
+  <section class="panel auth-card">
+    <div id="vista-login-admin">
+      <h3>Iniciar sesión</h3>
+      <form id="form-login-admin" class="form-campos">
+        <label class="field" for="admin-login-correo">Correo
+          <input id="admin-login-correo" type="email" required />
+        </label>
+
+        <label class="field" for="admin-login-password">Contraseña
+          <span class="password-wrap">
+            <input id="admin-login-password" type="password" required />
+            <button type="button" class="btn-ojo" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg class="ojo-abierto" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="ojo-cerrado" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
+            </button>
+          </span>
+        </label>
+
+        <button type="submit">Iniciar sesión</button>
+      </form>
+      <p class="cambiar-vista">¿No tienes cuenta? <button type="button" class="link-btn" data-ir="registro">Crea una</button></p>
+    </div>
+
+    <div id="vista-registro-admin" hidden>
+      <h3>Registrar administrador</h3>
+      <form id="form-registro-admin" class="form-campos">
+        <label class="field" for="admin-registro-nombre">Nombre
+          <input id="admin-registro-nombre" type="text" required />
+        </label>
+
+        <label class="field" for="admin-registro-correo">Correo
+          <input id="admin-registro-correo" type="email" required />
+        </label>
+
+        <label class="field" for="admin-registro-password">Contraseña
+          <span class="password-wrap">
+            <input id="admin-registro-password" type="password" minlength="6" required />
+            <button type="button" class="btn-ojo" aria-label="Mostrar contraseña" aria-pressed="false">
+              <svg class="ojo-abierto" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="ojo-cerrado" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>
+            </button>
+          </span>
+        </label>
+
+        <button type="submit">Crear cuenta de administrador</button>
+      </form>
+      <p class="cambiar-vista">¿Ya tienes cuenta? <button type="button" class="link-btn" data-ir="login">Inicia sesión</button></p>
+    </div>
+  </section>
+</main>
+
+  <!-- #zona-crud arranca con hidden: admin.js lo muestra solo cuando
+       confirma sesión iniciada Y perfil en admin_practica -->
+  <div id="zona-crud" hidden>
+
   <!-- Mismo esquema que gestion.html (Proyecto-1): sidebar a la izquierda
        con las opciones del CRUD + contenido a la derecha, donde se ve UNA
        sola vista a la vez -->
@@ -534,8 +702,23 @@
     </div>
 
     <!-- Botón redondo como .prev/.next de Jaziz. El ícono (☀ / ☾) y el
-         aria-label los pone prueba-2.js según el tema activo -->
+         aria-label los pone admin.js según el tema activo -->
     <button id="btn-tema" class="btn-round" type="button" aria-label="Cambiar tema">☀</button>
+
+    <!-- Círculo de perfil + menú desplegable, igual que en cliente.html -->
+    <div id="perfil-admin" class="perfil">
+      <button id="btn-perfil-admin" class="btn-round btn-avatar" type="button"
+              aria-expanded="false" aria-controls="menu-perfil-admin" aria-label="Abrir menú de perfil">?</button>
+
+      <div id="menu-perfil-admin" class="menu-perfil" hidden>
+        <div class="menu-cabecera">
+          <strong id="menu-nombre-admin"></strong>
+          <span id="menu-correo-admin"></span>
+        </div>
+        <hr class="menu-separador" />
+        <button id="btn-logout-admin" type="button" class="menu-item menu-item--peligro">Cerrar sesión</button>
+      </div>
+    </div>
   </header>
 
   <div class="layout">
@@ -557,7 +740,7 @@
     <main class="contenido">
 
       <!-- Una "vista" por cada botón del sidebar. mostrarVista() en
-           prueba-2.js deja visible solo la que coincide con data-vista
+           admin.js deja visible solo la que coincide con data-vista
            y oculta el resto con el atributo hidden -->
 
       <!-- Vista: Productos -->
@@ -565,7 +748,7 @@
         <div class="vista-header">
           <h2 class="vista-titulo">Lista de <span>productos</span></h2>
           <div class="vista-acciones">
-            <!-- Selector Tarjetas / Tabla: prueba-2.js muestra uno y oculta el otro -->
+            <!-- Selector Tarjetas / Tabla: admin.js muestra uno y oculta el otro -->
             <div class="toggle" role="group" aria-label="Modo de vista">
               <button type="button" class="toggle-btn" data-modo="tarjetas">Tarjetas</button>
               <button type="button" class="toggle-btn" data-modo="tabla">Tabla</button>
@@ -579,7 +762,7 @@
         <!-- Los dos contenedores van dentro de #productos-contenido: así un
              solo listener (delegación) atiende los botones "Editar" de ambos -->
         <div id="productos-contenido">
-          <!-- prueba-2.js inserta aquí una tarjeta por producto -->
+          <!-- admin.js inserta aquí una tarjeta por producto -->
           <div id="tarjetas-productos" class="product-grid"></div>
           <!-- …y aquí la <table> -->
           <div id="tabla-productos" class="panel table-wrap" hidden></div>
@@ -647,7 +830,7 @@
         </div>
         <div class="panel">
           <p class="hint">Esto borra el producto de Supabase y no se puede deshacer.</p>
-          <!-- prueba-2.js arma una fila por producto, cada una con su botón
+          <!-- admin.js arma una fila por producto, cada una con su botón
                "Eliminar" (ver renderizarEliminar), como en gestion.html -->
           <div id="lista-eliminar" class="lista-eliminar"></div>
           <div id="notificacion-eliminar" class="message"></div>
@@ -657,11 +840,13 @@
     </main>
   </div>
 
+  </div><!-- /zona-crud -->
+
   <!-- supabaseClient.js crea "db" (sección 4.3): el cliente ya
        conectado a tu proyecto de Supabase. Lo vamos a usar en
-       prueba.js, por eso tiene que cargarse ANTES que ese archivo -->
+       admin.js, por eso tiene que cargarse ANTES que ese archivo -->
   <script src="js/supabaseClient.js"></script>
-  <!-- prueba.js: aquí escribes el código de los Pasos 2, 3 y 4 -->
-  <script src="js/prueba-2.js"></script>
+  <!-- admin.js: lógica CRUD de productos, tema y vistas -->
+  <script src="js/admin.js"></script>
 </body>
 </html>

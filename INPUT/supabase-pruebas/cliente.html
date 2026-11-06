@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mi cuenta</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Asap: la misma fuente de títulos que prueba-2.html (Jaziz) -->
+    <!-- Asap: la misma fuente de títulos que admin.html (Jaziz) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-      /* Estilos copiados de prueba-2.html (opción A): solo las reglas que
+      /* Estilos copiados de admin.html (opción A): solo las reglas que
          usa esta página. Si cambias la paleta allá, cámbiala aquí también */
       :root {
         --bg: #1a0a10;
@@ -75,7 +75,7 @@
 
       .btn-small { padding: 0.5rem 1.1rem; font-size: 0.85rem; }
 
-      /* Botón redondo del tema, igual que en prueba-2.html */
+      /* Botón redondo del tema, igual que en admin.html */
       .btn-round {
         width: 50px;
         height: 50px;
@@ -121,12 +121,12 @@
 
       /* display: flex le gana a la regla del navegador "[hidden] { display: none }",
          así que sin esto la zona se vería aunque tenga hidden. Es el mismo
-         caso que .product-grid[hidden] en prueba-2.html */
+         caso que .product-grid[hidden] en admin.html */
       .contenido[hidden],
       .menu-perfil[hidden] { display: none; }
 
       /* Aparición suave al cargar y al cambiar de vista, igual que .vista
-         en prueba-2.html */
+         en admin.html */
       .contenido,
       .vista { animation: aparecer 0.4s ease; }
       @keyframes aparecer {
@@ -217,7 +217,7 @@
 
       .field { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
 
-      /* prueba-2.html no tiene email ni password, por eso se agregan aquí */
+      /* admin.html no tiene email ni password, por eso se agregan aquí */
       input[type="text"],
       input[type="email"],
       input[type="tel"],
@@ -276,7 +276,7 @@
 
       /* "¿No tienes cuenta? Crea una": un <button> que se ve como link.
          Es <button> y no <a href="#"> porque no lleva a otra página,
-         solo cambia de formulario (igual que .sidebar-item en prueba-2) */
+         solo cambia de formulario (igual que .sidebar-item en admin) */
       .cambiar-vista { margin: 1.5rem 0 0; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
       .link-btn { background: transparent; color: var(--accent); padding: 0; border-radius: 0; text-decoration: underline; text-underline-offset: 3px; }
       .link-btn:hover { background: transparent; color: var(--accent-hover); transform: none; }
@@ -303,7 +303,7 @@
     <header class="topbar">
       <h1 class="topbar-titulo">Mi <span>cuenta</span></h1>
       <div class="topbar-acciones">
-        <!-- Igual que en prueba-2.html: el ícono y el aria-label los pone
+        <!-- Igual que en admin.html: el ícono y el aria-label los pone
              aplicarTema() en cliente.js -->
         <button id="btn-tema" class="btn-round" type="button" aria-label="Cambiar tema">☀</button>
 

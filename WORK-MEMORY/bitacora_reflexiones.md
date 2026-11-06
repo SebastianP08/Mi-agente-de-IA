@@ -157,3 +157,7 @@ Después de eso le dimos el estilo de prueba-2 a la página de cuenta (con modo 
 ## 2026-11-05
 
 Hoy vimos como crear una policy RLS en Supabase, como funciona y como restringir lo que se muestra dependiendo de si alguien es anonimo o alguien ingresado. Ademas vimos el CURL y como inyectar o atacar una pagina que no tiene RLS, por lo que alguien puede ver todos los usuarios registrados, sus correos, datos e ID, y al final se inyectaron usuarios a la base de datos con CURL. Se dejo como curiosidad revisar que es el .env
+
+## 2026-11-06
+
+El día de hoy vimos un poco de mas de la politicas RLS y creamos una nueva tabla para admin, en el que se creo su login y se creo la cuenta, por ahora no es seguro eso es algo que veremos más adelante, y para finalizar estamos haciendo la galeria para que eso sea lo que vera el usuario anonimo
