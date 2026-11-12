@@ -365,6 +365,23 @@
     /* Categorías como pastillas. En claro usan el --majenta-primario de Jaziz */
     .tag { display: inline-block; font-size: 0.75rem; background: var(--tag-bg); color: var(--tag-text); padding: 0.2rem 0.6rem; border-radius: 999px; margin: 0.1rem 0; white-space: nowrap; }
 
+    /* ---------- Tabla de pedidos ---------- */
+
+    .select-estado {
+      font: inherit;
+      font-size: 0.9rem;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.45rem 0.6rem;
+      cursor: pointer;
+    }
+    .select-estado:focus { outline: none; border-color: var(--accent); }
+    /* Mientras se guarda el cambio en Supabase */
+    .select-estado:disabled { opacity: 0.5; cursor: wait; }
+    .col-items { color: var(--text-muted); font-size: 0.85rem; min-width: 180px; }
+
     /* <details> = bloque plegable nativo de HTML, no necesita JS */
     details { margin-top: 1.75rem; }
     summary { cursor: pointer; color: var(--text-muted); font-size: 0.9rem; }
@@ -733,6 +750,7 @@
           <li><button type="button" class="sidebar-item" data-vista="agregar">Agregar</button></li>
           <li><button type="button" class="sidebar-item" data-vista="editar">Editar</button></li>
           <li><button type="button" class="sidebar-item" data-vista="eliminar">Eliminar</button></li>
+          <li><button type="button" class="sidebar-item" data-vista="pedidos">Pedidos</button></li>
         </ul>
       </nav>
     </aside>
@@ -837,6 +855,22 @@
         </div>
       </section>
 
+      <!-- Vista: Pedidos. El admin cambia la etapa con el <select> de cada
+           fila → UPDATE en pedidos_practica. El cliente ve el cambio en
+           pedido.html (el camión avanza) -->
+      <section class="vista" data-vista="pedidos" hidden>
+        <div class="vista-header">
+          <h2 class="vista-titulo">Gestión de <span>pedidos</span></h2>
+          <div class="vista-acciones">
+            <button id="btn-recargar-pedidos" type="button" class="btn-secondary btn-small">Recargar</button>
+          </div>
+        </div>
+        <div class="panel table-wrap">
+          <div id="tabla-pedidos"></div>
+        </div>
+        <div id="notificacion-pedidos" class="message"></div>
+      </section>
+
     </main>
   </div>
 
@@ -847,6 +881,7 @@
        admin.js, por eso tiene que cargarse ANTES que ese archivo -->
   <script src="js/supabaseClient.js"></script>
   <!-- admin.js: lógica CRUD de productos, tema y vistas -->
+  <script src="js/pedidosLocal.js"></script>  <!-- pedidos en localStorage (temporal) -->
   <script src="js/admin.js"></script>
 </body>
 </html>

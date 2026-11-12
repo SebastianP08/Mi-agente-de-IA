@@ -9,6 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Tarjetas, filtros, modal y carrito: el mismo archivo que galeria.html -->
+    <link rel="stylesheet" href="css/catalogo.css">
     <style>
       /* Estilos copiados de admin.html (opción A): solo las reglas que
          usa esta página. Si cambias la paleta allá, cámbiala aquí también */
@@ -24,8 +26,14 @@
         --shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
         --success: #6fcf97;
         --danger: #ff6b6b;
+        /* Estas 4 las necesita catalogo.css (mismos valores que galeria.html) */
+        --border: #4a2333;
+        --card-media: #3d1a29;
+        --tag-bg: #3d1a29;
+        --tag-text: #f2c4cf;
         --header-h: 84px;
         --radius: 20px;
+        --radius-lg: 30px;
         color-scheme: dark;
       }
 
@@ -41,6 +49,10 @@
         --shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
         --success: #2e7d32;
         --danger: #9b1c1c;
+        --border: #ead7d7;
+        --card-media: #e8c9cf;
+        --tag-bg: #f6e3e6;
+        --tag-text: #520d24;
         color-scheme: light;
       }
 
@@ -182,6 +194,19 @@
       /* Sin el "salto" de button:hover: en un menú se vería raro */
       .menu-item:hover { background: var(--surface-2); transform: none; }
       .menu-item--peligro { color: var(--danger); }
+      /* El <a> de "Mis pedidos" se ve igual que los <button> del menú */
+      a.menu-item { text-decoration: none; font-weight: 600; }
+
+      /* ---------- Vista Productos ---------- */
+
+      /* Las otras vistas miden 560px (un formulario); esta lleva una grilla */
+      .vista.vista--ancha { max-width: 1100px; }
+      /* La búsqueda va en la fila de filtros, no en el header como en galería */
+      .vista--ancha .filtros { justify-content: center; margin-bottom: 1.5rem; }
+      /* cliente.html usa radio 10px en botones; el carrito y el modal de la
+         galería usan 20px. Se los devolvemos para que se vean iguales */
+      .carrito-panel button:not(.btn-cantidad):not(.btn-quitar):not(.btn-cerrar-carrito),
+      .btn-agregar, .btn-agregar-modal { border-radius: var(--radius); }
 
       .menu-separador { border: none; border-top: 1px solid var(--surface-2); margin: 0.3rem 0; width: 100%; }
 
@@ -307,6 +332,12 @@
              aplicarTema() en cliente.js -->
         <button id="btn-tema" class="btn-round" type="button" aria-label="Cambiar tema">☀</button>
 
+        <!-- Mismo botón del carrito que galeria.html (mismo id → catalogo.js
+             lo maneja). hidden hasta que haya sesión (mostrarEstadoSesion) -->
+        <button id="btn-abrir-carrito" class="btn-carrito" type="button" aria-label="Abrir carrito" hidden>
+          🛒<span id="carrito-count" class="carrito-count"></span>
+        </button>
+
         <!-- Círculo de perfil + menú. hidden: solo aparece con la sesión
              iniciada (mostrarEstadoSesion). position: relative en .perfil →
              el menú (position: absolute) se abre justo debajo del círculo -->
@@ -324,6 +355,9 @@
             </div>
             <button type="button" class="menu-item" data-ir-vista="inicio">Mi cuenta</button>
             <button type="button" class="menu-item" data-ir-vista="configuracion">Editar datos</button>
+            <button type="button" class="menu-item" data-ir-vista="productos">Productos</button>
+            <!-- Este sí es un <a>: lleva a OTRA página, no cambia de vista -->
+            <a class="menu-item" href="pedido.html">Mis pedidos</a>
             <hr class="menu-separador" />
             <button id="btn-logout" type="button" class="menu-item menu-item--peligro">Cerrar sesión</button>
           </div>
@@ -455,9 +489,56 @@
           </div>
         </section>
 
+        <!-- Vista: Productos. Es el MISMO catálogo de galeria.html: los id
+             (input-busqueda, filtro-categoria, filtro-orden, galeria) son
+             iguales, por eso catalogo.js funciona aquí sin cambios -->
+        <section class="vista vista--ancha" data-vista="productos" hidden>
+          <h2 class="vista-titulo">Nuestros <span>productos</span></h2>
+          <div class="filtros">
+            <input type="search" id="input-busqueda" class="catalogo-control" placeholder="Buscar producto…" autocomplete="off" aria-label="Buscar producto">
+            <select id="filtro-categoria" class="catalogo-control" aria-label="Filtrar por categoría">
+              <option value="">Todas las categorías</option>
+            </select>
+            <select id="filtro-orden" class="catalogo-control" aria-label="Ordenar por">
+              <option value="nombre">Nombre A–Z</option>
+              <option value="nombre-desc">Nombre Z–A</option>
+              <option value="precio">Precio: menor a mayor</option>
+              <option value="precio-desc">Precio: mayor a menor</option>
+            </select>
+          </div>
+          <div id="galeria" class="product-grid"></div>
+        </section>
+
     </main>
 
+    <!-- Panel del carrito y modal: copiados de galeria.html con los mismos id.
+         Van fuera de <main> porque son position: fixed (flotan sobre todo) -->
+    <div id="carrito-overlay" class="carrito-overlay"></div>
+    <aside id="carrito-panel" class="carrito-panel">
+      <div class="carrito-header">
+        <h2>Tu carrito</h2>
+        <button id="btn-cerrar-carrito" class="btn-cerrar-carrito" type="button" aria-label="Cerrar carrito">&times;</button>
+      </div>
+      <div id="carrito-items" class="carrito-items"></div>
+      <div class="carrito-footer">
+        <div class="carrito-total">
+          <span>Total</span>
+          <span id="carrito-total-valor">$ 0</span>
+        </div>
+        <button id="btn-ir-pagar" type="button" onclick="location.href = 'pago.html'">Ir a pagar</button>
+      </div>
+    </aside>
+
+    <div id="modal-overlay" class="modal-overlay">
+      <div class="modal">
+        <div id="modal-media" class="modal-media"></div>
+        <button id="btn-cerrar-modal" class="btn-cerrar-modal" type="button" aria-label="Cerrar">&times;</button>
+        <div id="modal-body" class="modal-body"></div>
+      </div>
+    </div>
+
     <script src="js/supabaseClient.js"></script>
+    <script src="js/catalogo.js"></script>  <!-- catálogo compartido con galeria.html -->
     <script src="js/cliente.js"></script>
   </body>
 </html>

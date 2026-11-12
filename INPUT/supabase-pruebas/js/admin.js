@@ -381,6 +381,7 @@ function mostrarVista(nombreVista) {
   // agregar, editar o borrar)
   if (nombreVista === "productos") traerProductos();
   if (nombreVista === "eliminar") renderizarEliminar();
+  if (nombreVista === "pedidos") traerPedidos();
 }
 
 itemsSidebar.forEach(item => {
@@ -784,3 +785,125 @@ listaEliminar.addEventListener("click", async (e) => {
 // llama mostrarEstadoSesionAdmin() solo cuando confirma que hay sesión
 // de admin válida. Así no pedimos productos a Supabase antes de saber
 // quién está usando la página.
+
+// ---------- Pedidos (el admin cambia la etapa) ----------
+// Mismos valores que el check (...) de la columna estado en sql/pedidos.sql
+// y que ETAPAS en tienda.js. El orden importa: es el orden del camión
+const ESTADOS_PEDIDO = [
+  { valor: 'pagado',     titulo: 'Pago confirmado' },
+  { valor: 'preparando', titulo: 'Preparando' },
+  { valor: 'en_camino',  titulo: 'En camino' },
+  { valor: 'entregado',  titulo: 'Entregado' },
+];
+
+// El nombre y la ciudad de envío los escribe el CLIENTE en pago.html. Si
+// alguien pone <img src=x onerror=...> como nombre y lo pegamos tal cual
+// con innerHTML, ese código correría en el navegador del ADMIN (XSS).
+// Esta función lo vuelve texto inofensivo (misma que en tienda.js)
+function escaparHTML(texto) {
+  return String(texto ?? '')
+    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+}
+
+const tablaPedidos        = document.getElementById('tabla-pedidos');
+const notificacionPedidos = document.getElementById('notificacion-pedidos');
+
+function mostrarMensajePedidos(texto, tipo) {
+  notificacionPedidos.className = 'message message--' + tipo;
+  notificacionPedidos.textContent = texto;
+}
+
+async function traerPedidos() {
+  // POR AHORA desde localStorage (pedidosLocal.js): solo ves los pedidos
+  // hechos en ESTE navegador. Con Supabase, la política "admin ve todos"
+  // (es_admin()) dejará ver los de todos los clientes con la misma consulta
+  const { data, error } = await listarPedidosLocal();
+
+  if (error) {
+    console.log('Error al leer pedidos:', error);
+    tablaPedidos.innerHTML = '<p class="hint">No se pudieron leer los pedidos.</p>';
+    return;
+  }
+
+  if (data.length === 0) {
+    tablaPedidos.innerHTML = '<p class="hint">Todavía no hay pedidos.</p>';
+    return;
+  }
+
+  const filas = data.map((p) => {
+    // "2× Collar, 1× Anillo"
+    const items = p.pedido_items_practica.map((i) => `${i.cantidad}× ${escaparHTML(i.nombre)}`).join(', ');
+
+    // selected en la opción que coincide con el estado guardado.
+    // En el <select>: data-id = cuál pedido; data-anterior = el estado
+    // guardado, para devolverlo si el UPDATE falla
+    const opciones = ESTADOS_PEDIDO.map((e) =>
+      `<option value="${e.valor}" ${e.valor === p.estado ? 'selected' : ''}>${e.titulo}</option>`
+    ).join('');
+
+    return `
+      <tr>
+        <td class="col-id"><a href="pedido.html?id=${p.id}" target="_blank">#${p.id}</a></td>
+        <td>${new Date(p.created_at).toLocaleDateString('es-CO')}</td>
+        <td class="col-name">${escaparHTML(p.nombre_envio)}<br><span class="hint">${escaparHTML(p.ciudad_envio)}</span></td>
+        <td class="col-items">${items}</td>
+        <td class="col-price">${formatearPrecio(p.total)}</td>
+        <td>
+          <select class="select-estado" data-id="${p.id}" data-anterior="${p.estado}" aria-label="Estado del pedido #${p.id}">
+            ${opciones}
+          </select>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  tablaPedidos.innerHTML = `
+    <table class="product-table">
+      <thead>
+        <tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Productos</th><th class="col-price">Total</th><th>Estado</th></tr>
+      </thead>
+      <tbody>${filas}</tbody>
+    </table>
+  `;
+}
+
+async function cambiarEstadoPedido(id, estado) {
+  // POR AHORA en localStorage. Con Supabase será como modificarProducto():
+  // update({ estado }).eq('id', id).select(), y la fecha de la etapa la
+  // pondrá el trigger marcar_fecha_estado()
+  const { data, error } = await cambiarEstadoLocal(id, estado);
+
+  if (error) {
+    console.log('Error al cambiar el estado:', error);
+    return false;
+  }
+  // 0 filas sin error = no existe el pedido (con Supabase: o RLS no dejó)
+  if (data.length === 0) {
+    console.log('No se actualizó ninguna fila.');
+    return false;
+  }
+  return true;
+}
+
+// Delegación: un solo listener para todos los <select> de la tabla.
+// 'change' se dispara cuando eliges otra opción
+tablaPedidos.addEventListener('change', async (e) => {
+  const select = e.target.closest('.select-estado');
+  if (!select) return;
+
+  select.disabled = true;
+  const ok = await cambiarEstadoPedido(select.dataset.id, select.value);
+  select.disabled = false;
+
+  if (ok) {
+    select.dataset.anterior = select.value;
+    const titulo = ESTADOS_PEDIDO.find((x) => x.valor === select.value).titulo;
+    mostrarMensajePedidos(`Pedido #${select.dataset.id} → ${titulo}.`, 'success');
+  } else {
+    select.value = select.dataset.anterior; // vuelve a lo que estaba guardado
+    mostrarMensajePedidos('No se pudo cambiar el estado. Revisa la consola.', 'error');
+  }
+});
+
+document.getElementById('btn-recargar-pedidos').addEventListener('click', traerPedidos);

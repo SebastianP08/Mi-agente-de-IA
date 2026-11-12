@@ -161,3 +161,7 @@ Hoy vimos como crear una policy RLS en Supabase, como funciona y como restringir
 ## 2026-11-06
 
 El día de hoy vimos un poco de mas de la politicas RLS y creamos una nueva tabla para admin, en el que se creo su login y se creo la cuenta, por ahora no es seguro eso es algo que veremos más adelante, y para finalizar estamos haciendo la galeria para que eso sea lo que vera el usuario anonimo
+
+## 2026-11-12
+
+el día de hoy vimos como conectar tanto el apartado de clientes como el de pedidos creando mas policies rls y ya estamos preparando poco a poco migrar esto al proyecto real con nuestro productos reales

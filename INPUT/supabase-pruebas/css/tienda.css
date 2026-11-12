@@ -1,0 +1,337 @@
+/* =====================================================================
+   tienda.css — estilos compartidos de pago.html y pedido.html.
+   Misma paleta Jaziz que admin.html / galeria.html. En vez de copiar el
+   <style> en cada página, las dos enlazan este archivo con <link>: si
+   cambias un color aquí, cambia en las dos.
+   ===================================================================== */
+
+:root {
+  --bg: #1a0a10;
+  --surface: #26101a;
+  --surface-2: #341824;
+  --border: #4a2333;
+  --text: #f2f2f2;
+  --text-muted: #c9a9b3;
+  --accent: #d67474;
+  --accent-hover: #e89a9a;
+  --accent-text: #1a0a10;
+  --card-media: #3d1a29;
+  --tag-bg: #3d1a29;
+  --tag-text: #f2c4cf;
+  --shadow: 0 10px 35px rgba(0, 0, 0, 0.45);
+  --success: #6fcf97;
+  --danger: #ff6b6b;
+  --header-h: 84px;
+  --radius: 20px;
+  --radius-lg: 30px;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f2f2f2;
+  --surface: #ffffff;
+  --surface-2: #f8eeee;
+  --border: #ead7d7;
+  --text: #1a1a1a;
+  --text-muted: #6e5a5f;
+  --accent: #b04a4a;
+  --accent-hover: #7c1437;
+  --accent-text: #ffffff;
+  --card-media: #e8c9cf;
+  --tag-bg: #f6e3e6;
+  --tag-text: #520d24;
+  --shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+  --success: #2e7d32;
+  --danger: #9b1c1c;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+h1, h2, h3, h4 { font-family: "Asap", sans-serif; }
+
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+a { color: var(--accent); }
+
+/* ---------- Botones ---------- */
+
+button, .btn {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  padding: 0.85rem 1.6rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.3s, background 0.2s, color 0.2s;
+}
+button:hover, .btn:hover { background: var(--accent-hover); transform: translateY(-4px) scale(1.02); }
+button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+.btn-secondary:hover { background: var(--accent); color: var(--accent-text); }
+.btn-small { padding: 0.5rem 1.1rem; font-size: 0.85rem; }
+
+.btn-round {
+  width: 50px; height: 50px; padding: 0;
+  border-radius: 50%; font-size: 1.3rem;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ---------- Header ---------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+  background: var(--bg);
+}
+.topbar-titulo { margin: 0; font-size: 1.7rem; font-weight: 700; letter-spacing: -1px; white-space: nowrap; }
+.topbar-titulo span { color: var(--accent); }
+.topbar-acciones { display: flex; align-items: center; gap: 0.75rem; }
+
+/* ---------- Contenido ---------- */
+
+.contenido { max-width: 1100px; margin: 0 auto; padding: 1rem clamp(1rem, 4vw, 3rem) 3rem; }
+.contenido[hidden], [hidden] { display: none !important; }
+
+.vista-titulo { margin: 1rem 0 1.75rem; font-size: clamp(2rem, 4.5vw, 3.2rem); line-height: 0.95; letter-spacing: -2px; }
+.vista-titulo span { color: var(--accent); }
+.subtitulo { margin: -1rem 0 1.75rem; color: var(--text-muted); }
+
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.75rem;
+  box-shadow: var(--shadow);
+}
+.panel h3 { margin: 0 0 1.1rem; font-size: 1.3rem; letter-spacing: -0.5px; }
+.panel + .panel { margin-top: 1.5rem; }
+
+/* Dos columnas: la principal (ancha) y la lateral (resumen). En celular
+   se apilan solas porque el grid usa auto-fit */
+.dos-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+/* position: sticky → el resumen se queda visible mientras bajas */
+.columna-lateral { position: sticky; top: calc(var(--header-h) + 1rem); }
+
+.aviso { text-align: center; max-width: 480px; margin: 3rem auto; }
+.aviso p { color: var(--text-muted); }
+
+/* ---------- Formularios ---------- */
+
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+.form-grid .full { grid-column: 1 / -1; }
+
+.field { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.8rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+
+input[type="text"], input[type="tel"], input[type="email"] {
+  font: inherit;
+  font-size: 0.95rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  transition: border-color 0.2s;
+}
+input:focus { outline: none; border-color: var(--accent); }
+/* :user-invalid = el campo está mal PERO solo después de que la persona
+   lo tocó (así no sale todo en rojo apenas carga la página) */
+input:user-invalid { border-color: var(--danger); }
+
+fieldset { border: none; padding: 0; margin: 0; min-width: 0; }
+
+/* Métodos de pago: radio buttons que se ven como tarjetas */
+.metodos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
+.metodo {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: border-color 0.2s, background 0.2s;
+}
+.metodo input { accent-color: var(--accent); }
+/* :has() = "el label que TIENE adentro un radio marcado". Antes había que
+   hacer esto con JS; ahora CSS lo puede preguntar solo */
+.metodo:has(input:checked) { border-color: var(--accent); background: var(--surface-2); }
+
+.nota { font-size: 0.85rem; color: var(--text-muted); margin: 0.75rem 0 0; }
+
+/* ---------- Resumen / items ---------- */
+
+.item { display: flex; gap: 1rem; align-items: center; padding: 0.85rem 0; border-bottom: 1px solid var(--border); }
+.item:last-child { border-bottom: none; }
+.item img, .item .sin-img {
+  width: 64px; height: 80px; flex-shrink: 0;
+  object-fit: cover; border-radius: 12px; background: var(--card-media);
+}
+.item-info { flex: 1; min-width: 0; }
+.item-info h4 { margin: 0 0 0.25rem; font-size: 1rem; }
+.item-info p { margin: 0.2rem 0; font-size: 0.85rem; color: var(--text-muted); }
+.item-precio { font-family: "Asap", sans-serif; font-weight: 700; white-space: nowrap; text-align: right; }
+
+.fila-total { display: flex; justify-content: space-between; padding: 0.4rem 0; color: var(--text-muted); }
+.fila-total--grande { font-family: "Asap", sans-serif; font-size: 1.35rem; font-weight: 700; color: var(--text); border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 0.9rem; }
+
+.tag { display: inline-block; font-size: 0.72rem; background: var(--tag-bg); color: var(--tag-text); padding: 0.15rem 0.55rem; border-radius: 999px; margin: 0.15rem 0.15rem 0 0; }
+
+.datos-lista { margin: 0; }
+.datos-lista div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+.datos-lista div:last-child { border-bottom: none; }
+.datos-lista dt { font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+.datos-lista dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+
+/* ---------- Mensajes ---------- */
+
+.message { margin-top: 1.25rem; padding: 0.85rem 1.1rem; border-radius: 12px; background: var(--surface-2); border-left: 4px solid var(--accent); }
+.message:empty { display: none; }
+.message--error { border-left-color: var(--danger); }
+.message--success { border-left-color: var(--success); }
+
+/* ---------- Seguimiento del pedido (el camión) ---------- */
+
+.estado-cabecera { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.estado-titulo { margin: 0; font-size: 1.6rem; }
+.estado-titulo--ok { color: var(--success); }
+.estado-mensaje { margin: 0.35rem 0 0; color: var(--text-muted); }
+
+/* position: relative → la pista (absolute) se ubica respecto al tracker */
+.tracker { margin-top: 2rem; position: relative; }
+
+/* La pista va del centro del 1er paso al centro del 4°. Cada paso ocupa
+   1/4 del ancho, así que su centro está a 12.5% del borde → left/right 12.5%.
+   top: 44px (espacio del camión) + 22px (mitad del círculo) − 3px (mitad
+   de la pista) = 63px → queda justo por el centro de los círculos */
+.tracker-pista {
+  position: absolute;
+  left: 12.5%;
+  right: 12.5%;
+  top: 63px;
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+}
+/* --progreso lo pone pedido.js (0%, 33%, 66% o 100%). El relleno y el
+   camión leen la MISMA variable, así siempre van juntos */
+.tracker-relleno {
+  position: absolute; inset: 0 auto 0 0;
+  width: var(--progreso, 0%);
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width 1.2s ease;
+}
+.tracker-camion {
+  position: absolute;
+  left: var(--progreso, 0%);
+  bottom: 28px;            /* encima del círculo del paso, sin taparlo */
+  transform: translateX(-50%);
+  transition: left 1.2s ease;
+}
+.tracker-camion svg { display: block; width: 58px; height: auto; }
+.camion-caja { fill: var(--accent); }
+.camion-cabina { fill: var(--accent-hover); }
+.camion-ventana { fill: var(--surface); }
+.camion-rueda { fill: var(--text); }
+.camion-rin { fill: var(--surface); }
+
+/* Solo cuando está "en camino" el camión rebota y las ruedas giran */
+.tracker[data-estado="en_camino"] .tracker-camion svg { animation: rebote 0.6s ease-in-out infinite; }
+.tracker[data-estado="en_camino"] .camion-humo { opacity: 1; }
+.camion-humo { fill: var(--text-muted); opacity: 0; animation: humo 1.2s linear infinite; }
+@keyframes rebote { 50% { transform: translateY(-3px); } }
+@keyframes humo { from { transform: translateX(0); } to { transform: translateX(-10px); opacity: 0; } }
+
+.tracker-pasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding-top: 44px;       /* espacio para el camión */
+  position: relative;
+}
+.paso { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.35rem; padding: 0 0.25rem; }
+.paso-icono {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 3px solid var(--border);
+  position: relative;      /* queda encima de la pista */
+  z-index: 1;
+  transition: background 0.4s, border-color 0.4s, color 0.4s;
+}
+.paso-icono svg { width: 20px; height: 20px; }
+.paso strong { font-size: 0.9rem; margin-top: 0.3rem; }
+.paso time { font-size: 0.75rem; color: var(--text-muted); min-height: 1em; }
+
+.paso--hecho .paso-icono { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.paso--actual .paso-icono { background: var(--accent); border-color: var(--accent); color: var(--accent-text); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 25%, transparent); }
+.paso--actual strong { color: var(--accent); }
+.paso--pendiente strong { color: var(--text-muted); font-weight: 600; }
+
+/* ---------- Lista "Mis pedidos" ---------- */
+
+.lista-pedidos { display: flex; flex-direction: column; gap: 1rem; }
+.pedido-fila {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  text-decoration: none;
+  transition: transform 0.3s;
+}
+.pedido-fila:hover { transform: translateY(-4px); }
+.pedido-fila img, .pedido-fila .sin-img { width: 56px; height: 70px; object-fit: cover; border-radius: 10px; background: var(--card-media); flex-shrink: 0; }
+.pedido-fila-info { flex: 1; min-width: 0; }
+.pedido-fila-info h4 { margin: 0 0 0.2rem; }
+.pedido-fila-info p { margin: 0; font-size: 0.85rem; color: var(--text-muted); }
+
+.badge-estado { font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.7rem; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent); white-space: nowrap; }
+.badge-estado--entregado { border-color: var(--success); color: var(--success); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- Celular ---------- */
+
+@media (max-width: 760px) {
+  .topbar-titulo { font-size: 1.3rem; }
+  .dos-columnas { grid-template-columns: 1fr; }
+  .columna-lateral { position: static; }
+  .panel { padding: 1.1rem; }
+  .paso strong { font-size: 0.75rem; }
+  .paso time { font-size: 0.68rem; }
+  .paso-icono { width: 36px; height: 36px; }
+  .tracker-pista { top: 59px; }   /* 44 + 18 (mitad del círculo de 36) − 3 */
+  .tracker-camion { bottom: 24px; }
+  .tracker-camion svg { width: 44px; }
+}

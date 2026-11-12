@@ -254,6 +254,11 @@ function mostrarVista(nombre) {
     vista.hidden = vista.dataset.vista !== nombre;
   });
   cerrarMenuPerfil(); // si se eligió desde el menú, el menú se cierra solo
+
+  // Igual que en admin.js: la vista de productos se pide de nuevo cada vez
+  // que entras, así siempre muestra lo último que subió el admin
+  // cargarProductos() viene de catalogo.js (el mismo que usa la galería)
+  if (nombre === 'productos') cargarProductos();
 }
 
 // "Mi cuenta" y "Editar datos" del menú, y "Editar mis datos" en Inicio
@@ -364,6 +369,7 @@ async function mostrarEstadoSesion() {
   document.getElementById('zona-auth').hidden = haySesion;
   document.getElementById('zona-cuenta').hidden = !haySesion;
   document.getElementById('perfil').hidden = !haySesion;
+  document.getElementById('btn-abrir-carrito').hidden = !haySesion;
   cerrarMenuPerfil(); // al cerrar sesión desde el menú, que no quede abierto
   // Borra los mensajes de la sesión anterior
   document.getElementById('notificacion-perfil').textContent = '';
@@ -397,5 +403,12 @@ async function mostrarEstadoSesion() {
   llenarFormularioPerfil(cliente);
 }
 
-// Al cargar la página, revisa si ya había una sesión activa
+// ---------- Arranque ----------
+// 1. El carrito guardado (localStorage) se dibuja de una vez: así el número
+//    del 🛒 aparece aunque no hayas entrado a Productos
+// 2. cargarProductos() (catalogo.js) trae los productos y vuelve a dibujar
+//    el carrito, ahora con nombres, fotos y precios
+// 3. Revisa si ya había una sesión activa
+renderizarCarrito();
+cargarProductos();
 mostrarEstadoSesion();
