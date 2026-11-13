@@ -165,3 +165,50 @@ El día de hoy vimos un poco de mas de la politicas RLS y creamos una nueva tabl
 ## 2026-11-12
 
 el día de hoy vimos como conectar tanto el apartado de clientes como el de pedidos creando mas policies rls y ya estamos preparando poco a poco migrar esto al proyecto real con nuestro productos reales
+
+## 2026-11-13
+
+El día de hoy vimos un poco de sql como funciona y lo util que es trabajarlo con IA ya que te puede ayudar a hacer esos cambios en supabase rapidamente con código
+
+### [TEMPORAL — borrar después] Resumen para quien no vino a clase
+
+**Qué hicimos hoy**
+1. Sacamos la estructura de la base de datos como JSON (con el SQL de abajo) y se la pasamos a la IA como contexto para analizarla.
+2. Protegimos `clientes_practica`: activamos RLS, cada cliente solo ve y edita su propia fila, y con `grant update (nombre, telefono, direccion)` el cliente ya no puede cambiar su `correo` ni su `rol`.
+3. Pasamos los pedidos a 3 tablas: `pedidos` (la cabecera), `detalles_pedidos` (los productos) e `historial_estados_pedido`.
+4. Creamos índices: un índice único parcial para que cada cliente tenga un solo carrito, y otros en las foreign keys.
+5. Activamos RLS y permisos por columna en las 3 tablas de pedidos. Queda pendiente el SQL de las funciones de la guía (`confirmar_pedido()`, etc.).
+6. Hicimos pruebas de seguridad desde la consola del navegador.
+
+**Idea clave:** RLS controla qué **filas** puede tocar cada usuario. `grant` por columna controla qué **columnas** puede cambiar. Se necesitan las dos.
+
+**SQL para sacar el JSON de tu esquema.** Pégalo en Supabase → SQL Editor → Run, copia el resultado y pásaselo a la IA:
+
+```sql
+select json_build_object(
+  'columnas', (select json_agg(json_build_object('tabla', table_name, 'columna', column_name, 'tipo', data_type, 'nulo', is_nullable, 'default', column_default) order by table_name, ordinal_position)
+               from information_schema.columns where table_schema = 'public'),
+  'restricciones', (select json_agg(json_build_object('tabla', conrelid::regclass::text, 'nombre', conname, 'definicion', pg_get_constraintdef(oid)))
+                    from pg_constraint where connamespace = 'public'::regnamespace),
+  'rls', (select json_agg(json_build_object('tabla', relname, 'rls_activo', relrowsecurity))
+          from pg_class where relnamespace = 'public'::regnamespace and relkind = 'r'),
+  'politicas', (select json_agg(json_build_object('tabla', tablename, 'nombre', policyname, 'comando', cmd, 'roles', roles, 'using', qual, 'with_check', with_check))
+                from pg_policies where schemaname = 'public')
+) as esquema;
+```
+
+**Fragmento de prueba de seguridad (consola del navegador).** ⚠️ **Adáptalo a tu proyecto:** cambia los nombres de tablas y columnas por los tuyos y abre la consola en una página que cargue tu cliente de Supabase (aquí se llama `db`). Va dentro de `(async () => { ... })()` para que sus variables no choquen con las de tus scripts; si no, sale `Identifier '...' has already been declared`.
+
+```js
+(async () => {
+  const { data: u } = await db.auth.getUser();
+  if (!u.user) return console.error('Inicia sesión primero');
+  const id = u.user.id;
+  // Cada una debería FALLAR (error) o devolver data: []
+  console.log('Cambiarme el rol:', await db.from('clientes_practica').update({ rol: 'admin' }).eq('id', id).select());
+  console.log('Ver otros perfiles (solo debe salir el mío):', await db.from('clientes_practica').select('*'));
+  console.log('Pedido a nombre de otro:', await db.from('pedidos').insert({ cliente_id: '00000000-0000-0000-0000-000000000000' }).select());
+})();
+```
+
+Los archivos SQL del día están en `INPUT/supabase-pruebas/sql/` (`clientes.sql` y `pedidos_rls.sql`).
