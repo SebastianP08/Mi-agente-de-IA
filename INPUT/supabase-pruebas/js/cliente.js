@@ -176,7 +176,7 @@ document.getElementById('form-login').addEventListener('submit', async (event) =
 
   if (usuario) {
     form.reset();
-    mostrarEstadoSesion(); // definida en la sección 5
+    mostrarEstadoSesion(); // definida en la sección 5 (también carga el carrito)
   } else {
     document.getElementById('estado-sesion').textContent =
       'Correo o contraseña incorrectos.';
@@ -185,7 +185,7 @@ document.getElementById('form-login').addEventListener('submit', async (event) =
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
   await db.auth.signOut();
-  mostrarEstadoSesion();
+  mostrarEstadoSesion(); // sin sesión → vacía el carrito local (paso 8)
 });
 
 // ---------- Perfil del cliente (READ + UPDATE) ----------
@@ -378,14 +378,25 @@ async function mostrarEstadoSesion() {
   if (!haySesion) {
     idClienteActual = null;
     estado.textContent = 'No has iniciado sesión.';
+    // Paso 8: sesión cerrada → se limpia la pantalla (el carrito sigue en Supabase)
+    vaciarCarritoLocal();
     return;
   }
 
   // El correo sale de Auth, así el menú lo muestra aunque falle la lectura
   document.getElementById('menu-correo').textContent = data.user.email;
 
-  // Siempre se entra por Inicio
-  mostrarVista('inicio');
+  // Se entra por Inicio, salvo que la URL pida otra vista:
+  // cliente.html?vista=productos (así llegan "Seguir comprando" de pago.html
+  // y "Productos" del menú de perfil, sin pasar por galeria.html).
+  // Solo se aceptan vistas que existen; cualquier otro valor → Inicio.
+  const vistaPedida = new URLSearchParams(location.search).get('vista');
+  const vistasValidas = ['inicio', 'configuracion', 'productos'];
+  mostrarVista(vistasValidas.includes(vistaPedida) ? vistaPedida : 'inicio');
+
+  // Paso 8: con sesión → trae el carrito que este cliente tenía en Supabase.
+  // Va antes de leerCliente() para que un fallo al leer el perfil no lo salte.
+  cargarCarritoDesdeBD();
 
   // Primero LEER, después mostrar: las dos vistas se llenan con lo que hay
   // en Supabase, no con lo que se escribió en el login
@@ -409,6 +420,9 @@ async function mostrarEstadoSesion() {
 // 2. cargarProductos() (catalogo.js) trae los productos y vuelve a dibujar
 //    el carrito, ahora con nombres, fotos y precios
 // 3. Revisa si ya había una sesión activa
+// 4. Paso 5: productosListos = la promesa de cargarProductos(). Aquí NO se
+//    llama cargarCarritoDesdeBD(): ya lo hace mostrarEstadoSesion() (paso 8),
+//    y dos cargas al mismo tiempo podrían duplicar productos en el carrito
 renderizarCarrito();
-cargarProductos();
+const productosListos = cargarProductos();
 mostrarEstadoSesion();

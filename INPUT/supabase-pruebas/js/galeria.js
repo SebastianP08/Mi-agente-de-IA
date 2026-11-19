@@ -24,5 +24,8 @@ try {
 aplicarTema();
 
 // ---------- Arranque ----------
+// Paso 5: primero los productos (la promesa queda en productosListos) y
+// después el carrito de Supabase, que espera esa promesa antes de dibujarse.
 renderizarCarrito();
-cargarProductos();
+const productosListos = cargarProductos();
+cargarCarritoDesdeBD();

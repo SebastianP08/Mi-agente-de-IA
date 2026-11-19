@@ -5,7 +5,8 @@
 // =====================================================================
 
 // ---------- Precios ----------
-// Mismas fórmulas que galeria.js: si cambian allá, cambiarlas aquí
+// Mismas fórmulas que catalogo.js: si cambian allá, cambiarlas aquí.
+// Solo para MOSTRAR: el precio que se cobra lo fija la base de datos.
 function formatearPrecio(valor) {
   return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(valor);
 }
@@ -36,20 +37,23 @@ function escaparHTML(texto) {
 
 // ---------- Etapas del pedido ----------
 // El orden de este array ES el orden del camión. "valor" coincide con el
-// check (...) de la columna estado en sql/pedidos.sql, y "campoFecha" con
-// la columna donde el trigger guarda cuándo se llegó a esa etapa.
+// check de pedidos.estado (sql/current_schema.json). 'carrito' no es una
+// etapa (todavía no se compró) y 'cancelado' va aparte: no es un paso del
+// camión, corta el camino en cualquier punto.
 const ETAPAS = [
-  { valor: 'pagado',     titulo: 'Pago confirmado', campoFecha: 'created_at',
-    mensaje: 'Recibimos tu pago. Pronto empezaremos a preparar tu pedido.' },
-  { valor: 'preparando', titulo: 'Preparando',      campoFecha: 'preparando_at',
-    mensaje: 'Estamos empacando tus productos.' },
-  { valor: 'en_camino',  titulo: 'En camino',       campoFecha: 'en_camino_at',
+  { valor: 'confirmado', titulo: 'Pedido confirmado',
+    mensaje: 'Recibimos tu pedido. Pronto lo vamos a despachar.' },
+  { valor: 'enviado',    titulo: 'Enviado',
     mensaje: 'Tu pedido salió y va rumbo a tu dirección.' },
-  { valor: 'entregado',  titulo: 'Entregado',       campoFecha: 'entregado_at',
+  { valor: 'entregado',  titulo: 'Entregado',
     mensaje: 'Tu pedido fue entregado. ¡Que lo disfrutes!' },
 ];
 
+const ETAPA_CANCELADO = { valor: 'cancelado', titulo: 'Cancelado',
+  mensaje: 'Este pedido fue cancelado. Si tienes dudas, escríbenos.' };
+
 function etapaDe(estado) {
+  if (estado === 'cancelado') return ETAPA_CANCELADO;
   return ETAPAS.find(e => e.valor === estado) ?? ETAPAS[0];
 }
 

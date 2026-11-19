@@ -382,6 +382,8 @@ function mostrarVista(nombreVista) {
   if (nombreVista === "productos") traerProductos();
   if (nombreVista === "eliminar") renderizarEliminar();
   if (nombreVista === "pedidos") traerPedidos();
+  if (nombreVista === "clientes") traerClientes();
+  if (nombreVista === "finanzas") traerFinanzas();
 }
 
 itemsSidebar.forEach(item => {
@@ -787,23 +789,45 @@ listaEliminar.addEventListener("click", async (e) => {
 // quién está usando la página.
 
 // ---------- Pedidos (el admin cambia la etapa) ----------
-// Mismos valores que el check (...) de la columna estado en sql/pedidos.sql
-// y que ETAPAS en tienda.js. El orden importa: es el orden del camión
-const ESTADOS_PEDIDO = [
-  { valor: 'pagado',     titulo: 'Pago confirmado' },
-  { valor: 'preparando', titulo: 'Preparando' },
-  { valor: 'en_camino',  titulo: 'En camino' },
-  { valor: 'entregado',  titulo: 'Entregado' },
-];
+// Ahora desde Supabase (antes: localStorage con pedidosLocal.js).
+// Los mismos valores del check de pedidos.estado (sql/current_schema.json).
+// 'carrito' no aparece: un carrito abierto todavía no es un pedido.
+const ESTADOS_PEDIDO = {
+  confirmado: 'Confirmado',
+  enviado:    'Enviado',
+  entregado:  'Entregado',
+  cancelado:  'Cancelado',
+};
 
-// El nombre y la ciudad de envío los escribe el CLIENTE en pago.html. Si
-// alguien pone <img src=x onerror=...> como nombre y lo pegamos tal cual
-// con innerHTML, ese código correría en el navegador del ADMIN (XSS).
-// Esta función lo vuelve texto inofensivo (misma que en tienda.js)
+// Las mismas transiciones que permite el trigger validar_transicion_estado
+// (sql/trigger_order_status.sql). El <select> solo ofrece estas; si alguien
+// fuerza otra, la base la rechaza igual. 'entregado' y 'cancelado' son finales.
+const SIGUIENTES_ESTADOS = {
+  confirmado: ['enviado', 'cancelado'],
+  enviado:    ['entregado', 'cancelado'],
+  entregado:  [],
+  cancelado:  [],
+};
+
+// Texto del botón que lleva a cada estado
+const ACCION_ESTADO = {
+  enviado:   'Marcar enviado',
+  entregado: 'Marcar entregado',
+  cancelado: 'Cancelar',
+};
+
+// Dirección, teléfono y observación los escribe el CLIENTE. Si alguien pone
+// <img src=x onerror=...> y lo pegamos tal cual con innerHTML, ese código
+// correría en el navegador del ADMIN (XSS). Esto lo vuelve texto inofensivo.
 function escaparHTML(texto) {
   return String(texto ?? '')
     .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+}
+
+function formatearFechaHora(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
 const tablaPedidos        = document.getElementById('tabla-pedidos');
@@ -815,44 +839,78 @@ function mostrarMensajePedidos(texto, tipo) {
 }
 
 async function traerPedidos() {
-  // POR AHORA desde localStorage (pedidosLocal.js): solo ves los pedidos
-  // hechos en ESTE navegador. Con Supabase, la política "admin ve todos"
-  // (es_admin()) dejará ver los de todos los clientes con la misma consulta
-  const { data, error } = await listarPedidosLocal();
+  tablaPedidos.innerHTML = '<p class="hint">Cargando pedidos…</p>';
 
+  // Dos consultas en paralelo (Promise.all = las dos a la vez, no una tras otra):
+  // 1) pedidos con su cliente y sus líneas, gracias a las FK:
+  //    pedidos.cliente_id → clientes_practica, detalles_pedidos.pedido_id → pedidos,
+  //    detalles_pedidos.producto_id → productos_practica
+  // 2) el total de cada pedido, que calcula la vista (el navegador NO suma precios)
+  // RLS deja al admin ver todos: ver_pedidos, ver_detalles y admin_ve_clientes.
+  const [respPedidos, respTotales] = await Promise.all([
+    db.from('pedidos')
+      .select(`id, estado, envio, direccion, telefono, observacion, created_at, confirmado_en,
+               clientes_practica(nombre, correo),
+               detalles_pedidos(cantidad, productos_practica(nombre))`)
+      .neq('estado', 'carrito')
+      .order('id', { ascending: false }),
+    db.from('pedidos_con_total')
+      .select('id, total')
+      .neq('estado', 'carrito'),
+  ]);
+
+  const error = respPedidos.error || respTotales.error;
   if (error) {
     console.log('Error al leer pedidos:', error);
-    tablaPedidos.innerHTML = '<p class="hint">No se pudieron leer los pedidos.</p>';
+    tablaPedidos.innerHTML = '<p class="hint">No se pudieron leer los pedidos. Revisa la consola.</p>';
     return;
   }
 
-  if (data.length === 0) {
-    tablaPedidos.innerHTML = '<p class="hint">Todavía no hay pedidos.</p>';
+  const pedidos = respPedidos.data;
+  if (pedidos.length === 0) {
+    tablaPedidos.innerHTML = '<p class="hint">Todavía no hay pedidos confirmados.</p>';
     return;
   }
 
-  const filas = data.map((p) => {
+  // { id_pedido: total } para buscar el total de cada fila sin recorrer la lista
+  const totales = {};
+  for (const t of respTotales.data) totales[t.id] = t.total;
+
+  const filas = pedidos.map((p) => {
+    const cliente = p.clientes_practica ?? {};
     // "2× Collar, 1× Anillo"
-    const items = p.pedido_items_practica.map((i) => `${i.cantidad}× ${escaparHTML(i.nombre)}`).join(', ');
+    const items = p.detalles_pedidos
+      .map((d) => `${d.cantidad}× ${escaparHTML(d.productos_practica?.nombre ?? 'Producto borrado')}`)
+      .join(', ');
 
-    // selected en la opción que coincide con el estado guardado.
-    // En el <select>: data-id = cuál pedido; data-anterior = el estado
-    // guardado, para devolverlo si el UPDATE falla
-    const opciones = ESTADOS_PEDIDO.map((e) =>
-      `<option value="${e.valor}" ${e.valor === p.estado ? 'selected' : ''}>${e.titulo}</option>`
+    const entrega = p.envio
+      ? `Envío a domicilio<br><span class="hint">${escaparHTML(p.direccion)} · ${escaparHTML(p.telefono)}</span>`
+      : 'Recoge en tienda';
+    const observacion = p.observacion
+      ? `<br><span class="hint">“${escaparHTML(p.observacion)}”</span>`
+      : '';
+
+    // Estado actual como etiqueta de color + un botón por cada estado al que
+    // puede pasar. En entregado / cancelado no hay botones (son finales).
+    // (Antes era un <select>: sus opciones las dibuja el sistema operativo y
+    // casi no se pueden estilizar.)
+    const botones = SIGUIENTES_ESTADOS[p.estado].map((valor) =>
+      `<button type="button" class="btn-estado btn-estado--${valor}" data-id="${p.id}" data-estado="${valor}">${ACCION_ESTADO[valor]}</button>`
     ).join('');
 
     return `
       <tr>
-        <td class="col-id"><a href="pedido.html?id=${p.id}" target="_blank">#${p.id}</a></td>
-        <td>${new Date(p.created_at).toLocaleDateString('es-CO')}</td>
-        <td class="col-name">${escaparHTML(p.nombre_envio)}<br><span class="hint">${escaparHTML(p.ciudad_envio)}</span></td>
+        <td class="col-id">#${p.id}</td>
+        <td>${formatearFechaHora(p.confirmado_en)}</td>
+        <td class="col-name">${escaparHTML(cliente.nombre || 'Sin nombre')}<br><span class="hint">${escaparHTML(cliente.correo)}</span></td>
         <td class="col-items">${items}</td>
-        <td class="col-price">${formatearPrecio(p.total)}</td>
-        <td>
-          <select class="select-estado" data-id="${p.id}" data-anterior="${p.estado}" aria-label="Estado del pedido #${p.id}">
-            ${opciones}
-          </select>
+        <td>${entrega}${observacion}</td>
+        <td class="col-price">${formatearPrecio(totales[p.id] ?? 0)}</td>
+        <td class="col-estado">
+          <div class="acciones-estado">
+            <span class="estado-pedido estado-pedido--${p.estado}">${ESTADOS_PEDIDO[p.estado]}</span>
+            ${botones}
+          </div>
         </td>
       </tr>
     `;
@@ -861,49 +919,263 @@ async function traerPedidos() {
   tablaPedidos.innerHTML = `
     <table class="product-table">
       <thead>
-        <tr><th>Pedido</th><th>Fecha</th><th>Cliente</th><th>Productos</th><th class="col-price">Total</th><th>Estado</th></tr>
+        <tr><th>Pedido</th><th>Confirmado</th><th>Cliente</th><th>Productos</th><th>Entrega</th><th class="col-price">Total</th><th>Estado</th></tr>
       </thead>
       <tbody>${filas}</tbody>
     </table>
   `;
 }
 
+// Devuelve null si salió bien, o el mensaje de error para mostrar.
 async function cambiarEstadoPedido(id, estado) {
-  // POR AHORA en localStorage. Con Supabase será como modificarProducto():
-  // update({ estado }).eq('id', id).select(), y la fecha de la etapa la
-  // pondrá el trigger marcar_fecha_estado()
-  const { data, error } = await cambiarEstadoLocal(id, estado);
+  // Como modificarProducto(): update + .select() para detectar 0 filas.
+  // grant update (estado) deja tocar solo esa columna; la política
+  // admin_actualiza_estado deja pasar solo al admin; el trigger valida la
+  // transición y otro trigger guarda el cambio en historial_estados_pedido.
+  const { data, error } = await db
+    .from('pedidos')
+    .update({ estado })
+    .eq('id', id)
+    .select();
 
   if (error) {
     console.log('Error al cambiar el estado:', error);
-    return false;
+    return error.message; // p. ej. 'Transicion de estado no permitida: entregado -> enviado'
   }
-  // 0 filas sin error = no existe el pedido (con Supabase: o RLS no dejó)
+  // 0 filas sin error = RLS no dejó (o el pedido no existe)
   if (data.length === 0) {
-    console.log('No se actualizó ninguna fila.');
-    return false;
+    console.log('No se actualizó ninguna fila (¿RLS?).');
+    return 'No se actualizó el pedido. Revisa la consola.';
   }
-  return true;
+  return null;
 }
 
-// Delegación: un solo listener para todos los <select> de la tabla.
-// 'change' se dispara cuando eliges otra opción
-tablaPedidos.addEventListener('change', async (e) => {
-  const select = e.target.closest('.select-estado');
-  if (!select) return;
+// Delegación: un solo listener para todos los botones de estado de la tabla
+tablaPedidos.addEventListener('click', async (e) => {
+  const btn = e.target.closest('.btn-estado');
+  if (!btn) return;
 
-  select.disabled = true;
-  const ok = await cambiarEstadoPedido(select.dataset.id, select.value);
-  select.disabled = false;
+  const { id, estado } = btn.dataset;
 
-  if (ok) {
-    select.dataset.anterior = select.value;
-    const titulo = ESTADOS_PEDIDO.find((x) => x.valor === select.value).titulo;
-    mostrarMensajePedidos(`Pedido #${select.dataset.id} → ${titulo}.`, 'success');
-  } else {
-    select.value = select.dataset.anterior; // vuelve a lo que estaba guardado
-    mostrarMensajePedidos('No se pudo cambiar el estado. Revisa la consola.', 'error');
+  // Cancelar es final (el trigger no deja salir de 'cancelado'): se confirma antes
+  if (estado === 'cancelado' && !confirm(`¿Cancelar el pedido #${id}? No se puede deshacer.`)) return;
+
+  // Deshabilita los botones de ESA fila mientras se guarda (evita doble clic)
+  const fila = btn.closest('tr');
+  fila.querySelectorAll('.btn-estado').forEach((b) => { b.disabled = true; });
+
+  const error = await cambiarEstadoPedido(id, estado);
+
+  if (error) {
+    fila.querySelectorAll('.btn-estado').forEach((b) => { b.disabled = false; });
+    mostrarMensajePedidos('No se pudo cambiar el estado: ' + error, 'error');
+    return;
   }
+
+  mostrarMensajePedidos(`Pedido #${id} → ${ESTADOS_PEDIDO[estado]}.`, 'success');
+  // Se vuelve a dibujar la tabla: así la fila muestra el NUEVO estado y los
+  // botones de lo que sigue (o ninguno si llegó a entregado / cancelado)
+  traerPedidos();
 });
 
 document.getElementById('btn-recargar-pedidos').addEventListener('click', traerPedidos);
+
+
+// ---------- Mis clientes ----------
+const tablaClientes = document.getElementById('tabla-clientes');
+
+async function traerClientes() {
+  tablaClientes.innerHTML = '<p class="hint">Cargando clientes…</p>';
+
+  // La política admin_ve_clientes deja al admin leer todas las filas.
+  // pedidos(estado, confirmado_en) viene anidado por la FK pedidos.cliente_id.
+  const { data, error } = await db
+    .from('clientes_practica')
+    .select('id, nombre, correo, telefono, direccion, created_at, pedidos(estado, confirmado_en)')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.log('Error al leer clientes:', error);
+    tablaClientes.innerHTML = '<p class="hint">No se pudieron leer los clientes. Revisa la consola.</p>';
+    return;
+  }
+
+  if (data.length === 0) {
+    tablaClientes.innerHTML = '<p class="hint">Todavía no hay clientes registrados.</p>';
+    return;
+  }
+
+  const filas = data.map((c) => {
+    // Solo cuentan los pedidos de verdad (no el carrito abierto)
+    const pedidos = c.pedidos.filter((p) => p.estado !== 'carrito');
+    const ultimo = pedidos
+      .map((p) => p.confirmado_en)
+      .filter(Boolean)
+      .sort()
+      .at(-1); // fechas ISO: ordenadas como texto quedan en orden cronológico
+
+    return `
+      <tr>
+        <td class="col-name">${escaparHTML(c.nombre || 'Sin nombre')}<br><span class="hint">${escaparHTML(c.correo)}</span></td>
+        <td>${escaparHTML(c.telefono || '—')}</td>
+        <td>${escaparHTML(c.direccion || '—')}</td>
+        <td>${new Date(c.created_at).toLocaleDateString('es-CO')}</td>
+        <td class="col-num">${pedidos.length}</td>
+        <td>${formatearFechaHora(ultimo)}</td>
+      </tr>
+    `;
+  }).join('');
+
+  tablaClientes.innerHTML = `
+    <table class="product-table">
+      <thead>
+        <tr><th>Cliente</th><th>Teléfono</th><th>Dirección</th><th>Registro</th><th class="col-num">Pedidos</th><th>Último pedido</th></tr>
+      </thead>
+      <tbody>${filas}</tbody>
+    </table>
+  `;
+}
+
+document.getElementById('btn-recargar-clientes').addEventListener('click', traerClientes);
+
+
+// ---------- Finanzas ----------
+// Números resumidos de la tienda. Solo LEE (RLS deja al admin ver todo).
+// Los totales de cada pedido salen de la vista pedidos_con_total (los
+// calcula la base); aquí solo se suman para el resumen.
+const ESTADOS_VENTA = ['confirmado', 'enviado', 'entregado']; // los cancelados no son ingreso
+
+function tarjetaKpi(etiqueta, valor, detalle = '') {
+  return `
+    <div class="kpi">
+      <span class="kpi-etiqueta">${etiqueta}</span>
+      <span class="kpi-valor">${valor}</span>
+      ${detalle ? `<span class="kpi-detalle">${detalle}</span>` : ''}
+    </div>
+  `;
+}
+
+async function traerFinanzas() {
+  const kpis = document.getElementById('kpis-finanzas');
+  kpis.innerHTML = '<p class="hint">Cargando…</p>';
+
+  // Cuatro consultas a la vez:
+  // 1) cuántos clientes (count exacto, head: true = sin traer las filas)
+  // 2) estado y total de cada pedido (incluye carritos para contarlos aparte)
+  // 3) las líneas vendidas: pedidos!inner + .in('pedidos.estado', …) filtra
+  //    las líneas por el estado de SU pedido (solo ventas reales)
+  // 4) los productos, para saber cuántos están agotados
+  const [respClientes, respPedidos, respLineas, respProductos] = await Promise.all([
+    db.from('clientes_practica').select('id', { count: 'exact', head: true }),
+    db.from('pedidos_con_total').select('estado, total'),
+    db.from('detalles_pedidos')
+      .select('producto_id, cantidad, precio_unitario, productos_practica(nombre), pedidos!inner(estado)')
+      .in('pedidos.estado', ESTADOS_VENTA),
+    db.from('productos_practica').select('id, unidades, disponible'),
+  ]);
+
+  const error = respClientes.error || respPedidos.error || respLineas.error || respProductos.error;
+  if (error) {
+    console.log('Error al leer finanzas:', error);
+    kpis.innerHTML = '<p class="hint">No se pudieron leer los datos. Revisa la consola.</p>';
+    return;
+  }
+
+  // --- Pedidos por estado ---
+  const conteo = { carrito: 0, confirmado: 0, enviado: 0, entregado: 0, cancelado: 0 };
+  let ingresos = 0;
+  for (const p of respPedidos.data) {
+    conteo[p.estado] = (conteo[p.estado] ?? 0) + 1;
+    if (ESTADOS_VENTA.includes(p.estado)) ingresos += p.total;
+  }
+  const ventas = ESTADOS_VENTA.reduce((s, e) => s + conteo[e], 0);
+  const pedidosHechos = ventas + conteo.cancelado;
+  const ticketPromedio = ventas > 0 ? Math.round(ingresos / ventas) : 0;
+
+  // --- Productos ---
+  const unidadesVendidas = respLineas.data.reduce((s, l) => s + l.cantidad, 0);
+  const agotados = respProductos.data.filter((p) => !p.disponible || (p.unidades ?? 0) <= 0).length;
+
+  kpis.innerHTML = [
+    tarjetaKpi('Ingresos', formatearPrecio(ingresos), `${ventas} pedido(s) vendidos`),
+    tarjetaKpi('Clientes', respClientes.count ?? 0, 'registrados'),
+    tarjetaKpi('Pedidos hechos', pedidosHechos, `${conteo.cancelado} cancelado(s)`),
+    tarjetaKpi('Ticket promedio', formatearPrecio(ticketPromedio), 'por pedido vendido'),
+    tarjetaKpi('Unidades vendidas', unidadesVendidas),
+    tarjetaKpi('Carritos abiertos', conteo.carrito, 'aún sin confirmar'),
+    tarjetaKpi('Productos', respProductos.data.length, `${agotados} agotado(s) o no disponible(s)`),
+  ].join('');
+
+  renderizarEstadosFinanzas(conteo, pedidosHechos);
+  renderizarTopProductos(respLineas.data);
+}
+
+// Barra segmentada (una parte por estado) + leyenda con nombre y número
+function renderizarEstadosFinanzas(conteo, total) {
+  const cont = document.getElementById('estados-finanzas');
+  if (total === 0) {
+    cont.innerHTML = '<p class="hint">Todavía no hay pedidos.</p>';
+    return;
+  }
+
+  const orden = ['confirmado', 'enviado', 'entregado', 'cancelado'];
+  const porcentaje = (n) => Math.round((n / total) * 100);
+
+  const segmentos = orden
+    .filter((e) => conteo[e] > 0)
+    .map((e) => `<span class="seg--${e}" style="flex: ${conteo[e]}" title="${ESTADOS_PEDIDO[e]}: ${conteo[e]} (${porcentaje(conteo[e])}%)"></span>`)
+    .join('');
+
+  const leyenda = orden.map((e) => `
+    <li>
+      <span class="muestra seg--${e}"></span>
+      ${ESTADOS_PEDIDO[e]}
+      <span class="cifra">${conteo[e]} · ${porcentaje(conteo[e])}%</span>
+    </li>
+  `).join('');
+
+  cont.innerHTML = `
+    <div class="barra-estados" role="img" aria-label="Pedidos por estado">${segmentos}</div>
+    <ul class="leyenda-estados">${leyenda}</ul>
+  `;
+}
+
+// Top 5 por unidades vendidas, con lo que generó cada uno
+function renderizarTopProductos(lineas) {
+  const cont = document.getElementById('top-productos');
+  if (lineas.length === 0) {
+    cont.innerHTML = '<p class="hint">Todavía no hay ventas.</p>';
+    return;
+  }
+
+  // Agrupar por producto: { id: { nombre, unidades, ingresos } }
+  const porProducto = {};
+  for (const l of lineas) {
+    const fila = porProducto[l.producto_id] ??= {
+      nombre: l.productos_practica?.nombre ?? 'Producto borrado', unidades: 0, ingresos: 0,
+    };
+    fila.unidades += l.cantidad;
+    fila.ingresos += l.cantidad * l.precio_unitario;
+  }
+
+  const top = Object.values(porProducto).sort((a, b) => b.unidades - a.unidades).slice(0, 5);
+  const maximo = top[0].unidades;
+
+  const filas = top.map((p) => `
+    <tr>
+      <td class="col-name">${escaparHTML(p.nombre)}</td>
+      <td style="width: 35%;"><div class="barra-mini" style="width: ${(p.unidades / maximo) * 100}%"></div></td>
+      <td class="col-num">${p.unidades}</td>
+      <td class="col-price">${formatearPrecio(p.ingresos)}</td>
+    </tr>
+  `).join('');
+
+  cont.innerHTML = `
+    <table class="product-table">
+      <thead><tr><th>Producto</th><th></th><th class="col-num">Unid.</th><th class="col-price">Ingresos</th></tr></thead>
+      <tbody>${filas}</tbody>
+    </table>
+  `;
+}
+
+document.getElementById('btn-recargar-finanzas').addEventListener('click', traerFinanzas);

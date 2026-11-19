@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&display=swap" rel="stylesheet">
   <!-- Tarjetas, filtros, modal y carrito: compartido con cliente.html -->
   <link rel="stylesheet" href="css/catalogo.css">
+  <link rel="stylesheet" href="css/perfil.css">
   <style>
     /* Misma paleta Jaziz que admin.html */
     :root {
@@ -158,6 +159,9 @@
     <button id="btn-abrir-carrito" class="btn-carrito" type="button" aria-label="Abrir carrito">
       🛒<span id="carrito-count" class="carrito-count"></span>
     </button>
+
+    <!-- Círculo de perfil + menú (Mi cuenta, Mis pedidos…): js/perfilMenu.js -->
+    <div id="perfil-global"></div>
   </header>
 
   <main class="catalogo">
@@ -189,9 +193,26 @@
         <span>Total</span>
         <span id="carrito-total-valor">$ 0</span>
       </div>
-      <!-- Lleva a pago.html, que lee el carrito guardado en localStorage.
-           disabled lo maneja renderizarCarrito() cuando no hay nada -->
-      <button id="btn-ir-pagar" type="button" onclick="location.href = 'pago.html'">Ir a pagar</button>
+      <!-- Paso 6: el checkout va dentro del panel (antes era un botón a pago.html).
+           Mismo bloque en cliente.html: los dos comparten catalogo.js -->
+      <p id="mensaje-carrito" class="mensaje-carrito" role="status"></p>
+      <form id="form-checkout" class="form-checkout" hidden>
+        <label class="checkout-casilla">
+          <input type="checkbox" id="checkout-envio"> Envío a domicilio
+        </label>
+        <label class="checkout-campo">Dirección
+          <input type="text" id="checkout-direccion" class="catalogo-control" autocomplete="street-address" placeholder="Calle 10 # 20-30">
+        </label>
+        <label class="checkout-campo">Teléfono
+          <input type="tel" id="checkout-telefono" class="catalogo-control" autocomplete="tel">
+        </label>
+        <label class="checkout-campo">Observación
+          <textarea id="checkout-observacion" class="catalogo-control" rows="2"></textarea>
+        </label>
+        <button type="submit" id="btn-confirmar">Confirmar pedido</button>
+        <button type="button" id="btn-cancelar-checkout" class="btn-secondary">Volver al carrito</button>
+      </form>
+      <button id="btn-checkout" type="button">Ir a pagar</button>
     </div>
   </aside>
 
@@ -205,6 +226,7 @@
   </div>
 
   <script src="js/supabaseClient.js"></script>
+  <script src="js/perfilMenu.js"></script> <!-- círculo de perfil + menú -->
   <script src="js/catalogo.js"></script>  <!-- tarjetas, filtros, modal, carrito (compartido) -->
   <script src="js/galeria.js"></script>   <!-- solo lo propio de esta página: tema y arranque -->
 </body>

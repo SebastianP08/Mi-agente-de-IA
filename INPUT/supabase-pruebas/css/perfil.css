@@ -1,0 +1,70 @@
+/* =====================================================================
+   perfil.css — círculo de perfil + menú para galeria.html, pago.html y
+   pedido.html (js/perfilMenu.js). Copia los estilos del menú de
+   cliente.html para que se vea igual en todas las páginas del cliente.
+   Variables que necesita (las pone la paleta de cada página):
+   --surface --surface-2 --text --text-muted --accent --danger --radius
+   ===================================================================== */
+
+.perfil { position: relative; }
+.perfil-menu[hidden] { display: none; }
+
+/* Mismo círculo que el botón del tema (.btn-round), con la inicial */
+.btn-avatar { font-family: "Asap", sans-serif; font-weight: 700; font-size: 1.2rem; }
+
+/* top: 100% = justo debajo del círculo; right: 0 = alineado a su borde
+   derecho, para que el menú no se salga de la pantalla */
+.perfil-menu {
+  position: absolute;
+  top: calc(100% + 0.6rem);
+  right: 0;
+  z-index: 120; /* por encima del panel del carrito (z-index 100) */
+  min-width: 230px;
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+  animation: abrir-menu-perfil 0.2s ease;
+}
+@keyframes abrir-menu-perfil {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .perfil-menu { animation: none; }
+}
+
+.perfil-cabecera { display: flex; flex-direction: column; gap: 2px; padding: 0.7rem 0.8rem 0.8rem; margin-bottom: 0.3rem; border-bottom: 1px solid var(--surface-2); }
+.perfil-cabecera strong { font-family: "Asap", sans-serif; font-size: 1.05rem; color: var(--text); }
+.perfil-cabecera span { font-size: 0.85rem; color: var(--text-muted); overflow-wrap: anywhere; }
+
+.perfil-item {
+  display: block;
+  width: 100%;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  text-decoration: none;
+  padding: 0.65rem 0.8rem;
+  border: none;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* Sin el "salto" de button:hover: en un menú se vería raro */
+.perfil-item:hover { background: var(--surface-2); transform: none !important; }
+.perfil-item--peligro { color: var(--danger); }
+.perfil-separador { border: none; border-top: 1px solid var(--surface-2); margin: 0.3rem 0; width: 100%; }
+
+/* Sin sesión: un enlace sencillo a cliente.html */
+.perfil-login {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.perfil-login:hover { text-decoration: underline; }

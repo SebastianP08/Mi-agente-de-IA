@@ -1,58 +1,68 @@
 // =====================================================================
-// pago.js — convierte el carrito (localStorage) en un pedido de Supabase.
+// pago.js — confirma el carrito de Supabase como pedido.
 // Depende de: supabaseClient.js (db) y tienda.js (formatearPrecio, etc.)
+//
+// El navegador NO calcula el total que se cobra ni cambia el estado:
+// - el total sale de la vista pedidos_con_total
+// - "Pagar" llama a confirmar_pedido(), que valida, descuenta stock, fija
+//   los precios y confirma, todo en UNA transacción dentro de la base.
+// El método de pago es SOLO visual por ahora: no se guarda nada de él.
 // =====================================================================
 
 const formPago      = document.getElementById('form-pago');
 const camposTarjeta = document.getElementById('campos-tarjeta');
+const camposEnvio   = document.getElementById('campos-envio');
 const btnPagar      = document.getElementById('btn-pagar');
 const mensajePago   = document.getElementById('mensaje-pago');
 
-// Cada línea = { producto: {...fila de productos_practica}, cantidad }
-let lineas = [];
-let idCliente = null; // id de Auth si hay sesión; null si se paga sin cuenta
+let pedidoId = null;     // id del pedido en estado 'carrito' de este cliente
+let totalPedido = 0;     // el que calculó pedidos_con_total
 
 // ---------- Mostrar solo una zona ----------
 function mostrarZona(nombre) {
-  ['vacio', 'pago'].forEach((z) => {
+  ['sesion', 'vacio', 'pago'].forEach((z) => {
     document.getElementById('zona-' + z).hidden = z !== nombre;
   });
 }
 
-// ---------- Leer el carrito que guardó galeria.js ----------
-function leerCarrito() {
-  try {
-    return JSON.parse(localStorage.getItem('carrito')) ?? [];
-  } catch (_) {
-    return [];
-  }
-}
-
-function calcularTotal() {
-  return lineas.reduce((suma, l) => suma + precioFinal(l.producto) * l.cantidad, 0);
-}
-
 // ---------- Resumen de la derecha ----------
-function renderizarResumen() {
-  document.getElementById('resumen-items').innerHTML = lineas.map(({ producto: p, cantidad }) => `
-    <div class="item">
-      ${p.Img_url ? `<img src="${escaparHTML(p.Img_url)}" alt="">` : '<div class="sin-img"></div>'}
-      <div class="item-info">
-        <h4>${escaparHTML(p.nombre)}</h4>
-        <p>${cantidad} × ${formatearPrecio(precioFinal(p))}</p>
+// Cada detalle trae su producto anidado (FK detalles_pedidos.producto_id).
+// precio_unitario es el que puso el trigger; confirmar_pedido lo vuelve a
+// fijar con el precio de ese momento.
+function renderizarResumen(detalles) {
+  document.getElementById('resumen-items').innerHTML = detalles.map((d) => {
+    const p = d.productos_practica ?? {};
+    return `
+      <div class="item">
+        ${p.Img_url ? `<img src="${escaparHTML(p.Img_url)}" alt="">` : '<div class="sin-img"></div>'}
+        <div class="item-info">
+          <h4>${escaparHTML(p.nombre ?? 'Producto')}</h4>
+          <p>${d.cantidad} × ${formatearPrecio(d.precio_unitario)}</p>
+        </div>
+        <span class="item-precio">${formatearPrecio(d.precio_unitario * d.cantidad)}</span>
       </div>
-      <span class="item-precio">${formatearPrecio(precioFinal(p) * cantidad)}</span>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
-  const unidades = lineas.reduce((s, l) => s + l.cantidad, 0);
+  const unidades = detalles.reduce((s, d) => s + d.cantidad, 0);
   document.getElementById('resumen-unidades').textContent = unidades;
-  document.getElementById('resumen-total').textContent = formatearPrecio(calcularTotal());
-  btnPagar.textContent = 'Pagar ' + formatearPrecio(calcularTotal());
+  document.getElementById('resumen-total').textContent = formatearPrecio(totalPedido);
+  btnPagar.textContent = 'Pagar ' + formatearPrecio(totalPedido);
 }
 
-// ---------- Método de pago ----------
-// disabled en el fieldset → sus inputs no se validan ni se envían
+// ---------- Envío o recoger en tienda ----------
+// disabled en el fieldset → sus inputs no se validan (no pide dirección)
+function actualizarEntrega() {
+  const domicilio = formPago.elements.entrega.value === 'domicilio';
+  camposEnvio.disabled = !domicilio;
+  camposEnvio.hidden   = !domicilio;
+}
+
+formPago.querySelectorAll('input[name="entrega"]').forEach((radio) => {
+  radio.addEventListener('change', actualizarEntrega);
+});
+
+// ---------- Método de pago (visual) ----------
 function actualizarMetodo() {
   const metodo = formPago.elements.metodo.value; // el value del radio marcado
   camposTarjeta.disabled = metodo !== 'tarjeta';
@@ -80,132 +90,97 @@ formPago.elements.cvv.addEventListener('input', (e) => {
   e.target.value = e.target.value.replace(/\D/g, '');
 });
 
-// ---------- Crear el pedido ----------
-async function crearPedido(datosEnvio, metodo, ultimosDigitos) {
-
-  // Los items guardan una "foto" del producto al momento de comprar: si
-  // mañana el admin le cambia el precio, el pedido sigue mostrando lo pagado
-  const items = lineas.map(({ producto: p, cantidad }) => ({
-    producto_id:     p.id,
-    nombre:          p.nombre,
-    img_url:         p.Img_url,
-    descripcion:     p.descripcion,
-    categorias:      p.categorias,
-    precio_unitario: precioFinal(p),
-    descuento:       p.descuento ?? 0,
-    cantidad,
-  }));
-
-  // POR AHORA se guarda en localStorage (pedidosLocal.js).
-  // Cuando conectemos Supabase, aquí van 2 inserts: primero el pedido en
-  // pedidos_practica (con .select().single() para recibir su id) y después
-  // los items en pedido_items_practica con ese pedido_id
-  const { data: pedido, error } = await crearPedidoLocal({
-    cliente_id:      idCliente,
-    nombre_envio:    datosEnvio.nombre,
-    telefono_envio:  datosEnvio.telefono,
-    direccion_envio: datosEnvio.direccion,
-    ciudad_envio:    datosEnvio.ciudad,
-    metodo_pago:     metodo,
-    ultimos_digitos: ultimosDigitos,
-    total:           calcularTotal(),
-  }, items);
-
-  if (error) {
-    console.log('Error al crear el pedido:', error);
-    return null;
-  }
-
-  return pedido;
+// '' (o solo espacios) → null, como espera confirmar_pedido
+function textoONull(valor) {
+  const limpio = valor.trim();
+  return limpio === '' ? null : limpio;
 }
 
+// ---------- Pagar = confirmar el pedido en la base ----------
 formPago.addEventListener('submit', async (event) => {
-  event.preventDefault(); // sin esto la página se recarga (igual que en cliente.js)
+  event.preventDefault(); // sin esto la página se recarga
+  if (pedidoId === null) return;
 
   const campos = formPago.elements;
-  const metodo = campos.metodo.value;
-
-  // Solo los 4 últimos dígitos. El número completo NUNCA sale del navegador
-  const ultimosDigitos = metodo === 'tarjeta'
-    ? campos.numero.value.replace(/\D/g, '').slice(-4)
-    : null;
+  const envio = campos.entrega.value === 'domicilio';
 
   btnPagar.disabled = true;
   btnPagar.textContent = 'Procesando pago…';
   mensajePago.textContent = '';
 
-  // Simulamos que "el banco" tarda un poco en responder. En una tienda real
-  // aquí iría la pasarela de pagos (Wompi, Mercado Pago, Stripe…)
+  // Simulamos que "el banco" tarda un poco. En una tienda real aquí iría la
+  // pasarela de pagos (Wompi, Mercado Pago, Stripe…) ANTES de confirmar.
   await new Promise((resolver) => setTimeout(resolver, 1200));
 
-  const pedido = await crearPedido({
-    nombre:    campos.nombre.value.trim(),
-    telefono:  campos.telefono.value.trim(),
-    direccion: campos.direccion.value.trim(),
-    ciudad:    campos.ciudad.value.trim(),
-  }, metodo, ultimosDigitos);
+  // Los nombres p_... son EXACTAMENTE los de sql/confirm_order.sql.
+  // Sin envío se mandan null: la función no exige dirección ni teléfono.
+  const { data, error } = await db.rpc('confirmar_pedido', {
+    p_pedido_id:   pedidoId,
+    p_envio:       envio,
+    p_direccion:   envio ? textoONull(campos.direccion.value) : null,
+    p_telefono:    envio ? textoONull(campos.telefono.value) : null,
+    p_observacion: textoONull(campos.observacion.value),
+  });
 
-  if (!pedido) {
+  if (error) {
+    // error.message = el "raise exception" de la función, p. ej.
+    // 'Stock insuficiente o producto no disponible (producto 2)'.
+    // La transacción se deshizo: el carrito sigue intacto.
+    console.log('Error al confirmar el pedido:', error);
     mensajePago.className = 'message message--error';
-    mensajePago.textContent = 'No se pudo crear el pedido. Revisa la consola.';
+    mensajePago.textContent = error.message;
     btnPagar.disabled = false;
-    renderizarResumen(); // devuelve el texto "Pagar $…" al botón
+    btnPagar.textContent = 'Pagar ' + formatearPrecio(totalPedido);
     return;
   }
 
-  // Pedido creado: el carrito ya no tiene sentido
+  // El carrito quedó confirmado en la base; el de localStorage sobra
   try { localStorage.removeItem('carrito'); } catch (_) {}
 
-  // ?id=... en la URL → pedido.js lo lee para saber qué pedido mostrar
-  location.href = 'pedido.html?id=' + pedido.id;
+  // data = la fila del pedido confirmado. ?id=... → pedido.js lo muestra
+  location.href = 'pedido.html?id=' + data.id;
 });
 
 // ---------- Arranque ----------
 async function iniciar() {
-  const carrito = leerCarrito();
-  if (carrito.length === 0) { mostrarZona('vacio'); return; }
+  const { data: { user } } = await db.auth.getUser();
+  if (!user) { mostrarZona('sesion'); return; }
 
-  // Pedimos los productos OTRA VEZ a Supabase en vez de confiar en lo que
-  // quedó en localStorage: si el precio cambió o se agotó, aquí se nota.
-  // .in('id', [...]) = "donde el id sea alguno de estos"
-  const { data: productos, error } = await db
-    .from('productos_practica')
-    .select('*')
-    .in('id', carrito.map((item) => item.id));
+  // El carrito con sus líneas y, dentro de cada línea, su producto.
+  // RLS: el cliente solo ve sus pedidos y sus detalles.
+  const { data: carrito, error } = await db
+    .from('pedidos')
+    .select('id, detalles_pedidos(cantidad, precio_unitario, productos_practica(nombre, Img_url))')
+    .eq('cliente_id', user.id)
+    .eq('estado', 'carrito')
+    .maybeSingle();
 
-  if (error) {
-    console.log('Error al leer productos:', error);
+  if (error) console.log('Error al leer el carrito:', error);
+  if (error || !carrito || carrito.detalles_pedidos.length === 0) {
     mostrarZona('vacio');
     return;
   }
 
-  lineas = carrito
-    .map((item) => ({ producto: productos.find((p) => p.id === item.id), cantidad: item.cantidad }))
-    .filter((l) => l.producto && l.producto.disponible); // fuera los borrados o agotados
+  pedidoId = carrito.id;
 
-  if (lineas.length === 0) { mostrarZona('vacio'); return; }
+  // Total calculado por la base (vista security_invoker: respeta RLS).
+  // Datos del cliente para precargar el envío. Las dos consultas a la vez.
+  const [respTotal, respCliente] = await Promise.all([
+    db.from('pedidos_con_total').select('total').eq('id', pedidoId).single(),
+    db.from('clientes_practica').select('telefono, direccion').eq('id', user.id).maybeSingle(),
+  ]);
 
-  // Si hay sesión (cliente.html), precargamos el envío con sus datos.
-  // Sin sesión también se puede pagar: el formulario queda vacío
-  const { data: { user } } = await db.auth.getUser();
-  idCliente = user?.id ?? null; // ?. → si user es null, no revienta, da undefined
+  if (respTotal.error) console.log('Error al leer el total:', respTotal.error);
+  totalPedido = respTotal.data?.total ?? 0;
 
-  const { data: cliente } = user
-    ? await db
-        .from('clientes_practica')
-        .select('nombre, telefono, direccion')
-        .eq('id', user.id)
-        .maybeSingle() // como single(), pero si no hay fila devuelve null sin error
-    : { data: null };
-
-  if (cliente) {
-    formPago.elements.nombre.value    = cliente.nombre ?? '';
-    formPago.elements.telefono.value  = cliente.telefono ?? '';
-    formPago.elements.direccion.value = cliente.direccion ?? '';
+  if (respCliente.data) {
+    formPago.elements.telefono.value  = respCliente.data.telefono ?? '';
+    formPago.elements.direccion.value = respCliente.data.direccion ?? '';
   }
 
+  actualizarEntrega();
   actualizarMetodo();
-  renderizarResumen();
+  renderizarResumen(carrito.detalles_pedidos);
   mostrarZona('pago');
 }
 

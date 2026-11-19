@@ -213,7 +213,10 @@
 
     /* min-width: 0 → sin esto, la tabla ancha estira el <main> en vez de
        usar su propio scroll horizontal (.table-wrap) */
-    .contenido { flex: 1; min-width: 0; max-width: 1200px; padding: 1.5rem clamp(1rem, 4vw, 3rem) 3rem 1rem; }
+    .contenido { flex: 1; min-width: 0; padding: 1.5rem clamp(1rem, 4vw, 3rem) 3rem 1rem; }
+    /* Todas las vistas usan el ancho completo: antes un max-width de 1200px
+       dejaba un hueco a la derecha. Los formularios (.form-grid con
+       auto-fill) simplemente reparten los campos en más columnas */
 
     /* ---------- Vistas ---------- */
 
@@ -367,19 +370,71 @@
 
     /* ---------- Tabla de pedidos ---------- */
 
-    .select-estado {
-      font: inherit;
-      font-size: 0.9rem;
-      color: var(--text);
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.45rem 0.6rem;
-      cursor: pointer;
+    /* Estado: etiqueta de color + botones con la siguiente acción
+       (admin.js → traerPedidos). Reemplaza al <select>, cuyas opciones las
+       dibuja el sistema operativo y no toman estos estilos */
+    /* La etiqueta y los botones en UNA fila (nowrap): el ancho mínimo cabe
+       "Confirmado" + "Marcar entregado" + "Cancelar" sin saltar de línea */
+    .col-estado { min-width: 340px; }
+    .estado-pedido {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid currentColor;
+      white-space: nowrap;
     }
-    .select-estado:focus { outline: none; border-color: var(--accent); }
+    .estado-pedido--confirmado { color: var(--accent); }
+    .estado-pedido--enviado    { color: var(--accent); background: var(--surface-2); }
+    .estado-pedido--entregado  { color: var(--success); }
+    .estado-pedido--cancelado  { color: var(--danger); }
+
+    .acciones-estado { display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap; }
+
+    /* ---------- Finanzas ---------- */
+
+    /* Tarjetas de un número: el número grande en color de texto (no de
+       acento) y la etiqueta en gris arriba. auto-fit reparte las que quepan */
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .kpi { background: var(--surface); border-radius: var(--radius); padding: 1.1rem 1.25rem; box-shadow: var(--shadow); }
+    .kpi-etiqueta { display: block; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); }
+    .kpi-valor { display: block; font-family: "Asap", sans-serif; font-size: clamp(1.6rem, 2.6vw, 2.2rem); font-weight: 700; color: var(--text); margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
+    .kpi-detalle { display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+    .finanzas-fila { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 1rem; }
+    .finanzas-subtitulo { margin: 0 0 1rem; font-size: 1rem; }
+
+    /* Barra segmentada de estados: 2px de separación entre segmentos y
+       extremos redondeados. Cada segmento tiene title (tooltip nativo) y
+       debajo hay una leyenda con nombre + número: el color nunca va solo */
+    .barra-estados { display: flex; gap: 2px; height: 14px; border-radius: 4px; overflow: hidden; background: var(--surface-2); }
+    .barra-estados span { min-width: 4px; }
+    .seg--confirmado { background: var(--accent); }
+    .seg--enviado    { background: color-mix(in srgb, var(--accent) 55%, var(--surface-2)); }
+    .seg--entregado  { background: var(--success); }
+    .seg--cancelado  { background: var(--danger); }
+    .leyenda-estados { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
+    .leyenda-estados li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: var(--text); }
+    .leyenda-estados .muestra { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    .leyenda-estados .cifra { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+
+    /* Barrita de proporción dentro de la tabla de productos */
+    .barra-mini { height: 6px; border-radius: 4px; background: var(--accent); min-width: 4px; }
+    .btn-estado {
+      font-size: 0.8rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .btn-estado:hover { transform: none; }
+    /* Cancelar = acción destructiva: contorno rojo, no botón lleno */
+    .btn-estado--cancelado { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+    .btn-estado--cancelado:hover { background: var(--danger); color: var(--bg); }
     /* Mientras se guarda el cambio en Supabase */
-    .select-estado:disabled { opacity: 0.5; cursor: wait; }
+    .btn-estado:disabled { opacity: 0.5; cursor: wait; }
     .col-items { color: var(--text-muted); font-size: 0.85rem; min-width: 180px; }
 
     /* <details> = bloque plegable nativo de HTML, no necesita JS */
@@ -751,6 +806,8 @@
           <li><button type="button" class="sidebar-item" data-vista="editar">Editar</button></li>
           <li><button type="button" class="sidebar-item" data-vista="eliminar">Eliminar</button></li>
           <li><button type="button" class="sidebar-item" data-vista="pedidos">Pedidos</button></li>
+          <li><button type="button" class="sidebar-item" data-vista="clientes">Mis clientes</button></li>
+          <li><button type="button" class="sidebar-item" data-vista="finanzas">Finanzas</button></li>
         </ul>
       </nav>
     </aside>
@@ -855,9 +912,10 @@
         </div>
       </section>
 
-      <!-- Vista: Pedidos. El admin cambia la etapa con el <select> de cada
-           fila → UPDATE en pedidos_practica. El cliente ve el cambio en
-           pedido.html (el camión avanza) -->
+      <!-- Vista: Pedidos. Lista los pedidos confirmados de todos los clientes
+           (Supabase: pedidos + pedidos_con_total). El admin cambia el estado
+           con el <select> de cada fila → UPDATE en pedidos; el trigger valida
+           la transición y la guarda en historial_estados_pedido -->
       <section class="vista" data-vista="pedidos" hidden>
         <div class="vista-header">
           <h2 class="vista-titulo">Gestión de <span>pedidos</span></h2>
@@ -871,6 +929,46 @@
         <div id="notificacion-pedidos" class="message"></div>
       </section>
 
+      <!-- Vista: Mis clientes. Lectura de clientes_practica (política
+           admin_ve_clientes) con sus pedidos anidados para contarlos -->
+      <section class="vista" data-vista="clientes" hidden>
+        <div class="vista-header">
+          <h2 class="vista-titulo">Mis <span>clientes</span></h2>
+          <div class="vista-acciones">
+            <button id="btn-recargar-clientes" type="button" class="btn-secondary btn-small">Recargar</button>
+          </div>
+        </div>
+        <div class="panel table-wrap">
+          <div id="tabla-clientes"></div>
+        </div>
+      </section>
+
+      <!-- Vista: Finanzas. Números resumidos de la tienda (admin.js →
+           traerFinanzas). Solo lectura: no cambia nada en la base -->
+      <section class="vista" data-vista="finanzas" hidden>
+        <div class="vista-header">
+          <h2 class="vista-titulo">Resumen de <span>finanzas</span></h2>
+          <div class="vista-acciones">
+            <button id="btn-recargar-finanzas" type="button" class="btn-secondary btn-small">Recargar</button>
+          </div>
+        </div>
+
+        <!-- Tarjetas con un número grande cada una -->
+        <div id="kpis-finanzas" class="kpis"></div>
+
+        <div class="finanzas-fila">
+          <section class="panel">
+            <h3 class="finanzas-subtitulo">Pedidos por estado</h3>
+            <div id="estados-finanzas"></div>
+          </section>
+          <section class="panel table-wrap">
+            <h3 class="finanzas-subtitulo">Productos más vendidos</h3>
+            <div id="top-productos"></div>
+          </section>
+        </div>
+        <p class="hint">Ingresos = pedidos confirmados, enviados y entregados (los cancelados no cuentan). Precios con descuento, tal como quedaron al confirmar.</p>
+      </section>
+
     </main>
   </div>
 
@@ -881,7 +979,7 @@
        admin.js, por eso tiene que cargarse ANTES que ese archivo -->
   <script src="js/supabaseClient.js"></script>
   <!-- admin.js: lógica CRUD de productos, tema y vistas -->
-  <script src="js/pedidosLocal.js"></script>  <!-- pedidos en localStorage (temporal) -->
+  <!-- pedidosLocal.js ya no se carga aquí: los pedidos vienen de Supabase -->
   <script src="js/admin.js"></script>
 </body>
 </html>

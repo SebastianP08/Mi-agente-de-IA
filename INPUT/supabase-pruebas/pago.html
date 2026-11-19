@@ -9,25 +9,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&display=swap" rel="stylesheet">
   <!-- Estilos compartidos con pedido.html -->
   <link rel="stylesheet" href="css/tienda.css">
+  <link rel="stylesheet" href="css/perfil.css">
 </head>
 <body>
 
   <header class="topbar">
     <h1 class="topbar-titulo">Finalizar <span>compra</span></h1>
     <div class="topbar-acciones">
-      <a class="btn btn-secondary btn-small" href="galeria.html">← Seguir comprando</a>
+      <a class="btn btn-secondary btn-small" href="cliente.html?vista=productos">← Seguir comprando</a>
       <button id="btn-tema" class="btn-round" type="button" aria-label="Cambiar tema">☀</button>
+      <!-- Círculo de perfil + menú (Mi cuenta, Mis pedidos…): js/perfilMenu.js -->
+      <div id="perfil-global"></div>
     </div>
   </header>
 
-  <!-- pago.js muestra SOLO una de estas dos zonas, según el caso -->
+  <!-- pago.js muestra SOLO una de estas zonas, según el caso -->
+
+  <!-- 0. Sin sesión: confirmar_pedido exige un usuario (auth.uid()) -->
+  <main id="zona-sesion" class="contenido" hidden>
+    <div class="panel aviso">
+      <h3>Inicia sesión para pagar</h3>
+      <p>Tu carrito se guarda en tu cuenta. Entra y vuelve aquí.</p>
+      <a class="btn" href="cliente.html">Ir a Mi cuenta</a>
+    </div>
+  </main>
 
   <!-- 1. Carrito vacío -->
   <main id="zona-vacio" class="contenido" hidden>
     <div class="panel aviso">
       <h3>Tu carrito está vacío</h3>
       <p>Agrega productos desde la galería y vuelve aquí.</p>
-      <a class="btn" href="galeria.html">Ir a la galería</a>
+      <a class="btn" href="cliente.html?vista=productos">Ir a Productos</a>
     </div>
   </main>
 
@@ -42,22 +54,29 @@
 
       <div>
         <section class="panel">
-          <h3>1. ¿A dónde lo enviamos?</h3>
-          <!-- Se precargan con clientes_practica (pago.js), pero se pueden cambiar -->
-          <div class="form-grid">
-            <label class="field">Nombre de quien recibe
-              <input type="text" name="nombre" required autocomplete="name">
+          <h3>1. ¿Cómo lo recibes?</h3>
+          <!-- Mismas columnas de la tabla pedidos: envio, direccion, telefono,
+               observacion. Se mandan a confirmar_pedido() -->
+          <div class="metodos">
+            <label class="metodo"><input type="radio" name="entrega" value="domicilio" checked> 🚚 Envío a domicilio</label>
+            <label class="metodo"><input type="radio" name="entrega" value="tienda"> 🏬 Recoger en tienda</label>
+          </div>
+
+          <!-- Mismo truco que la tarjeta: con "Recoger en tienda" el fieldset
+               queda disabled y el navegador no pide dirección ni teléfono.
+               Se precargan con clientes_practica (pago.js), pero se pueden cambiar -->
+          <fieldset id="campos-envio" class="form-grid">
+            <label class="field full">Dirección
+              <input type="text" name="direccion" required autocomplete="street-address" placeholder="Calle 10 # 20-30, apto 401">
             </label>
             <label class="field">Teléfono
               <input type="tel" name="telefono" required autocomplete="tel" pattern="[0-9 +\-]{7,20}" title="Solo números, espacios, + o guiones (7 a 20 caracteres)">
             </label>
-            <label class="field full">Dirección
-              <input type="text" name="direccion" required autocomplete="street-address" placeholder="Calle 10 # 20-30, apto 401">
-            </label>
-            <label class="field">Ciudad
-              <input type="text" name="ciudad" required autocomplete="address-level2">
-            </label>
-          </div>
+          </fieldset>
+
+          <label class="field full" style="margin-top: 1rem;">Observación (opcional)
+            <textarea name="observacion" rows="2" placeholder="Ej.: dejar en portería"></textarea>
+          </label>
         </section>
 
         <section class="panel">
@@ -87,7 +106,7 @@
             </label>
           </fieldset>
 
-          <p class="nota">⚠ Pago simulado: no se cobra nada y solo se guardan los 4 últimos dígitos. No uses una tarjeta real.</p>
+          <p class="nota">⚠ Pago simulado: no se cobra nada y los datos de pago no se guardan en ningún lado. No uses una tarjeta real.</p>
         </section>
       </div>
 
@@ -109,7 +128,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/tienda.js"></script>   <!-- formatearPrecio, tema, etc. -->
-  <script src="js/pedidosLocal.js"></script>   <!-- pedidos en localStorage (temporal) -->
-  <script src="js/pago.js"></script>
+  <script src="js/perfilMenu.js"></script>
+  <script src="js/pago.js"></script>   <!-- el pedido se confirma en Supabase (confirmar_pedido) -->
 </body>
 </html>

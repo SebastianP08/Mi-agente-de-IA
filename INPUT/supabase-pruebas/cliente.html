@@ -525,7 +525,25 @@
           <span>Total</span>
           <span id="carrito-total-valor">$ 0</span>
         </div>
-        <button id="btn-ir-pagar" type="button" onclick="location.href = 'pago.html'">Ir a pagar</button>
+        <!-- Paso 6: mismo bloque que galeria.html (comparten catalogo.js) -->
+        <p id="mensaje-carrito" class="mensaje-carrito" role="status"></p>
+        <form id="form-checkout" class="form-checkout" hidden>
+          <label class="checkout-casilla">
+            <input type="checkbox" id="checkout-envio"> Envío a domicilio
+          </label>
+          <label class="checkout-campo">Dirección
+            <input type="text" id="checkout-direccion" class="catalogo-control" autocomplete="street-address" placeholder="Calle 10 # 20-30">
+          </label>
+          <label class="checkout-campo">Teléfono
+            <input type="tel" id="checkout-telefono" class="catalogo-control" autocomplete="tel">
+          </label>
+          <label class="checkout-campo">Observación
+            <textarea id="checkout-observacion" class="catalogo-control" rows="2"></textarea>
+          </label>
+          <button type="submit" id="btn-confirmar">Confirmar pedido</button>
+          <button type="button" id="btn-cancelar-checkout" class="btn-secondary">Volver al carrito</button>
+        </form>
+        <button id="btn-checkout" type="button">Ir a pagar</button>
       </div>
     </aside>
 

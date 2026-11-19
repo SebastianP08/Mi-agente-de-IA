@@ -8,17 +8,28 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/tienda.css">
+  <link rel="stylesheet" href="css/perfil.css">
 </head>
 <body>
 
   <header class="topbar">
     <h1 class="topbar-titulo">Mis <span>pedidos</span></h1>
     <div class="topbar-acciones">
-      <a class="btn btn-secondary btn-small" href="galeria.html">Galería</a>
-      <a class="btn btn-secondary btn-small" href="cliente.html">Mi cuenta</a>
+      <a class="btn btn-secondary btn-small" href="cliente.html?vista=productos">Productos</a>
       <button id="btn-tema" class="btn-round" type="button" aria-label="Cambiar tema">☀</button>
+      <!-- Círculo de perfil + menú (Mi cuenta, Mis pedidos…): js/perfilMenu.js -->
+      <div id="perfil-global"></div>
     </div>
   </header>
+
+  <!-- Sin sesión: RLS solo deja ver los pedidos de quien inició sesión -->
+  <main id="zona-sesion" class="contenido" hidden>
+    <div class="panel aviso">
+      <h3>Inicia sesión para ver tus pedidos</h3>
+      <p>Tus pedidos están guardados en tu cuenta.</p>
+      <a class="btn" href="cliente.html">Ir a Mi cuenta</a>
+    </div>
+  </main>
 
   <!-- pedido.html (sin ?id) → lista de todos mis pedidos -->
   <main id="zona-lista" class="contenido" hidden>
@@ -43,7 +54,7 @@
       </div>
 
       <!-- data-estado y --progreso los pone pedido.js. El CSS usa los dos:
-           --progreso mueve el camión y el relleno; data-estado="en_camino"
+           --progreso mueve el camión y el relleno; data-estado="enviado"
            activa el rebote -->
       <div id="tracker" class="tracker">
         <div class="tracker-pista">
@@ -82,7 +93,7 @@
           <dl id="detalle-envio" class="datos-lista"></dl>
         </section>
         <section class="panel">
-          <h3>Pago</h3>
+          <h3>Resumen</h3>
           <dl id="detalle-pago" class="datos-lista"></dl>
         </section>
       </aside>
@@ -94,7 +105,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabaseClient.js"></script>
   <script src="js/tienda.js"></script>
-  <script src="js/pedidosLocal.js"></script>   <!-- pedidos en localStorage (temporal) -->
-  <script src="js/pedido.js"></script>
+  <script src="js/perfilMenu.js"></script>
+  <script src="js/pedido.js"></script>   <!-- pedidos desde Supabase -->
+
 </body>
 </html>
