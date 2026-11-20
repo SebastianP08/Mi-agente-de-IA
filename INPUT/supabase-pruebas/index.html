@@ -3,30 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Supabase Pruebas</title>
+  <title>Jaziz Bisutería</title>
+  <meta name="description" content="Jaziz: bisutería tejida a mano con piedras murano y miyuki. Brazaletes y collares únicos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Asap:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* Paleta Jaziz (misma que marca.css del sitio original) */
+    :root {
+      --pink: #d67474;
+      --pink-text: #b04a4a;
+      --magenta: #520d24;
+      --white: #f2f2f2;
+      --black: #000000;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-x: clip;
+      background: var(--white);
+      color: var(--black);
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+
+    h1, h2, h3 { font-family: "Asap", sans-serif; margin: 0; }
+
+    /* ---------- Navbar ---------- */
+    #navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px clamp(16px, 6vw, 115px);
+      background: var(--white);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .logo {
+      font-family: "Asap", sans-serif;
+      font-weight: 800;
+      font-size: 26px;
+      letter-spacing: 2px;
+      color: var(--magenta);
+      text-decoration: none;
+      margin-right: auto;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 26px;
+      border-radius: 999px;
+      background: var(--pink-text);
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn:hover { background: var(--magenta); transform: translateY(-2px); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--pink-text);
+      border: 2px solid var(--pink-text);
+    }
+    .btn-outline:hover { color: #fff; }
+
+    /* ---------- Hero (en el original hay un video de fondo) ---------- */
+    .hero {
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 32px;
+      padding: 60px clamp(16px, 6vw, 115px);
+      background: linear-gradient(135deg, var(--magenta), var(--pink));
+      color: var(--white);
+    }
+
+    .hero h1 {
+      font-size: clamp(44px, 9vw, 110px);
+      line-height: 0.95;
+      font-weight: 800;
+    }
+
+    .hero .btn { background: var(--white); color: var(--magenta); font-size: 18px; }
+    .hero .btn:hover { background: var(--black); color: var(--white); }
+
+    /* ---------- Banner ---------- */
+    .banner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+      padding: 90px clamp(16px, 6vw, 115px);
+    }
+
+    .banner h2 {
+      font-size: clamp(32px, 5vw, 60px);
+      color: var(--magenta);
+      line-height: 1.05;
+    }
+
+    /* ---------- Footer ---------- */
+    .footer {
+      background: var(--magenta);
+      color: var(--white);
+      padding: 50px clamp(16px, 6vw, 115px) 20px;
+    }
+
+    .footer-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .footer .logo { color: var(--white); margin: 0; }
+    .footer h3 { font-size: 18px; margin-bottom: 12px; }
+
+    .socials { display: flex; gap: 18px; }
+    .socials a { color: var(--white); text-decoration: none; font-weight: 600; }
+    .socials a:hover { color: var(--pink); }
+
+    .footer-bottom {
+      margin-top: 36px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(242, 242, 242, 0.2);
+      font-size: 13px;
+      text-align: center;
+      opacity: 0.8;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <h1>Supabase Pruebas</h1>
+    <nav id="navbar">
+      <a href="index.html" class="logo">JAZIZ</a>
+      <a href="galeria.html" class="btn">Ver galería</a>
+    </nav>
   </header>
 
   <main>
-    <section id="app">
-      <form id="item-form">
-        <input type="text" id="item-name" placeholder="New item" required>
-        <button type="submit">Add</button>
-      </form>
+    <section class="hero">
+      <h1>DETALLES<br>QUE ILUMINAN<br>TUS MOMENTOS</h1>
+      <a href="galeria.html" class="btn">Ver galería</a>
+    </section>
 
-      <ul id="item-list">
-        <li>Loading...</li>
-      </ul>
+    <section class="banner">
+      <h2>Joyas que resaltan<br>tu esencia.</h2>
+      <a href="galeria.html" class="btn btn-outline">Ir a la galería</a>
     </section>
   </main>
 
-  <!-- Scripts at the end of <body> so the DOM exists before they run. Order matters. -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <!-- 1° Supabase library -->
-  <script src="js/supabaseClient.js"></script>  <!-- 2° creates the client -->
-  <script src="js/datos.js"></script>           <!-- 3° data functions -->
-  <script src="js/gestion.js"></script>         <!-- 4° page logic -->
+  <footer class="footer">
+    <div class="footer-top">
+      <a href="index.html" class="logo">JAZIZ</a>
+      <div>
+        <h3>Síguenos o comunícate con nosotros</h3>
+        <div class="socials">
+          <a href="https://wa.me/573134351476" target="_blank" rel="noopener">WhatsApp</a>
+          <a href="https://www.instagram.com/jaziz.bisuteria/" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://www.tiktok.com/@jaziz.bisuteria" target="_blank" rel="noopener">TikTok</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Jaziz Todos los derechos reservados.</p>
+    </div>
+  </footer>
 </body>
 </html>
